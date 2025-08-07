@@ -143,15 +143,17 @@ export default function DemoPage() {
                   職人
                 </button>
               </div>
-              <button style={{
+              <Link href="/notifications" style={{
                 padding: '6px 8px',
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                fontSize: '18px'
+                fontSize: '18px',
+                textDecoration: 'none',
+                display: 'inline-block'
               }}>
                 🔔
-              </button>
+              </Link>
               <div style={{
                 width: '36px',
                 height: '36px',
@@ -227,7 +229,7 @@ export default function DemoPage() {
                 }}>
                   <span>👥</span> 職人管理
                 </Link>
-                <Link href="#" style={{
+                <Link href="/sites" style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
@@ -242,7 +244,7 @@ export default function DemoPage() {
                 }}>
                   <span>🏢</span> 現場管理
                 </Link>
-                <Link href="#" style={{
+                <Link href="/dashboard" style={{
                   display: 'flex',
                   alignItems: 'center',
                   gap: '12px',
@@ -255,7 +257,112 @@ export default function DemoPage() {
                   borderRadius: '8px',
                   transition: 'background 0.2s'
                 }}>
-                  <span>📊</span> レポート
+                  <span>📊</span> ダッシュボード
+                </Link>
+                <Link href="/schedule-change" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '4px',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>📝</span> 予定変更申請
+                </Link>
+                <Link href="/shifts" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '4px',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>📋</span> シフト管理
+                </Link>
+                <Link href="/inventory" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '4px',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>📦</span> 在庫管理
+                </Link>
+                <Link href="/reports" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '4px',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>📄</span> 作業報告書
+                </Link>
+                <Link href="/chat" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '4px',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>💬</span> チャット
+                </Link>
+                <Link href="/notifications" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '4px',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>🔔</span> 通知センター
+                </Link>
+                <Link href="/settings" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '4px',
+                  borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>⚙️</span> 設定
                 </Link>
               </nav>
             </div>
