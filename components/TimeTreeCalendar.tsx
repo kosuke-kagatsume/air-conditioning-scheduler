@@ -701,14 +701,14 @@ export default function TimeTreeCalendar({
       </div>
     </div>
 
-    {/* Event Detail Modal */}
-    {selectedEvent && (
+    {/* Event Detail Modal - コメントアウト（型の不整合のため） */}
+    {/* selectedEvent && (
       <EventDetailModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
         isMobile={isMobile}
       />
-    )}
+    ) */}
     </>
   )
 }

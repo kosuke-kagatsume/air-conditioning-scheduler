@@ -1,4 +1,5 @@
 import './globals.css'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 export const metadata = {
   title: '空調工事現場スケジューラー | HVAC Scheduler',
@@ -19,7 +20,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   )
 }

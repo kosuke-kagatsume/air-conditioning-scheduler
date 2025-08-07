@@ -1,78 +1,109 @@
 'use client'
 
-import { useState } from 'react'
-
-interface Comment {
-  id: string
-  author: string
-  role: string
-  content: string
-  timestamp: Date
-}
+import React, { useState } from 'react'
+import { Event } from '@/types'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface EventDetailModalProps {
-  event: {
-    id: string
-    title: string
-    site: string
-    location: string
-    workType: string
-    date: Date
-    startTime: string
-    endTime: string
-    color: string
-    company: string
-    status: 'pending' | 'proposed' | 'accepted' | 'confirmed' | 'rejected'
-    workers?: string[]
-    dandoriUrl?: string
-    contractor?: string
-    salesRep?: string
-  }
+  event: Event
   onClose: () => void
-  isMobile?: boolean
+  onStatusChange?: (eventId: string, status: string, message?: string) => void
 }
 
-export default function EventDetailModal({ event, onClose, isMobile = false }: EventDetailModalProps) {
+export default function EventDetailModal({ event, onClose, onStatusChange }: EventDetailModalProps) {
+  const { user, currentTenant, canEditAllEvents, isMaster, isWorker } = useAuth()
   const [activeTab, setActiveTab] = useState<'detail' | 'progress' | 'materials' | 'comments' | 'history'>('detail')
+  const [showResponseForm, setShowResponseForm] = useState(false)
+  const [responseType, setResponseType] = useState<'accept' | 'pending' | 'reject'>('accept')
+  const [responseMessage, setResponseMessage] = useState('')
+  const [showCancelForm, setShowCancelForm] = useState(false)
+  const [cancelMessage, setCancelMessage] = useState('')
   const [newComment, setNewComment] = useState('')
-  
-  // Mock data
-  const comments: Comment[] = [
-    {
-      id: '1',
-      author: '田中（営業部）',
-      role: '自社営業',
-      content: 'お客様より、作業時間を午後からに変更してほしいとの要望がありました。調整可能でしょうか？',
-      timestamp: new Date(2025, 6, 20, 14, 30)
-    },
-    {
-      id: '2',
-      author: '山田太郎',
-      role: '協力業者',
-      content: '午後からの作業で問題ありません。13:00開始でお願いします。',
-      timestamp: new Date(2025, 6, 20, 15, 45)
-    }
-  ]
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'confirmed': return '確定'
-      case 'proposed': return '提案中'
-      case 'accepted': return '承諾済'
-      case 'rejected': return '拒否'
-      default: return '保留'
+  // ステータスの日本語表示
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      proposed: '提案中',
+      accepted: '確定',
+      pending: '保留',
+      rejected: '拒否',
+      cancelled: 'キャンセル',
+      completed: '完了'
     }
+    return labels[status] || status
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return '#51cf66'
-      case 'proposed': return '#ffd93d'
-      case 'accepted': return '#74c0fc'
-      case 'rejected': return '#ff6b6b'
-      default: return '#6c7684'
+    const colors: Record<string, string> = {
+      proposed: '#ffd93d',
+      accepted: '#51cf66',
+      pending: '#ffd93d',
+      rejected: '#ff6b6b',
+      cancelled: '#6c7684',
+      completed: '#9775fa'
     }
+    return colors[status] || '#6c7684'
   }
+
+  // 職人が予定に応答可能か
+  const canRespond = (isWorker || isMaster) && 
+    event.workerId === user?.id && 
+    event.status === 'proposed'
+
+  // キャンセル交渉可能か
+  const canRequestCancel = event.status === 'accepted' && 
+    (event.workerId === user?.id || event.createdBy === user?.id)
+
+  // 完了報告可能か
+  const canMarkComplete = (isWorker || isMaster) && 
+    event.workerId === user?.id && 
+    event.status === 'accepted'
+
+  const handleResponse = () => {
+    if (onStatusChange) {
+      let newStatus = ''
+      if (responseType === 'accept') newStatus = 'accepted'
+      else if (responseType === 'pending') newStatus = 'pending'
+      else newStatus = 'rejected'
+      
+      onStatusChange(event.id, newStatus, responseMessage)
+    }
+    setShowResponseForm(false)
+    onClose()
+  }
+
+  const handleCancelRequest = () => {
+    if (onStatusChange) {
+      onStatusChange(event.id, 'cancel_requested', cancelMessage)
+    }
+    setShowCancelForm(false)
+    onClose()
+  }
+
+  const handleMarkComplete = () => {
+    if (onStatusChange) {
+      onStatusChange(event.id, 'completed')
+    }
+    onClose()
+  }
+
+  // モックコメント
+  const comments = [
+    {
+      id: '1',
+      author: '田中（営業部）',
+      role: '営業担当',
+      content: 'お客様より、作業時間を午後からに変更してほしいとの要望がありました。調整可能でしょうか？',
+      timestamp: new Date(2025, 0, 7, 14, 30)
+    },
+    {
+      id: '2',
+      author: event.workerName,
+      role: '職人',
+      content: '午後からの作業で問題ありません。13:00開始でお願いします。',
+      timestamp: new Date(2025, 0, 7, 15, 45)
+    }
+  ]
 
   return (
     <div style={{
@@ -89,11 +120,12 @@ export default function EventDetailModal({ event, onClose, isMobile = false }: E
       padding: '20px'
     }}>
       <div className="card" style={{
-        width: isMobile ? '100%' : '90%',
-        maxWidth: '800px',
+        width: '90%',
+        maxWidth: '900px',
         maxHeight: '90vh',
         overflow: 'auto'
       }}>
+        {/* ヘッダー */}
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -106,17 +138,27 @@ export default function EventDetailModal({ event, onClose, isMobile = false }: E
             <div style={{
               width: '8px',
               height: '36px',
-              background: event.color,
+              background: getStatusColor(event.status),
               borderRadius: '4px'
             }} />
             <div>
               <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0, color: '#2c3e50' }}>
-                {event.site}
+                {event.constructionType} - {event.city}
               </h2>
               <p style={{ fontSize: '14px', color: '#6c7684', margin: '4px 0 0' }}>
-                {event.workType}
+                {new Date(event.date).toLocaleDateString('ja-JP')} {event.startTime}
               </p>
             </div>
+            <span style={{
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '14px',
+              fontWeight: '500',
+              background: `${getStatusColor(event.status)}20`,
+              color: getStatusColor(event.status)
+            }}>
+              {getStatusLabel(event.status)}
+            </span>
           </div>
           <button
             onClick={onClose}
@@ -131,6 +173,49 @@ export default function EventDetailModal({ event, onClose, isMobile = false }: E
             ×
           </button>
         </div>
+
+        {/* 交渉中の表示 */}
+        {event.negotiation && event.negotiation.status === 'pending' && (
+          <div style={{
+            padding: '16px',
+            background: '#fff9e6',
+            border: '1px solid #ffd93d',
+            borderRadius: '8px',
+            marginBottom: '24px'
+          }}>
+            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#e67e22', marginBottom: '8px' }}>
+              ⚠️ 交渉中
+            </h4>
+            <p style={{ fontSize: '14px', color: '#7f8c8d' }}>{event.negotiation.message}</p>
+            {event.negotiation.response && (
+              <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #ffd93d' }}>
+                <p style={{ fontSize: '14px', color: '#7f8c8d' }}>
+                  <span style={{ fontWeight: '600' }}>回答:</span> {event.negotiation.response}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* トラブル情報 */}
+        {event.trouble && (
+          <div style={{
+            padding: '16px',
+            background: '#ffe6e6',
+            border: '1px solid #ff6b6b',
+            borderRadius: '8px',
+            marginBottom: '24px'
+          }}>
+            <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#e74c3c', marginBottom: '8px' }}>
+              🚨 トラブル発生
+            </h4>
+            <div style={{ fontSize: '14px', color: '#7f8c8d', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <p><span style={{ fontWeight: '600' }}>種類:</span> {event.trouble.type}</p>
+              <p><span style={{ fontWeight: '600' }}>詳細:</span> {event.trouble.description}</p>
+              <p><span style={{ fontWeight: '600' }}>ステータス:</span> {event.trouble.status === 'open' ? '対応中' : '解決済み'}</p>
+            </div>
+          </div>
+        )}
 
         {/* タブメニュー */}
         <div style={{
@@ -164,7 +249,7 @@ export default function EventDetailModal({ event, onClose, isMobile = false }: E
               }}
             >
               <span style={{ fontSize: '16px' }}>{tab.icon}</span>
-              <span className={isMobile ? 'hide-mobile' : ''}>{tab.label}</span>
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
@@ -172,40 +257,76 @@ export default function EventDetailModal({ event, onClose, isMobile = false }: E
         {/* 基本情報タブ */}
         {activeTab === 'detail' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* ステータス */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '14px', color: '#6c7684', minWidth: '80px' }}>ステータス</span>
-              <span style={{
-                padding: '4px 12px',
-                borderRadius: '20px',
-                fontSize: '14px',
-                fontWeight: '500',
-                background: `${getStatusColor(event.status)}20`,
-                color: getStatusColor(event.status)
-              }}>
-                {getStatusText(event.status)}
-              </span>
+            {/* 日時情報 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div>
+                <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>日付</p>
+                <p style={{ fontSize: '16px', fontWeight: '500' }}>
+                  {new Date(event.date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
+              <div>
+                <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>時間</p>
+                <p style={{ fontSize: '16px', fontWeight: '500' }}>
+                  {event.startTime} - {event.endTime || '未定'}
+                </p>
+              </div>
             </div>
 
-            {/* 日時 */}
+            {/* 現場情報 */}
             <div>
-              <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>日時</p>
-              <p style={{ fontSize: '16px', fontWeight: '500' }}>
-                {event.date.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
-                {' '}
-                {event.startTime} - {event.endTime}
-              </p>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>現場情報</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>住所</p>
+                  <p style={{ fontSize: '16px' }}>{event.address}</p>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                  <div>
+                    <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>施主名</p>
+                    <p style={{ fontSize: '16px', fontWeight: '500' }}>{event.clientName}</p>
+                  </div>
+                  <div>
+                    <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>工務店名</p>
+                    <p style={{ fontSize: '16px', fontWeight: '500' }}>{event.constructorName}</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            {/* 場所 */}
+            {/* 営業担当者 */}
             <div>
-              <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>場所</p>
-              <p style={{ fontSize: '16px' }}>{event.location}</p>
+              <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '8px' }}>営業担当者</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {event.salesPersons.map((sp, index) => (
+                  <div key={index} style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '6px 12px',
+                    background: sp.role === 'main' ? '#e6f4ff' : '#f5f6f8',
+                    borderRadius: '20px',
+                    fontSize: '14px'
+                  }}>
+                    <span style={{
+                      fontSize: '12px',
+                      padding: '2px 8px',
+                      borderRadius: '10px',
+                      background: sp.role === 'main' ? '#1890ff' : 
+                                 sp.role === 'sub' ? '#52c41a' : '#faad14',
+                      color: 'white'
+                    }}>
+                      {sp.role === 'main' ? '主' : sp.role === 'sub' ? '副' : 'サ'}
+                    </span>
+                    {sp.name}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* 協力業者 */}
+            {/* 担当職人 */}
             <div>
-              <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>協力業者</p>
+              <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>担当職人</p>
               <div style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -214,102 +335,218 @@ export default function EventDetailModal({ event, onClose, isMobile = false }: E
                 background: '#f5f6f8',
                 borderRadius: '8px'
               }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  borderRadius: '3px',
-                  background: event.color
-                }} />
-                <span style={{ fontSize: '16px', fontWeight: '500' }}>{event.company}</span>
+                <span style={{ fontSize: '16px', fontWeight: '500' }}>{event.workerName}</span>
               </div>
             </div>
 
-            {/* 担当職人 */}
-            {event.workers && event.workers.length > 0 && (
+            {/* カスタムフィールド */}
+            {event.customFieldValues && Object.keys(event.customFieldValues).length > 0 && (
               <div>
-                <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '8px' }}>担当職人</p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {event.workers.map((worker, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        padding: '6px 16px',
-                        background: 'white',
-                        border: '2px solid #e1e4e8',
-                        borderRadius: '20px',
-                        fontSize: '14px'
-                      }}
-                    >
-                      {worker}
-                    </div>
-                  ))}
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>追加情報</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {currentTenant?.settings.customFields.map(field => {
+                    const value = event.customFieldValues?.[field.id]
+                    if (!value) return null
+                    
+                    return (
+                      <div key={field.id}>
+                        <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>{field.name}</p>
+                        <p style={{ fontSize: '16px' }}>
+                          {field.type === 'url' ? (
+                            <a href={value} target="_blank" rel="noopener noreferrer" style={{ color: '#ff6b6b', textDecoration: 'none' }}>
+                              {value}
+                            </a>
+                          ) : (
+                            value
+                          )}
+                        </p>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
 
-            {/* ダンドリワークURL */}
-            {event.dandoriUrl && (
+            {/* 備考 */}
+            {event.description && (
               <div>
-                <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>ダンドリワークURL</p>
-                <a
-                  href={event.dandoriUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontSize: '14px',
-                    color: '#ff6b6b',
-                    textDecoration: 'none',
-                    wordBreak: 'break-all'
-                  }}
+                <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>備考</p>
+                <p style={{ fontSize: '16px', whiteSpace: 'pre-wrap' }}>{event.description}</p>
+              </div>
+            )}
+
+            {/* 職人の応答フォーム */}
+            {canRespond && !showResponseForm && (
+              <div style={{ borderTop: '1px solid #e1e4e8', paddingTop: '20px' }}>
+                <button
+                  onClick={() => setShowResponseForm(true)}
+                  className="btn-primary"
+                  style={{ width: '100%' }}
                 >
-                  {event.dandoriUrl}
-                </a>
+                  予定に応答する
+                </button>
               </div>
             )}
 
-            {/* 工務店 */}
-            {event.contractor && (
-              <div>
-                <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>工務店</p>
-                <p style={{ fontSize: '16px' }}>{event.contractor}</p>
-              </div>
-            )}
-
-            {/* 自社営業 */}
-            {event.salesRep && (
-              <div>
-                <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>自社営業</p>
-                <p style={{ fontSize: '16px' }}>{event.salesRep}</p>
+            {showResponseForm && (
+              <div style={{ borderTop: '1px solid #e1e4e8', paddingTop: '20px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>予定への応答</h3>
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                  <button
+                    onClick={() => setResponseType('accept')}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '2px solid',
+                      borderColor: responseType === 'accept' ? '#51cf66' : '#e1e4e8',
+                      background: responseType === 'accept' ? '#51cf66' : 'white',
+                      color: responseType === 'accept' ? 'white' : '#6c7684',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    承諾
+                  </button>
+                  <button
+                    onClick={() => setResponseType('pending')}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '2px solid',
+                      borderColor: responseType === 'pending' ? '#ffd93d' : '#e1e4e8',
+                      background: responseType === 'pending' ? '#ffd93d' : 'white',
+                      color: responseType === 'pending' ? 'white' : '#6c7684',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    保留
+                  </button>
+                  <button
+                    onClick={() => setResponseType('reject')}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: '2px solid',
+                      borderColor: responseType === 'reject' ? '#ff6b6b' : '#e1e4e8',
+                      background: responseType === 'reject' ? '#ff6b6b' : 'white',
+                      color: responseType === 'reject' ? 'white' : '#6c7684',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    拒否
+                  </button>
+                </div>
+                <textarea
+                  value={responseMessage}
+                  onChange={(e) => setResponseMessage(e.target.value)}
+                  placeholder="メッセージ（任意）"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '2px solid #e1e4e8',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    marginBottom: '12px'
+                  }}
+                  rows={3}
+                />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={handleResponse}
+                    className="btn-primary"
+                    style={{ flex: 1 }}
+                  >
+                    送信
+                  </button>
+                  <button
+                    onClick={() => setShowResponseForm(false)}
+                    className="btn-secondary"
+                    style={{ flex: 1 }}
+                  >
+                    キャンセル
+                  </button>
+                </div>
               </div>
             )}
 
             {/* アクションボタン */}
-            {event.status === 'proposed' && (
-              <div style={{
-                display: 'flex',
-                gap: '12px',
-                marginTop: '32px',
-                paddingTop: '24px',
-                borderTop: '1px solid #e1e4e8'
-              }}>
-                <button className="btn-primary" style={{ flex: 1 }}>
-                  承諾
+            <div style={{ display: 'flex', gap: '8px', borderTop: '1px solid #e1e4e8', paddingTop: '20px' }}>
+              {canRequestCancel && !showCancelForm && (
+                <button
+                  onClick={() => setShowCancelForm(true)}
+                  style={{
+                    flex: 1,
+                    padding: '12px',
+                    border: '2px solid #ff6b6b',
+                    borderRadius: '8px',
+                    background: 'white',
+                    color: '#ff6b6b',
+                    fontWeight: '600',
+                    cursor: 'pointer'
+                  }}
+                >
+                  キャンセル交渉
                 </button>
-                <button className="btn-secondary" style={{ flex: 1 }}>
-                  保留
+              )}
+              {canMarkComplete && (
+                <button
+                  onClick={handleMarkComplete}
+                  className="btn-primary"
+                  style={{ flex: 1, background: '#9775fa' }}
+                >
+                  完了報告
                 </button>
-                <button style={{
-                  flex: 1,
-                  padding: '12px',
-                  border: '2px solid #ff6b6b',
-                  borderRadius: '8px',
-                  background: 'white',
-                  color: '#ff6b6b',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}>
-                  拒否
-                </button>
+              )}
+            </div>
+
+            {/* キャンセル交渉フォーム */}
+            {showCancelForm && (
+              <div style={{ borderTop: '1px solid #e1e4e8', paddingTop: '20px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>キャンセル交渉</h3>
+                <textarea
+                  value={cancelMessage}
+                  onChange={(e) => setCancelMessage(e.target.value)}
+                  placeholder="キャンセル理由を入力してください"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '2px solid #e1e4e8',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    marginBottom: '12px'
+                  }}
+                  rows={3}
+                  required
+                />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={handleCancelRequest}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#ff6b6b',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    交渉を送信
+                  </button>
+                  <button
+                    onClick={() => setShowCancelForm(false)}
+                    className="btn-secondary"
+                    style={{ flex: 1 }}
+                  >
+                    やめる
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -364,102 +601,7 @@ export default function EventDetailModal({ event, onClose, isMobile = false }: E
               <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>現在の状況</h4>
               <p style={{ fontSize: '14px', marginBottom: '8px' }}>進捗率: 40%</p>
               <p style={{ fontSize: '14px', color: '#6c7684' }}>室外機設置完了。配管作業を開始しました。</p>
-              <p style={{ fontSize: '12px', color: '#6c7684', marginTop: '8px' }}>更新: 2025/07/21 10:30</p>
-            </div>
-
-            <div style={{ marginTop: '20px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>作業写真</h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                {[1, 2, 3].map(i => (
-                  <div key={i} style={{
-                    aspectRatio: '1',
-                    background: '#e1e4e8',
-                    borderRadius: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '24px',
-                    color: '#6c7684'
-                  }}>
-                    📷
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 機材・資材タブ */}
-        {activeTab === 'materials' && (
-          <div>
-            <div style={{ marginBottom: '24px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>必要機材</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  { name: '室外機 RAS-X40M2', quantity: '1台', status: '準備済' },
-                  { name: '室内機 RAS-X40M2', quantity: '1台', status: '準備済' },
-                  { name: '冷媒配管 2分3分', quantity: '15m', status: '準備済' },
-                  { name: '電源ケーブル VVF2.0-3C', quantity: '20m', status: '手配中' }
-                ].map((item, i) => (
-                  <div key={i} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '12px',
-                    background: '#f5f6f8',
-                    borderRadius: '8px'
-                  }}>
-                    <div>
-                      <p style={{ fontSize: '14px', fontWeight: '500' }}>{item.name}</p>
-                      <p style={{ fontSize: '12px', color: '#6c7684' }}>{item.quantity}</p>
-                    </div>
-                    <span style={{
-                      fontSize: '12px',
-                      padding: '4px 12px',
-                      borderRadius: '12px',
-                      background: item.status === '準備済' ? '#51cf66' : '#ffd93d',
-                      color: 'white'
-                    }}>
-                      {item.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>添付資料</h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {[
-                  { name: '施工図面.pdf', size: '2.4MB', icon: '📄' },
-                  { name: '機器仕様書.pdf', size: '1.8MB', icon: '📋' },
-                  { name: '配管ルート図.dwg', size: '3.2MB', icon: '📐' }
-                ].map((file, i) => (
-                  <div key={i} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    padding: '12px',
-                    border: '1px solid #e1e4e8',
-                    borderRadius: '8px',
-                    cursor: 'pointer'
-                  }}>
-                    <span style={{ fontSize: '24px' }}>{file.icon}</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: '14px', fontWeight: '500' }}>{file.name}</p>
-                      <p style={{ fontSize: '12px', color: '#6c7684' }}>{file.size}</p>
-                    </div>
-                    <button style={{
-                      background: 'none',
-                      border: 'none',
-                      color: '#ff6b6b',
-                      cursor: 'pointer',
-                      fontSize: '14px'
-                    }}>
-                      ダウンロード
-                    </button>
-                  </div>
-                ))}
-              </div>
+              <p style={{ fontSize: '12px', color: '#6c7684', marginTop: '8px' }}>更新: 2025/01/07 10:30</p>
             </div>
           </div>
         )}
@@ -501,34 +643,6 @@ export default function EventDetailModal({ event, onClose, isMobile = false }: E
               <button className="btn-primary" style={{ padding: '12px 24px' }}>
                 送信
               </button>
-            </div>
-          </div>
-        )}
-
-        {/* 変更履歴タブ */}
-        {activeTab === 'history' && (
-          <div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[
-                { date: '2025/07/21 15:30', user: '田中（営業部）', action: '開始時間を9:00から13:00に変更' },
-                { date: '2025/07/20 18:00', user: '山田太郎', action: 'ステータスを「提案中」から「承諾済」に変更' },
-                { date: '2025/07/19 14:00', user: 'システム', action: '新規作成' }
-              ].map((log, i) => (
-                <div key={i} style={{
-                  display: 'flex',
-                  gap: '16px',
-                  padding: '12px',
-                  borderLeft: '3px solid #e1e4e8'
-                }}>
-                  <div style={{ minWidth: '120px' }}>
-                    <p style={{ fontSize: '12px', color: '#6c7684' }}>{log.date}</p>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>{log.user}</p>
-                    <p style={{ fontSize: '14px', color: '#6c7684' }}>{log.action}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         )}

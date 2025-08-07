@@ -3,150 +3,294 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function Login() {
   const router = useRouter()
+  const { login } = useAuth()
   const [email, setEmail] = useState('')
-  const [otp, setOtp] = useState('')
-  const [step, setStep] = useState<'email' | 'otp'>('email')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleRequestOTP = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
     
-    // Simulate API call
-    setTimeout(() => {
-      setStep('otp')
-      setLoading(false)
-    }, 1500)
+    // モックログイン処理
+    const success = await login(email, password)
+    
+    if (success) {
+      router.push('/demo')
+    } else {
+      setError('メールアドレスまたはパスワードが正しくありません')
+    }
+    
+    setLoading(false)
   }
 
-  const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      router.push('/demo')
-      setLoading(false)
-    }, 1500)
+  // デモアカウントで自動入力
+  const fillDemoAccount = (type: 'admin' | 'worker') => {
+    if (type === 'admin') {
+      setEmail('admin@hvac.jp')
+      setPassword('demo123')
+    } else {
+      setEmail('tanaka@worker.jp')
+      setPassword('demo123')
+    }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-6">
-      <div className="absolute inset-0 gradient-bg opacity-5"></div>
-      
-      <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-8">
-            <div className="w-12 h-12 gradient-bg rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-2xl">⚡</span>
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+    }}>
+      <div style={{
+        background: 'white',
+        padding: '48px',
+        borderRadius: '16px',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+        maxWidth: '440px',
+        width: '100%',
+        margin: '20px'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <Link href="/" style={{ textDecoration: 'none' }}>
+            <div style={{
+              width: '64px',
+              height: '64px',
+              background: 'linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)',
+              borderRadius: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '32px',
+              color: 'white',
+              margin: '0 auto 20px',
+              cursor: 'pointer'
+            }}>
+              📅
             </div>
-            <h1 className="text-2xl font-bold">HVAC Scheduler</h1>
           </Link>
-          
-          <h2 className="text-3xl font-bold mb-2">
-            {step === 'email' ? 'ログイン' : 'ワンタイムパスワード'}
-          </h2>
-          <p className="text-gray-400">
-            {step === 'email' 
-              ? 'メールアドレスを入力してください' 
-              : `${email} に送信された6桁のコードを入力`}
+          <h1 style={{ 
+            fontSize: '28px', 
+            fontWeight: '700', 
+            color: '#2c3e50',
+            marginBottom: '8px'
+          }}>
+            HVAC Scheduler
+          </h1>
+          <p style={{ 
+            fontSize: '16px', 
+            color: '#6c7684' 
+          }}>
+            空調工事現場スケジューラー
           </p>
         </div>
 
-        <div className="glass p-8">
-          {step === 'email' ? (
-            <form onSubmit={handleRequestOTP}>
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">
-                  メールアドレス
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-purple-500 focus:outline-none transition-colors"
-                  placeholder="you@example.com"
-                  required
-                />
-              </div>
+        <h2 style={{ 
+          fontSize: '20px', 
+          fontWeight: '600', 
+          marginBottom: '24px',
+          color: '#2c3e50'
+        }}>
+          ログイン
+        </h2>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full btn-primary py-3 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <span className="loader w-5 h-5"></span>
-                ) : (
-                  <>
-                    <span>ワンタイムパスワードを送信</span>
-                    <span>→</span>
-                  </>
-                )}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={handleVerifyOTP}>
-              <div className="mb-6">
-                <label className="block text-sm font-medium mb-2">
-                  6桁のコード
-                </label>
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-purple-500 focus:outline-none transition-colors text-center text-2xl tracking-wider"
-                  placeholder="000000"
-                  maxLength={6}
-                  required
-                />
-              </div>
+        {error && (
+          <div style={{
+            padding: '12px',
+            background: '#fee',
+            border: '1px solid #fcc',
+            borderRadius: '8px',
+            marginBottom: '20px',
+            color: '#c00',
+            fontSize: '14px'
+          }}>
+            {error}
+          </div>
+        )}
 
-              <button
-                type="submit"
-                disabled={loading || otp.length !== 6}
-                className="w-full btn-primary py-3 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <span className="loader w-5 h-5"></span>
-                ) : (
-                  <>
-                    <span>ログイン</span>
-                    <span>→</span>
-                  </>
-                )}
-              </button>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontSize: '14px', 
+              fontWeight: '500',
+              color: '#2c3e50'
+            }}>
+              メールアドレス
+            </label>
+            <input 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e1e4e8',
+                borderRadius: '8px',
+                fontSize: '16px',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setStep('email')
-                  setOtp('')
-                }}
-                className="w-full mt-4 text-gray-400 hover:text-white transition-colors"
-              >
-                メールアドレスを変更
-              </button>
-            </form>
-          )}
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ 
+              display: 'block', 
+              marginBottom: '8px', 
+              fontSize: '14px', 
+              fontWeight: '500',
+              color: '#2c3e50'
+            }}>
+              パスワード
+            </label>
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e1e4e8',
+                borderRadius: '8px',
+                fontSize: '16px',
+                outline: 'none',
+                boxSizing: 'border-box'
+              }}
+            />
+          </div>
 
-          <div className="mt-8 pt-8 border-t border-white/10 text-center">
-            <p className="text-gray-400">
-              アカウントをお持ちでない方は
-              <Link href="/register" className="text-purple-400 hover:text-purple-300 ml-1">
-                新規登録
-              </Link>
+          <button 
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              padding: '14px',
+              background: loading ? '#ccc' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              boxShadow: '0 4px 15px rgba(102, 126, 234, 0.3)'
+            }}
+          >
+            {loading ? 'ログイン中...' : 'ログイン →'}
+          </button>
+        </form>
+
+        <div style={{ 
+          marginTop: '32px', 
+          paddingTop: '24px', 
+          borderTop: '1px solid #e1e4e8' 
+        }}>
+          <p style={{ 
+            fontSize: '14px', 
+            color: '#6c7684',
+            marginBottom: '16px',
+            textAlign: 'center'
+          }}>
+            デモ用アカウント（クリックで自動入力）
+          </p>
+          <div 
+            onClick={() => fillDemoAccount('admin')}
+            style={{
+              background: '#f5f6f8',
+              padding: '16px',
+              borderRadius: '8px',
+              marginBottom: '12px',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+              border: '2px solid transparent'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#e8f4ff'
+              e.currentTarget.style.borderColor = '#667eea'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#f5f6f8'
+              e.currentTarget.style.borderColor = 'transparent'
+            }}
+          >
+            <p style={{ 
+              fontSize: '13px', 
+              fontWeight: '600',
+              color: '#2c3e50',
+              marginBottom: '8px'
+            }}>
+              👨‍💼 管理者として
+            </p>
+            <p style={{ fontSize: '13px', color: '#6c7684', marginBottom: '4px' }}>
+              Email: admin@hvac.jp
+            </p>
+            <p style={{ fontSize: '13px', color: '#6c7684' }}>
+              Pass: demo123
+            </p>
+          </div>
+          <div 
+            onClick={() => fillDemoAccount('worker')}
+            style={{
+              background: '#f5f6f8',
+              padding: '16px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+              border: '2px solid transparent'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#e8f4ff'
+              e.currentTarget.style.borderColor = '#667eea'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#f5f6f8'
+              e.currentTarget.style.borderColor = 'transparent'
+            }}
+          >
+            <p style={{ 
+              fontSize: '13px', 
+              fontWeight: '600',
+              color: '#2c3e50',
+              marginBottom: '8px'
+            }}>
+              👷 職人として
+            </p>
+            <p style={{ fontSize: '13px', color: '#6c7684', marginBottom: '4px' }}>
+              Email: tanaka@worker.jp
+            </p>
+            <p style={{ fontSize: '13px', color: '#6c7684' }}>
+              Pass: demo123
             </p>
           </div>
         </div>
 
-        <div className="mt-8 text-center text-sm text-gray-500">
-          <p>デモ用アカウント</p>
-          <p className="font-mono mt-1">demo@example.com / 123456</p>
-        </div>
+        <p style={{ 
+          marginTop: '24px',
+          fontSize: '14px', 
+          color: '#6c7684',
+          textAlign: 'center'
+        }}>
+          アカウントをお持ちでない方は
+          <Link href="/register" style={{ 
+            color: '#667eea', 
+            textDecoration: 'none',
+            fontWeight: '500'
+          }}>
+            {' '}新規登録
+          </Link>
+        </p>
       </div>
     </div>
   )
