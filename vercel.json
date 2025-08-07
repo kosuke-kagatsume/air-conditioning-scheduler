@@ -1,4 +1,5 @@
 {
+  "name": "air-conditioning-scheduler",
   "headers": [
     {
       "source": "/(.*)",
