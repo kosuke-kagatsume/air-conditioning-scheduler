@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import CalendarView from '@/components/Calendar/CalendarView'
+import TimeTreeCalendar from '@/components/TimeTreeCalendar'
 import Link from 'next/link'
 import { mockEvents } from '@/lib/mockData'
 
@@ -121,9 +121,11 @@ export default function DemoPage() {
           </div>
 
           {/* Calendar View */}
-          <CalendarView 
-            selectedWorkers={selectedWorkers}
-            onEventClick={(event) => console.log('Event clicked:', event)}
+          <TimeTreeCalendar 
+            view="month"
+            selectedDate={new Date()}
+            onDateSelect={(date) => console.log('Date selected:', date)}
+            selectedCompanies={[]}
           />
 
           {/* Features */}
