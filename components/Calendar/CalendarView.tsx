@@ -288,13 +288,17 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
         {viewType === 'month' && (
           <div>
             {/* 曜日ヘッダー */}
-            <div className="grid grid-cols-7 gap-1 mb-2">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px', marginBottom: '8px' }}>
               {['日', '月', '火', '水', '木', '金', '土'].map((day, i) => (
                 <div
                   key={day}
-                  className={`text-center text-sm font-medium py-2 ${
-                    i === 0 ? 'text-red-500' : i === 6 ? 'text-blue-500' : 'text-gray-700'
-                  }`}
+                  style={{
+                    textAlign: 'center',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    padding: '8px 0',
+                    color: i === 0 ? '#ef4444' : i === 6 ? '#3b82f6' : '#374151'
+                  }}
                 >
                   {day}
                 </div>
@@ -302,7 +306,7 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
             </div>
             
             {/* 日付グリッド */}
-            <div className="grid grid-cols-7 gap-1">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}>
               {monthDays.map((day, index) => {
                 const dayEvents = filteredEvents.filter(e => e.date === day.dateStr)
                 const isToday = day.dateStr === todayStr
@@ -310,22 +314,31 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
                 return (
                   <div
                     key={index}
-                    className={`min-h-[100px] border rounded-lg p-2 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      day.isCurrentMonth ? 'bg-white' : 'bg-gray-50'
-                    } ${isToday ? 'border-blue-500 border-2' : 'border-gray-200'}`}
+                    style={{
+                      minHeight: '100px',
+                      border: isToday ? '2px solid #3b82f6' : '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      padding: '8px',
+                      cursor: 'pointer',
+                      background: day.isCurrentMonth ? 'white' : '#f9fafb',
+                      transition: 'background 0.2s'
+                    }}
                     onClick={() => handleDateClick(day.dateStr)}
                   >
-                    <div className={`text-sm font-medium mb-1 ${
-                      !day.isCurrentMonth ? 'text-gray-400' : 
-                      day.date.getDay() === 0 ? 'text-red-500' : 
-                      day.date.getDay() === 6 ? 'text-blue-500' : 
-                      'text-gray-700'
-                    }`}>
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      marginBottom: '4px',
+                      color: !day.isCurrentMonth ? '#9ca3af' : 
+                        day.date.getDay() === 0 ? '#ef4444' : 
+                        day.date.getDay() === 6 ? '#3b82f6' : 
+                        '#374151'
+                    }}>
                       {day.date.getDate()}
                     </div>
                     
                     {/* イベント表示 */}
-                    <div className="space-y-1">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                       {dayEvents.slice(0, 3).map(event => (
                         <div
                           key={event.id}
@@ -333,14 +346,33 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
                             e.stopPropagation()
                             handleEventClick(event)
                           }}
-                          className={`text-xs p-1 rounded border-l-2 cursor-pointer hover:opacity-80 transition-opacity ${getEventColor(event)}`}
+                          style={{
+                            fontSize: '11px',
+                            padding: '4px',
+                            borderRadius: '4px',
+                            borderLeft: '2px solid',
+                            cursor: 'pointer',
+                            transition: 'opacity 0.2s',
+                            background: event.status === 'accepted' ? '#dcfce7' :
+                              event.status === 'proposed' ? '#dbeafe' :
+                              event.status === 'pending' ? '#fef3c7' :
+                              event.status === 'rejected' ? '#fee2e2' : '#f3f4f6',
+                            borderLeftColor: event.status === 'accepted' ? '#22c55e' :
+                              event.status === 'proposed' ? '#3b82f6' :
+                              event.status === 'pending' ? '#f59e0b' :
+                              event.status === 'rejected' ? '#ef4444' : '#6b7280',
+                            color: event.status === 'accepted' ? '#166534' :
+                              event.status === 'proposed' ? '#1e40af' :
+                              event.status === 'pending' ? '#92400e' :
+                              event.status === 'rejected' ? '#991b1b' : '#374151'
+                          }}
                         >
-                          <div className="font-medium">{event.startTime} {event.city}</div>
-                          <div className="truncate">{event.constructionType}</div>
+                          <div style={{ fontWeight: '500' }}>{event.startTime} {event.city}</div>
+                          <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{event.constructionType}</div>
                         </div>
                       ))}
                       {dayEvents.length > 3 && (
-                        <div className="text-xs text-gray-500 text-center">
+                        <div style={{ fontSize: '11px', color: '#6b7280', textAlign: 'center' }}>
                           他{dayEvents.length - 3}件
                         </div>
                       )}
