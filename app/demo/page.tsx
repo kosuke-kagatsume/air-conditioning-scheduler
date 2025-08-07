@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import TimeTreeCalendar from '@/components/TimeTreeCalendar'
 import Link from 'next/link'
+import { AuthProvider } from '@/contexts/AuthContext'
+import CalendarView from '@/components/Calendar/CalendarView'
 
 export default function DemoPage() {
   const [mounted, setMounted] = useState(false)
-  const [currentView, setCurrentView] = useState<'month' | 'week' | 'day'>('month')
-  const [selectedDate, setSelectedDate] = useState(new Date())
 
   useEffect(() => {
     setMounted(true)
@@ -18,184 +17,299 @@ export default function DemoPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-      {/* Header */}
-      <header style={{
-        background: 'white',
-        borderBottom: '1px solid #e1e4e8',
-        padding: '16px 20px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-      }}>
+    <AuthProvider>
+      <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
+        {/* Header */}
+        <header style={{
+          background: 'white',
+          borderBottom: '1px solid #e1e4e8',
+          padding: '12px 20px'
+        }}>
+          <div style={{
+            maxWidth: '1400px',
+            margin: '0 auto',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  width: '36px',
+                  height: '36px',
+                  background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px',
+                  color: 'white'
+                }}>
+                  📅
+                </div>
+                <h1 style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  margin: 0,
+                  color: '#2c3e50'
+                }}>HVAC Scheduler</h1>
+              </div>
+
+              {/* Navigation Tabs */}
+              <nav style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  style={{
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    color: '#ff6b6b',
+                    border: 'none',
+                    borderBottom: '2px solid #ff6b6b',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  月
+                </button>
+                <button
+                  style={{
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    color: '#6c7684',
+                    border: 'none',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  週
+                </button>
+                <button
+                  style={{
+                    padding: '8px 16px',
+                    background: 'transparent',
+                    color: '#6c7684',
+                    border: 'none',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  日
+                </button>
+              </nav>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <Link href="/workers" style={{
+                color: '#6c7684',
+                fontSize: '14px',
+                textDecoration: 'none'
+              }}>
+                管理者
+              </Link>
+              <Link href="/workers" style={{
+                color: '#6c7684',
+                fontSize: '14px',
+                textDecoration: 'none'
+              }}>
+                職人
+              </Link>
+              <button style={{
+                padding: '6px 8px',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '18px'
+              }}>
+                🔔
+              </button>
+              <div style={{
+                width: '36px',
+                height: '36px',
+                borderRadius: '50%',
+                background: '#ff6b6b',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer'
+              }}>
+                A
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Layout */}
         <div style={{
+          display: 'flex',
           maxWidth: '1400px',
           margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
+          padding: '20px',
+          gap: '20px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              color: 'white',
-              boxShadow: '0 2px 8px rgba(255,107,107,0.3)'
-            }}>
-              📅
-            </div>
-            <h1 style={{
-              fontSize: '20px',
-              fontWeight: '700',
-              margin: 0,
-              color: '#2c3e50'
-            }}>HVAC Scheduler デモ</h1>
-          </div>
-
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Link href="/login" style={{
-              padding: '8px 20px',
-              background: 'white',
-              color: '#6c7684',
-              border: '1px solid #e1e4e8',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontSize: '14px',
-              fontWeight: '500',
-              transition: 'all 0.2s'
-            }}>
-              ログイン
-            </Link>
-            <Link href="/" style={{
-              padding: '8px 20px',
-              background: '#ff6b6b',
-              color: 'white',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontSize: '14px',
-              fontWeight: '500',
-              boxShadow: '0 2px 8px rgba(255,107,107,0.3)',
-              transition: 'all 0.2s'
-            }}>
-              ホームへ
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main style={{ padding: '24px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          {/* Demo Banner */}
-          <div style={{
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '16px',
-            padding: '32px',
-            marginBottom: '32px',
-            color: 'white',
-            boxShadow: '0 4px 20px rgba(102,126,234,0.3)'
+          {/* Sidebar */}
+          <aside style={{
+            width: '240px',
+            flexShrink: 0
           }}>
-            <h2 style={{ 
-              fontSize: '28px', 
-              fontWeight: '700', 
-              marginBottom: '12px',
-              letterSpacing: '-0.5px'
-            }}>
-              デモンストレーション
-            </h2>
-            <p style={{ 
-              fontSize: '16px', 
-              opacity: 0.95, 
-              marginBottom: '24px',
-              lineHeight: '1.6'
-            }}>
-              実際の画面イメージをご確認いただけます。カレンダービューの切り替え、予定の詳細表示、新規作成などの機能をお試しください。
-            </p>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setCurrentView('month')}
-                style={{
-                  padding: '10px 20px',
-                  background: currentView === 'month' ? 'white' : 'rgba(255,255,255,0.2)',
-                  color: currentView === 'month' ? '#667eea' : 'white',
-                  border: 'none',
+            {/* Menu Section */}
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{
+                fontSize: '12px',
+                color: '#6c7684',
+                fontWeight: '500',
+                marginBottom: '12px',
+                paddingLeft: '12px'
+              }}>
+                メニュー
+              </h3>
+              <nav>
+                <Link href="/demo" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  background: '#fff5f5',
                   borderRadius: '8px',
+                  textDecoration: 'none',
+                  color: '#ff6b6b',
                   fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                月/週/日ビュー切替
-              </button>
-              <button
-                style={{
-                  padding: '10px 20px',
-                  background: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  border: 'none',
+                  fontWeight: '500',
+                  marginBottom: '4px'
+                }}>
+                  <span>📅</span> カレンダー
+                </Link>
+                <Link href="/workers" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  marginBottom: '4px',
                   borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>👥</span> 職人管理
+                </Link>
+                <Link href="#" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
                   fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                予定の承認フロー
-              </button>
-              <button
-                style={{
-                  padding: '10px 20px',
-                  background: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  border: 'none',
+                  fontWeight: '500',
+                  marginBottom: '4px',
                   borderRadius: '8px',
+                  transition: 'background 0.2s'
+                }}>
+                  <span>🏢</span> 現場管理
+                </Link>
+                <Link href="#" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  padding: '10px 12px',
+                  textDecoration: 'none',
+                  color: '#2c3e50',
                   fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                職人の枠数管理
-              </button>
-              <button
-                style={{
-                  padding: '10px 20px',
-                  background: 'rgba(255,255,255,0.2)',
-                  color: 'white',
-                  border: 'none',
+                  fontWeight: '500',
+                  marginBottom: '4px',
                   borderRadius: '8px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s'
-                }}
-              >
-                カスタムフィールド
-              </button>
+                  transition: 'background 0.2s'
+                }}>
+                  <span>📊</span> レポート
+                </Link>
+              </nav>
             </div>
-          </div>
 
-          {/* Calendar Container */}
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '24px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
-          }}>
-            <TimeTreeCalendar 
-              view={currentView}
-              selectedDate={selectedDate}
-              onDateSelect={(date) => setSelectedDate(date)}
-              selectedCompanies={[]}
+            {/* Companies Filter */}
+            <div>
+              <h3 style={{
+                fontSize: '12px',
+                color: '#6c7684',
+                fontWeight: '500',
+                marginBottom: '12px',
+                paddingLeft: '12px'
+              }}>
+                協力業者
+              </h3>
+              <div style={{
+                background: 'white',
+                borderRadius: '8px',
+                padding: '12px'
+              }}>
+                {['A社', 'B社', 'C社', 'D社', 'E社'].map((company, index) => (
+                  <label key={company} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    marginBottom: '8px',
+                    cursor: 'pointer'
+                  }}>
+                    <input
+                      type="checkbox"
+                      defaultChecked
+                      style={{
+                        width: '16px',
+                        height: '16px',
+                        accentColor: ['#ff6b6b', '#74c0fc', '#51cf66', '#ffd93d', '#9775fa'][index]
+                      }}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                      <div style={{
+                        width: '8px',
+                        height: '8px',
+                        borderRadius: '50%',
+                        background: ['#ff6b6b', '#74c0fc', '#51cf66', '#ffd93d', '#9775fa'][index]
+                      }} />
+                      <span style={{ fontSize: '14px', color: '#2c3e50' }}>{company}</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* Main Content - Calendar */}
+          <main style={{ flex: 1 }}>
+            <CalendarView 
+              selectedWorkers={[]}
+              onEventClick={(event) => console.log('Event clicked:', event)}
             />
-          </div>
+          </main>
         </div>
-      </main>
-    </div>
+
+        {/* Floating Action Button */}
+        <button style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '24px',
+          width: '56px',
+          height: '56px',
+          borderRadius: '50%',
+          background: '#ff6b6b',
+          color: 'white',
+          border: 'none',
+          fontSize: '24px',
+          cursor: 'pointer',
+          boxShadow: '0 4px 12px rgba(255, 107, 107, 0.4)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'transform 0.2s'
+        }}>
+          +
+        </button>
+      </div>
+    </AuthProvider>
   )
 }
