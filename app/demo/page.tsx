@@ -7,6 +7,8 @@ import CalendarView from '@/components/Calendar/CalendarView'
 
 export default function DemoPage() {
   const [mounted, setMounted] = useState(false)
+  const [viewMode, setViewMode] = useState<'admin' | 'worker'>('admin')
+  const [selectedWorkers, setSelectedWorkers] = useState<string[]>([])
 
   useEffect(() => {
     setMounted(true)
@@ -100,21 +102,47 @@ export default function DemoPage() {
               </nav>
             </div>
 
+            {/* ヘッダー右側 */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <Link href="/workers" style={{
-                color: '#6c7684',
-                fontSize: '14px',
-                textDecoration: 'none'
+              <div style={{
+                display: 'flex',
+                background: '#f3f4f6',
+                borderRadius: '8px',
+                padding: '2px'
               }}>
-                管理者
-              </Link>
-              <Link href="/workers" style={{
-                color: '#6c7684',
-                fontSize: '14px',
-                textDecoration: 'none'
-              }}>
-                職人
-              </Link>
+                <button 
+                  onClick={() => setViewMode('admin')}
+                  style={{
+                    padding: '6px 16px',
+                    background: viewMode === 'admin' ? 'white' : 'transparent',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    color: viewMode === 'admin' ? '#1f2937' : '#6b7280',
+                    fontWeight: viewMode === 'admin' ? '500' : '400',
+                    boxShadow: viewMode === 'admin' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                    transition: 'all 0.2s'
+                  }}>
+                  管理者
+                </button>
+                <button 
+                  onClick={() => setViewMode('worker')}
+                  style={{
+                    padding: '6px 16px',
+                    background: viewMode === 'worker' ? 'white' : 'transparent',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    color: viewMode === 'worker' ? '#1f2937' : '#6b7280',
+                    fontWeight: viewMode === 'worker' ? '500' : '400',
+                    boxShadow: viewMode === 'worker' ? '0 1px 2px rgba(0,0,0,0.05)' : 'none',
+                    transition: 'all 0.2s'
+                  }}>
+                  職人
+                </button>
+              </div>
               <button style={{
                 padding: '6px 8px',
                 background: 'transparent',
@@ -137,7 +165,7 @@ export default function DemoPage() {
                 fontWeight: '600',
                 cursor: 'pointer'
               }}>
-                A
+                {viewMode === 'admin' ? 'A' : '田'}
               </div>
             </div>
           </div>
@@ -151,7 +179,8 @@ export default function DemoPage() {
           padding: '20px',
           gap: '20px'
         }}>
-          {/* Sidebar */}
+          {/* サイドバー - 管理者用 */}
+          {viewMode === 'admin' && (
           <aside style={{
             width: '240px',
             flexShrink: 0
@@ -278,13 +307,234 @@ export default function DemoPage() {
               </div>
             </div>
           </aside>
+          )}
 
-          {/* Main Content - Calendar */}
+          {/* サイドバー - 職人用 */}
+          {viewMode === 'worker' && (
+          <aside style={{
+            width: '280px',
+            background: 'white',
+            borderRadius: '12px',
+            padding: '20px',
+            marginRight: '20px'
+          }}>
+            {/* 職人プロフィール */}
+            <div style={{
+              padding: '16px',
+              background: '#f9fafb',
+              borderRadius: '8px',
+              marginBottom: '20px'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginBottom: '12px'
+              }}>
+                <div style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: '#3b82f6',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  marginRight: '12px'
+                }}>
+                  田
+                </div>
+                <div>
+                  <div style={{ fontWeight: '600', fontSize: '16px', color: '#1f2937' }}>
+                    田中太郎
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                    職人ID: W-001
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '8px' }}>
+                所属: 田中工務店
+              </div>
+              <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                役割: エアコン設置工事
+              </div>
+            </div>
+
+            {/* 今日の予定 */}
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '12px'
+              }}>
+                今日の予定
+              </h3>
+              <div style={{
+                padding: '12px',
+                background: '#fef3c7',
+                border: '1px solid #fde68a',
+                borderRadius: '8px',
+                marginBottom: '8px'
+              }}>
+                <div style={{ fontSize: '13px', fontWeight: '500', marginBottom: '4px' }}>
+                  09:00 - 12:00
+                </div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                  📍 渋谷区 - エアコン新設
+                </div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                  顧客: 山田様
+                </div>
+              </div>
+              <div style={{
+                padding: '12px',
+                background: '#dcfce7',
+                border: '1px solid #bbf7d0',
+                borderRadius: '8px'
+              }}>
+                <div style={{ fontSize: '13px', fontWeight: '500', marginBottom: '4px' }}>
+                  14:00 - 17:00
+                </div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                  📍 新宿区 - メンテナンス
+                </div>
+                <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                  顧客: 鈴木様
+                </div>
+              </div>
+            </div>
+
+            {/* クイックアクション */}
+            <div style={{ marginBottom: '20px' }}>
+              <h3 style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '12px'
+              }}>
+                クイックアクション
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button style={{
+                  padding: '10px',
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  📝 作業報告書を作成
+                </button>
+                <button style={{
+                  padding: '10px',
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  📅 予定変更を申請
+                </button>
+                <button style={{
+                  padding: '10px',
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  💬 管理者に連絡
+                </button>
+              </div>
+            </div>
+
+            {/* 今月の実績 */}
+            <div>
+              <h3 style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#1f2937',
+                marginBottom: '12px'
+              }}>
+                今月の実績
+              </h3>
+              <div style={{
+                padding: '12px',
+                background: '#f9fafb',
+                borderRadius: '8px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: '8px'
+                }}>
+                  <span style={{ fontSize: '12px', color: '#6b7280' }}>完了件数</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>18件</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginBottom: '8px'
+                }}>
+                  <span style={{ fontSize: '12px', color: '#6b7280' }}>稼働時間</span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>142時間</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between'
+                }}>
+                  <span style={{ fontSize: '12px', color: '#6b7280' }}>評価</span>
+                  <span style={{ fontSize: '14px', color: '#f59e0b' }}>⭐⭐⭐⭐⭐</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+          )}
+
+          {/* メインコンテンツ */}
           <main style={{ flex: 1 }}>
-            <CalendarView 
-              selectedWorkers={[]}
-              onEventClick={(event) => console.log('Event clicked:', event)}
-            />
+            {viewMode === 'admin' ? (
+              // 管理者ビュー
+              <CalendarView 
+                selectedWorkers={selectedWorkers}
+                onEventClick={(event) => console.log('Event clicked:', event)}
+              />
+            ) : (
+              // 職人ビュー
+              <div style={{
+                background: 'white',
+                borderRadius: '12px',
+                padding: '20px'
+              }}>
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#1f2937',
+                  marginBottom: '20px'
+                }}>
+                  マイスケジュール
+                </h2>
+                <CalendarView 
+                  selectedWorkers={['W-001']} // 自分の予定のみ表示
+                  onEventClick={(event) => console.log('Event clicked:', event)}
+                />
+              </div>
+            )}
           </main>
         </div>
 

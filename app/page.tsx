@@ -562,11 +562,6 @@ export default function Home() {
         </div>
       </footer>
 
-      <style jsx>{`
-        @media (max-width: 768px) {
-          .show-mobile { display: block !important; }
-        }
-      `}</style>
     </div>
   )
 }
