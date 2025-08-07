@@ -67,7 +67,7 @@ function ReportsContent() {
     photos: [] as string[],
     issues: '',
     nextSteps: '',
-    location: null as { lat: number; lng: number } | null
+    location: undefined as { lat: number; lng: number } | undefined
   })
 
   const [showCamera, setShowCamera] = useState(false)
