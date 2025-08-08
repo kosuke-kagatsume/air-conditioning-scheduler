@@ -157,53 +157,202 @@ function ScheduleChangeContent() {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-            <Link href="/demo" style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '12px',
-              textDecoration: 'none'
+          <Link href="/demo" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px',
+            textDecoration: 'none'
+          }}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              color: 'white'
             }}>
-              <div style={{
-                width: '36px',
-                height: '36px',
-                background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                color: 'white'
-              }}>
-                📅
-              </div>
-              <h1 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                margin: 0,
-                color: '#2c3e50'
-              }}>HVAC Scheduler</h1>
-            </Link>
-
-            <nav style={{ display: 'flex', gap: '24px' }}>
-              <Link href="/demo" style={{ color: '#6b7280', textDecoration: 'none' }}>
-                カレンダー
-              </Link>
-              <Link href="/schedule-change" style={{ color: '#ff6b6b', textDecoration: 'none', fontWeight: '600' }}>
-                予定変更申請
-              </Link>
-              <Link href="/shifts" style={{ color: '#6b7280', textDecoration: 'none' }}>
-                シフト管理
-              </Link>
-              <Link href="/inventory" style={{ color: '#6b7280', textDecoration: 'none' }}>
-                在庫管理
-              </Link>
-            </nav>
-          </div>
+              📅
+            </div>
+            <h1 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              margin: 0,
+              color: '#2c3e50'
+            }}>HVAC Scheduler</h1>
+          </Link>
         </div>
       </header>
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+      {/* Main Layout */}
+      <div style={{
+        display: 'flex',
+        maxWidth: '1400px',
+        margin: '0 auto',
+        padding: '20px',
+        gap: '20px'
+      }}>
+        {/* サイドバー */}
+        <aside style={{
+          width: '240px',
+          flexShrink: 0
+        }}>
+          {/* Menu Section */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{
+              fontSize: '12px',
+              color: '#6c7684',
+              fontWeight: '500',
+              marginBottom: '12px',
+              paddingLeft: '12px'
+            }}>
+              メニュー
+            </h3>
+            <nav>
+              <Link href="/demo" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📅</span> カレンダー
+              </Link>
+              <Link href="/workers" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>👥</span> 職人管理
+              </Link>
+              <Link href="/sites" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>🏢</span> 現場管理
+              </Link>
+              <Link href="/dashboard" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📊</span> ダッシュボード
+              </Link>
+              <Link href="/schedule-change" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                background: '#fff5f5',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                color: '#ff6b6b',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px'
+              }}>
+                <span>📝</span> 予定変更申請
+              </Link>
+              <Link href="/shifts" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📋</span> シフト管理
+              </Link>
+              <Link href="/inventory" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📦</span> 在庫管理
+              </Link>
+              <Link href="/reports" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📄</span> 作業報告書
+              </Link>
+              <Link href="/settings" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>⚙️</span> 設定
+              </Link>
+            </nav>
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main style={{ flex: 1 }}>
+        <div style={{ width: '100%' }}>
         <div style={{
           display: 'flex',
           justifyContent: 'space-between',
@@ -619,6 +768,8 @@ function ScheduleChangeContent() {
             </div>
           </div>
         )}
+        </div>
+        </main>
       </div>
     </div>
   )

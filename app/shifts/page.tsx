@@ -803,6 +803,8 @@ function ShiftsContent() {
           </form>
         </div>
       )}
+        </main>
+      </div>
     </div>
   )
 }
