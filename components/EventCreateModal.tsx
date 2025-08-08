@@ -547,7 +547,7 @@ export default function EventCreateModal({ initialDate = '', onClose, onSave }: 
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '6px' }}>
-                ガントリワークURL
+                ダンドリワークURL
               </label>
               <input
                 type="url"

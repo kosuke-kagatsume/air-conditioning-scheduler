@@ -29,7 +29,7 @@ function SettingsContent() {
   const [customFields, setCustomFields] = useState<CustomField[]>([
     { id: '1', name: '設置台数', type: 'number', required: true, order: 1 },
     { id: '2', name: '物流センター', type: 'select', required: false, options: ['東京', '神奈川', '千葉', '埼玉'], order: 2 },
-    { id: '3', name: 'ガントリワークURL', type: 'url', required: false, order: 3 },
+    { id: '3', name: 'ダンドリワークURL', type: 'url', required: false, order: 3 },
     { id: '4', name: '納品先', type: 'text', required: false, order: 4 },
     { id: '5', name: '特記事項', type: 'text', required: false, order: 5 }
   ])
