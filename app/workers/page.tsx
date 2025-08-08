@@ -210,35 +210,173 @@ export default function WorkersPage() {
         {/* Sidebar */}
         <aside style={{
           width: '240px',
-          background: 'white',
-          borderRight: '1px solid #e1e4e8',
-          padding: '20px',
-          overflowY: 'auto'
+          flexShrink: 0
         }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#6c7684', marginBottom: '16px' }}>
-            メニュー
-          </h3>
-          <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <Link href="/demo" className="nav-tab" style={{ width: '100%', textAlign: 'left' }}>
-              📅 カレンダー
-            </Link>
-            <button className="nav-tab active" style={{ width: '100%', textAlign: 'left' }}>
-              👷 職人管理
-            </button>
-            <button className="nav-tab" style={{ width: '100%', textAlign: 'left' }}>
-              🏗️ 現場管理
-            </button>
-            <button className="nav-tab" style={{ width: '100%', textAlign: 'left' }}>
-              📊 レポート
-            </button>
-          </nav>
+          {/* Menu Section */}
+          <div style={{ marginBottom: '24px' }}>
+            <h3 style={{
+              fontSize: '12px',
+              color: '#6c7684',
+              fontWeight: '500',
+              marginBottom: '12px',
+              paddingLeft: '12px'
+            }}>
+              メニュー
+            </h3>
+            <nav>
+              <Link href="/demo" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📅</span> カレンダー
+              </Link>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                background: '#fff5f5',
+                borderRadius: '8px',
+                color: '#ff6b6b',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px'
+              }}>
+                <span>👥</span> 職人管理
+              </div>
+              <Link href="/sites" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>🏢</span> 現場管理
+              </Link>
+              <Link href="/dashboard" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📊</span> ダッシュボード
+              </Link>
+              <Link href="/schedule-change" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📝</span> 予定変更申請
+              </Link>
+              <Link href="/shifts" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📋</span> シフト管理
+              </Link>
+              <Link href="/inventory" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📦</span> 在庫管理
+              </Link>
+              <Link href="/reports" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>📄</span> 作業報告書
+              </Link>
+              <Link href="/settings" style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '10px 12px',
+                textDecoration: 'none',
+                color: '#2c3e50',
+                fontSize: '14px',
+                fontWeight: '500',
+                marginBottom: '4px',
+                borderRadius: '8px',
+                transition: 'background 0.2s'
+              }}>
+                <span>⚙️</span> 設定
+              </Link>
+            </nav>
+          </div>
 
           {/* 統計サマリー */}
-          <div style={{ marginTop: '32px' }}>
-            <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#6c7684', marginBottom: '16px' }}>
+          <div>
+            <h3 style={{
+              fontSize: '12px',
+              color: '#6c7684',
+              fontWeight: '500',
+              marginBottom: '12px',
+              paddingLeft: '12px'
+            }}>
               本日の稼働状況
             </h3>
-            <div className="card" style={{ background: '#f5f6f8' }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '8px',
+              padding: '12px'
+            }}>
               <div style={{ marginBottom: '12px' }}>
                 <p style={{ fontSize: '12px', color: '#6c7684', marginBottom: '4px' }}>稼働中</p>
                 <p style={{ fontSize: '24px', fontWeight: '700', color: '#51cf66' }}>8名</p>
