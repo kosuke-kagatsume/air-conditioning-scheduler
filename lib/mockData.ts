@@ -1,4 +1,4 @@
-import { User, Event, Notification, WorkerCapacity, Tenant, DashboardData } from '@/types'
+import { User, Event, Notification, WorkerCapacity, Tenant, DashboardData, EventStatus, SalesPerson } from '@/types'
 
 // テナント（元請会社）データ
 export const mockTenants: Tenant[] = [
@@ -167,7 +167,7 @@ const generateMockEvents = (): Event[] => {
     date: getDateStr(0),
     startTime: '09:00',
     endTime: '12:00',
-    status: 'accepted',
+    status: 'accepted' as EventStatus,
     address: '東京都渋谷区渋谷1-1-1',
     city: '渋谷区',
     constructionType: 'エアコン新設',
@@ -175,8 +175,8 @@ const generateMockEvents = (): Event[] => {
     clientName: '山田様',
     constructorName: 'ABCホーム',
     salesPersons: [
-      { id: 'sp1', name: '営業田中', role: 'main' },
-      { id: 'sp2', name: '営業佐藤', role: 'sub' }
+      { id: 'sp1', name: '営業田中', role: 'main' as SalesPerson['role'] },
+      { id: 'sp2', name: '営業佐藤', role: 'sub' as SalesPerson['role'] }
     ],
     workerId: 'worker-1',
     workerName: '高橋次郎',
@@ -197,14 +197,14 @@ const generateMockEvents = (): Event[] => {
     date: getDateStr(1),
     startTime: '13:00',
     endTime: '15:00',
-    status: 'proposed',
+    status: 'proposed' as EventStatus,
     address: '東京都新宿区西新宿2-2-2',
     city: '新宿区',
     constructionType: '点検・メンテナンス',
     clientName: '佐藤様',
     constructorName: 'XYZ建設',
     salesPersons: [
-      { id: 'sp1', name: '営業田中', role: 'main' }
+      { id: 'sp1', name: '営業田中', role: 'main' as SalesPerson['role'] }
     ],
     workerId: 'worker-2',
     workerName: '伊藤三郎',
@@ -220,14 +220,14 @@ const generateMockEvents = (): Event[] => {
     date: getDateStr(0),
     startTime: '14:00',
     endTime: '16:00',
-    status: 'accepted',
+    status: 'accepted' as EventStatus,
     address: '東京都港区六本木3-3-3',
     city: '港区',
     constructionType: '修理',
     clientName: '鈴木様',
     constructorName: 'DEF工務店',
     salesPersons: [
-      { id: 'sp3', name: '営業高橋', role: 'main' }
+      { id: 'sp3', name: '営業高橋', role: 'main' as SalesPerson['role'] }
     ],
     workerId: 'worker-master1',
     workerName: '田中親方',
@@ -237,7 +237,7 @@ const generateMockEvents = (): Event[] => {
       id: 'trouble-1',
       type: '顧客クレーム',
       description: 'エアコンから異音',
-      status: 'open',
+      status: 'open' as 'open' | 'resolved',
       reportedAt: '2025-01-07T10:00:00Z'
     },
     timeSlotIds: ['ts2'],
@@ -250,7 +250,7 @@ const generateMockEvents = (): Event[] => {
     date: getDateStr(2),
     startTime: '09:00',
     endTime: '17:00',
-    status: 'pending',
+    status: 'pending' as EventStatus,
     address: '東京都豊島区池袋4-4-4',
     city: '豊島区',
     constructionType: 'エアコン交換',
@@ -258,8 +258,8 @@ const generateMockEvents = (): Event[] => {
     clientName: '田中様',
     constructorName: 'GHI建築',
     salesPersons: [
-      { id: 'sp1', name: '営業田中', role: 'main' },
-      { id: 'sp4', name: '営業渡辺', role: 'support' }
+      { id: 'sp1', name: '営業田中', role: 'main' as SalesPerson['role'] },
+      { id: 'sp4', name: '営業渡辺', role: 'support' as SalesPerson['role'] }
     ],
     workerId: 'worker-1',
     workerName: '高橋次郎',
@@ -271,9 +271,9 @@ const generateMockEvents = (): Event[] => {
     },
     negotiation: {
       id: 'nego-1',
-      type: 'conflict',
+      type: 'conflict' as 'conflict' | 'cancel' | 'change',
       message: 'この日は別の予定が入っていますが、調整可能でしょうか？',
-      status: 'pending',
+      status: 'pending' as 'pending' | 'accepted' | 'rejected',
       createdAt: '2025-01-06T15:00:00Z'
     },
     timeSlotIds: ['ts1', 'ts2'],
@@ -286,14 +286,14 @@ const generateMockEvents = (): Event[] => {
     date: getDateStr(7),
     startTime: '10:00',
     endTime: '14:00',
-    status: 'accepted',
+    status: 'accepted' as EventStatus,
     address: '東京都江東区豊洲5-5-5',
     city: '江東区',
     constructionType: '配管工事',
     clientName: '高橋様',
     constructorName: 'JKL工業',
     salesPersons: [
-      { id: 'sp2', name: '営業佐藤', role: 'main' }
+      { id: 'sp2', name: '営業佐藤', role: 'main' as SalesPerson['role'] }
     ],
     workerId: 'worker-2',
     workerName: '伊藤三郎',
@@ -315,8 +315,8 @@ const generateMockEvents = (): Event[] => {
     const randomCity = cities[Math.floor(Math.random() * cities.length)]
     const randomTimeSlot = timeSlots[Math.floor(Math.random() * timeSlots.length)]
     const randomWorker = Math.floor(Math.random() * workerIds.length)
-    const randomSalesPersons = [
-      { id: `sp${Math.floor(Math.random() * 5) + 1}`, name: `営業${['田中', '佐藤', '高橋', '渡辺', '山田'][Math.floor(Math.random() * 5)]}`, role: 'main' }
+    const randomSalesPersons: SalesPerson[] = [
+      { id: `sp${Math.floor(Math.random() * 5) + 1}`, name: `営業${['田中', '佐藤', '高橋', '渡辺', '山田'][Math.floor(Math.random() * 5)]}`, role: 'main' as SalesPerson['role'] }
     ]
     
     const event: Event = {
@@ -350,9 +350,9 @@ const generateMockEvents = (): Event[] => {
     if (Math.random() > 0.8) {
       event.negotiation = {
         id: `nego-dummy-${i + 1}`,
-        type: 'conflict',
+        type: 'conflict' as 'conflict' | 'cancel' | 'change',
         message: '時間の調整をお願いします',
-        status: 'pending',
+        status: 'pending' as 'pending' | 'accepted' | 'rejected',
         createdAt: new Date().toISOString()
       }
     }
@@ -362,7 +362,7 @@ const generateMockEvents = (): Event[] => {
         id: `trouble-dummy-${i + 1}`,
         type: ['施工遅延', '部材不足', '顧客クレーム'][Math.floor(Math.random() * 3)],
         description: 'トラブル対応中',
-        status: 'open',
+        status: 'open' as 'open' | 'resolved',
         reportedAt: new Date().toISOString()
       }
     }
