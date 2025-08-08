@@ -12,6 +12,9 @@ export default function DemoPage() {
   const [selectedWorkers, setSelectedWorkers] = useState<string[]>([])
   const [showNotifications, setShowNotifications] = useState(false)
   const [unreadCount, setUnreadCount] = useState(3)
+  const [showWorkReportModal, setShowWorkReportModal] = useState(false)
+  const [showScheduleChangeModal, setShowScheduleChangeModal] = useState(false)
+  const [showContactAdminModal, setShowContactAdminModal] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -410,7 +413,7 @@ export default function DemoPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <button 
                   onClick={() => {
-                    alert('作業報告書作成画面に遷移します（実装予定）')
+                    setShowWorkReportModal(true)
                   }}
                   style={{
                     padding: '10px',
@@ -432,7 +435,7 @@ export default function DemoPage() {
                 </button>
                 <button 
                   onClick={() => {
-                    alert('予定変更申請画面に遷移します（実装予定）')
+                    setShowScheduleChangeModal(true)
                   }}
                   style={{
                     padding: '10px',
@@ -454,7 +457,7 @@ export default function DemoPage() {
                 </button>
                 <button 
                   onClick={() => {
-                    alert('管理者連絡画面に遷移します（実装予定）')
+                    setShowContactAdminModal(true)
                   }}
                   style={{
                     padding: '10px',
@@ -576,6 +579,843 @@ export default function DemoPage() {
         }}>
           +
         </button>
+
+        {/* 作業報告書作成モーダル */}
+        {showWorkReportModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '90%',
+              maxWidth: '600px',
+              maxHeight: '90vh',
+              overflowY: 'auto'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '20px'
+              }}>
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#1f2937'
+                }}>
+                  作業報告書作成
+                </h2>
+                <button
+                  onClick={() => setShowWorkReportModal(false)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: 'none',
+                    background: '#f3f4f6',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    作業日
+                  </label>
+                  <input
+                    type="date"
+                    defaultValue={new Date().toISOString().split('T')[0]}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    顧客名
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="例: 株式会社ABC"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    現場住所
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="例: 東京都渋谷区..."
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    作業内容
+                  </label>
+                  <select style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}>
+                    <option value="">選択してください</option>
+                    <option value="installation">新規設置</option>
+                    <option value="maintenance">定期メンテナンス</option>
+                    <option value="repair">修理</option>
+                    <option value="removal">撤去</option>
+                    <option value="inspection">点検</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    作業詳細
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="実施した作業の詳細を入力してください"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    使用部材
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="使用した部材・部品を入力してください"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    作業時間
+                  </label>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <input
+                      type="time"
+                      defaultValue="09:00"
+                      style={{
+                        flex: 1,
+                        padding: '10px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                    <span>〜</span>
+                    <input
+                      type="time"
+                      defaultValue="17:00"
+                      style={{
+                        flex: 1,
+                        padding: '10px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    作業状況
+                  </label>
+                  <select style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}>
+                    <option value="completed">完了</option>
+                    <option value="in-progress">継続中</option>
+                    <option value="pending">保留</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    写真添付
+                  </label>
+                  <div style={{
+                    border: '2px dashed #d1d5db',
+                    borderRadius: '8px',
+                    padding: '20px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    background: '#f9fafb'
+                  }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>📷</div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      クリックして写真を選択<br />
+                      またはドラッグ&ドロップ
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginTop: '20px'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowWorkReportModal(false)}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: 'white',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      alert('作業報告書を提出しました')
+                      setShowWorkReportModal(false)
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    提出する
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* 予定変更申請モーダル */}
+        {showScheduleChangeModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '90%',
+              maxWidth: '500px'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '20px'
+              }}>
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#1f2937'
+                }}>
+                  予定変更申請
+                </h2>
+                <button
+                  onClick={() => setShowScheduleChangeModal(false)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: 'none',
+                    background: '#f3f4f6',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    変更種別
+                  </label>
+                  <select style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}>
+                    <option value="reschedule">日程変更</option>
+                    <option value="cancel">キャンセル</option>
+                    <option value="delay">遅延</option>
+                    <option value="early">早期化</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    対象予定
+                  </label>
+                  <select style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}>
+                    <option value="">選択してください</option>
+                    <option value="1">2025/08/10 09:00-17:00 渋谷ビル エアコン設置</option>
+                    <option value="2">2025/08/12 13:00-16:00 新宿マンション 定期点検</option>
+                    <option value="3">2025/08/15 10:00-12:00 品川オフィス 修理対応</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    変更希望日時
+                  </label>
+                  <input
+                    type="date"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      marginBottom: '8px'
+                    }}
+                  />
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <input
+                      type="time"
+                      style={{
+                        flex: 1,
+                        padding: '10px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                    <span>〜</span>
+                    <input
+                      type="time"
+                      style={{
+                        flex: 1,
+                        padding: '10px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    変更理由
+                  </label>
+                  <textarea
+                    rows={4}
+                    placeholder="変更が必要な理由を入力してください"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    優先度
+                  </label>
+                  <select style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}>
+                    <option value="low">低</option>
+                    <option value="medium">中</option>
+                    <option value="high">高</option>
+                    <option value="urgent">緊急</option>
+                  </select>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginTop: '20px'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowScheduleChangeModal(false)}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: 'white',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      alert('予定変更を申請しました')
+                      setShowScheduleChangeModal(false)
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#f59e0b',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    申請する
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* 管理者連絡モーダル */}
+        {showContactAdminModal && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000
+          }}>
+            <div style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              width: '90%',
+              maxWidth: '500px'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '20px'
+              }}>
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  color: '#1f2937'
+                }}>
+                  管理者への連絡
+                </h2>
+                <button
+                  onClick={() => setShowContactAdminModal(false)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: 'none',
+                    background: '#f3f4f6',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    宛先
+                  </label>
+                  <select style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}>
+                    <option value="all">全管理者</option>
+                    <option value="manager">山田管理者</option>
+                    <option value="supervisor">佐藤主任</option>
+                    <option value="office">事務所</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    件名
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="連絡の件名を入力"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    カテゴリー
+                  </label>
+                  <select style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}>
+                    <option value="">選択してください</option>
+                    <option value="report">報告</option>
+                    <option value="consultation">相談</option>
+                    <option value="emergency">緊急</option>
+                    <option value="request">依頼</option>
+                    <option value="confirmation">確認</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    メッセージ
+                  </label>
+                  <textarea
+                    rows={6}
+                    placeholder="連絡内容を入力してください"
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      resize: 'vertical'
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    marginBottom: '6px',
+                    color: '#374151'
+                  }}>
+                    添付ファイル
+                  </label>
+                  <div style={{
+                    border: '2px dashed #d1d5db',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    background: '#f9fafb'
+                  }}>
+                    <div style={{ fontSize: '24px', marginBottom: '4px' }}>📎</div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      ファイルを選択
+                    </div>
+                    <input
+                      type="file"
+                      multiple
+                      style={{ display: 'none' }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <input
+                    type="checkbox"
+                    id="urgent"
+                    style={{
+                      width: '16px',
+                      height: '16px'
+                    }}
+                  />
+                  <label htmlFor="urgent" style={{
+                    fontSize: '14px',
+                    color: '#374151'
+                  }}>
+                    緊急連絡として送信
+                  </label>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginTop: '20px'
+                }}>
+                  <button
+                    type="button"
+                    onClick={() => setShowContactAdminModal(false)}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: 'white',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    キャンセル
+                  </button>
+                  <button
+                    type="submit"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      alert('管理者に連絡を送信しました')
+                      setShowContactAdminModal(false)
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    送信する
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </AuthProvider>
   )
