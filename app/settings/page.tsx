@@ -28,17 +28,17 @@ function SettingsContent() {
   // カスタムフィールド
   const [customFields, setCustomFields] = useState<CustomField[]>([
     { id: '1', name: '設置台数', type: 'number', required: true, order: 1 },
-    { id: '2', name: '物流センター', type: 'select', required: false, options: ['東京', '神奈川', '千葉', '埼玉'], order: 2 },
-    { id: '3', name: 'ダンドリワークURL', type: 'url', required: false, order: 3 },
-    { id: '4', name: '納品先', type: 'text', required: false, order: 4 },
-    { id: '5', name: '特記事項', type: 'text', required: false, order: 5 }
+    { id: '2', name: '物流センター', type: 'select', required: false, options: ['東京DC', '神奈川DC', '千葉DC', '埼玉DC'], order: 2 },
+    { id: '3', name: '納品先', type: 'text', required: false, order: 3 },
+    { id: '4', name: '特記事項', type: 'text', required: false, order: 4 }
   ])
   
   // 通知設定
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [pushNotifications, setPushNotifications] = useState(true)
-  const [slackIntegration, setSlackIntegration] = useState(false)
-  const [slackWebhook, setSlackWebhook] = useState('')
+  
+  // ダンドリワーク連携
+  const [dandoriWorkUrl, setDandoriWorkUrl] = useState('https://dandori-work.com')
   
   // 外部連携
   const [googleCalendarEnabled, setGoogleCalendarEnabled] = useState(false)
@@ -503,41 +503,6 @@ function SettingsContent() {
                     </div>
                   </div>
 
-                  <div>
-                    <h4 style={{ fontSize: '15px', fontWeight: '500', marginBottom: '12px' }}>
-                      Slack連携
-                    </h4>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                      <input
-                        type="checkbox"
-                        checked={slackIntegration}
-                        onChange={(e) => setSlackIntegration(e.target.checked)}
-                        style={{ width: '16px', height: '16px' }}
-                      />
-                      <span style={{ fontSize: '14px' }}>Slack通知を有効にする</span>
-                    </label>
-                    {slackIntegration && (
-                      <div>
-                        <label style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>
-                          Webhook URL
-                        </label>
-                        <input
-                          type="url"
-                          value={slackWebhook}
-                          onChange={(e) => setSlackWebhook(e.target.value)}
-                          placeholder="https://hooks.slack.com/services/..."
-                          style={{
-                            width: '100%',
-                            maxWidth: '500px',
-                            padding: '8px 12px',
-                            border: '1px solid #d1d5db',
-                            borderRadius: '6px',
-                            fontSize: '14px'
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
             )}
@@ -550,6 +515,52 @@ function SettingsContent() {
                 </h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  <div style={{
+                    padding: '20px',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '12px',
+                    background: '#f9fafb'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                      <div style={{ fontSize: '24px' }}>🏗️</div>
+                      <h4 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>
+                        ダンドリワーク連携
+                      </h4>
+                    </div>
+                    <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+                      ダンドリワークシステムとの連携設定です。ここで設定したURLは全社共通で使用され、個別の予定には設定されません。
+                    </p>
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
+                        ダンドリワークURL
+                      </label>
+                      <input
+                        type="url"
+                        value={dandoriWorkUrl}
+                        onChange={(e) => setDandoriWorkUrl(e.target.value)}
+                        placeholder="https://dandori-work.com"
+                        style={{
+                          width: '100%',
+                          maxWidth: '500px',
+                          padding: '12px 16px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+                    <div style={{
+                      padding: '12px 16px',
+                      background: '#dbeafe',
+                      border: '1px solid #3b82f6',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      color: '#1e40af'
+                    }}>
+                      💡 このURLは全社共通設定です。予定作成時に参照URLとして利用されます。
+                    </div>
+                  </div>
+
                   <div style={{
                     padding: '16px',
                     border: '1px solid #e5e7eb',

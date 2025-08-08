@@ -275,36 +275,6 @@ export default function DemoPage() {
                 }}>
                   <span>📄</span> 作業報告書
                 </Link>
-                <Link href="/chat" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>💬</span> チャット
-                </Link>
-                <Link href="/notifications" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>🔔</span> 通知センター
-                </Link>
                 <Link href="/settings" style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -481,46 +451,70 @@ export default function DemoPage() {
                 クイックアクション
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <button style={{
-                  padding: '10px',
-                  background: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
+                <button 
+                  onClick={() => {
+                    alert('作業報告書作成画面に遷移します（実装予定）')
+                  }}
+                  style={{
+                    padding: '10px',
+                    background: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                >
                   📝 作業報告書を作成
                 </button>
-                <button style={{
-                  padding: '10px',
-                  background: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
+                <button 
+                  onClick={() => {
+                    alert('予定変更申請画面に遷移します（実装予定）')
+                  }}
+                  style={{
+                    padding: '10px',
+                    background: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                >
                   📅 予定変更を申請
                 </button>
-                <button style={{
-                  padding: '10px',
-                  background: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
+                <button 
+                  onClick={() => {
+                    alert('管理者連絡画面に遷移します（実装予定）')
+                  }}
+                  style={{
+                    padding: '10px',
+                    background: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                >
                   💬 管理者に連絡
                 </button>
               </div>

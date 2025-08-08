@@ -227,51 +227,6 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
             >
               今日
             </button>
-            
-            <div style={{ display: 'flex', gap: '4px' }}>
-              <button
-                onClick={() => setViewType('month')}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  background: viewType === 'month' ? '#3b82f6' : 'white',
-                  color: viewType === 'month' ? 'white' : '#6b7280',
-                  border: viewType === 'month' ? 'none' : '1px solid #e5e7eb',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                月
-              </button>
-              <button
-                onClick={() => setViewType('week')}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  background: viewType === 'week' ? '#3b82f6' : 'white',
-                  color: viewType === 'week' ? 'white' : '#6b7280',
-                  border: viewType === 'week' ? 'none' : '1px solid #e5e7eb',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                週
-              </button>
-              <button
-                onClick={() => setViewType('day')}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  background: viewType === 'day' ? '#3b82f6' : 'white',
-                  color: viewType === 'day' ? 'white' : '#6b7280',
-                  border: viewType === 'day' ? 'none' : '1px solid #e5e7eb',
-                  cursor: 'pointer',
-                  fontSize: '14px'
-                }}
-              >
-                日
-              </button>
-            </div>
 
             {canCreateEvent && (
               <button

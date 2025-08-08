@@ -119,8 +119,48 @@ const getDateStr = (daysOffset: number) => {
   return date.toISOString().split('T')[0]
 }
 
-// 予定データ
-export const mockEvents: Event[] = [
+// 今月と来月の日付を生成
+const generateDatesForTwoMonths = () => {
+  const dates: string[] = []
+  const today = new Date()
+  const currentMonth = today.getMonth()
+  const currentYear = today.getFullYear()
+  
+  // 今月の残り日数
+  for (let i = 0; i < 30; i++) {
+    const date = new Date(currentYear, currentMonth, today.getDate() + i)
+    dates.push(date.toISOString().split('T')[0])
+  }
+  
+  // 来月
+  for (let i = 0; i < 30; i++) {
+    const date = new Date(currentYear, currentMonth + 1, i + 1)
+    dates.push(date.toISOString().split('T')[0])
+  }
+  
+  return dates
+}
+
+const scheduleStatuses: Event['status'][] = ['pending', 'accepted', 'rejected', 'completed', 'onHold', 'cancelled']
+const constructionTypes = ['エアコン新設', 'エアコン交換', '点検・メンテナンス', '修理', '配管工事', '撤去']
+const cities = ['渋谷区', '新宿区', '港区', '千代田区', '中央区', '品川区', '目黒区', '世田谷区']
+const timeSlots = [
+  { start: '09:00', end: '12:00' },
+  { start: '13:00', end: '17:00' },
+  { start: '14:00', end: '17:00' },
+  { start: '10:00', end: '12:00' },
+  { start: '15:00', end: '18:00' }
+]
+const workerIds = ['worker-1', 'worker-2', 'worker-master1']
+const workerNames = ['高橋次郎', '伊藤三郎', '田中親方']
+
+// ダミーデータを生成
+const generateMockEvents = (): Event[] => {
+  const events: Event[] = []
+  const dates = generateDatesForTwoMonths()
+  
+  // 既存のベースデータ
+  const baseEvents = [
   {
     id: 'event-1',
     title: 'エアコン新設工事',
@@ -144,7 +184,6 @@ export const mockEvents: Event[] = [
     tenantId: 'tenant-1',
     customFieldValues: {
       cf1: 3,
-      cf2: 'https://dandori-work.com/project/123',
       cf3: '現地直送',
       cf4: '東京DC'
     },
@@ -265,6 +304,76 @@ export const mockEvents: Event[] = [
     updatedAt: '2025-01-01T09:00:00Z'
   }
 ]
+
+  // 50個のダミーイベント生成
+  events.push(...baseEvents)
+  
+  for (let i = 0; i < 50; i++) {
+    const randomDate = dates[Math.floor(Math.random() * dates.length)]
+    const randomStatus = scheduleStatuses[Math.floor(Math.random() * scheduleStatuses.length)]
+    const randomConstructionType = constructionTypes[Math.floor(Math.random() * constructionTypes.length)]
+    const randomCity = cities[Math.floor(Math.random() * cities.length)]
+    const randomTimeSlot = timeSlots[Math.floor(Math.random() * timeSlots.length)]
+    const randomWorker = Math.floor(Math.random() * workerIds.length)
+    const randomSalesPersons = [
+      { id: `sp${Math.floor(Math.random() * 5) + 1}`, name: `営業${['田中', '佐藤', '高橋', '渡辺', '山田'][Math.floor(Math.random() * 5)]}`, role: 'main' }
+    ]
+    
+    const event: Event = {
+      id: `dummy-event-${i + 1}`,
+      title: `${randomConstructionType}`,
+      date: randomDate,
+      startTime: randomTimeSlot.start,
+      endTime: randomTimeSlot.end,
+      status: randomStatus,
+      address: `東京都${randomCity}${Math.floor(Math.random() * 9) + 1}-${Math.floor(Math.random() * 9) + 1}-${Math.floor(Math.random() * 9) + 1}`,
+      city: randomCity,
+      constructionType: randomConstructionType,
+      description: `${randomConstructionType}の作業`,
+      clientName: `${['佐藤', '田中', '山田', '高橋', '鈴木', '渡辺', '伊藤', '中村', '小林', '加藤'][Math.floor(Math.random() * 10)]}様`,
+      constructorName: `${['ABC', 'XYZ', 'DEF', 'GHI', 'JKL', 'MNO', 'PQR', 'STU', 'VWX', 'YZ'][Math.floor(Math.random() * 10)]}${['ホーム', '建設', '工務店', '建築', '工業'][Math.floor(Math.random() * 5)]}`,
+      salesPersons: randomSalesPersons,
+      workerId: workerIds[randomWorker],
+      workerName: workerNames[randomWorker],
+      createdBy: 'user-staff1',
+      tenantId: 'tenant-1',
+      customFieldValues: {
+        cf1: Math.floor(Math.random() * 5) + 1,
+        cf3: Math.random() > 0.7 ? '事前連絡要' : '通常'
+      },
+      timeSlotIds: [Math.random() > 0.5 ? 'ts1' : 'ts2'],
+      createdAt: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)).toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    
+    // ランダムでネゴシエーションやトラブルを追加
+    if (Math.random() > 0.8) {
+      event.negotiation = {
+        id: `nego-dummy-${i + 1}`,
+        type: 'conflict',
+        message: '時間の調整をお願いします',
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      }
+    }
+    
+    if (Math.random() > 0.9) {
+      event.trouble = {
+        id: `trouble-dummy-${i + 1}`,
+        type: ['施工遅延', '部材不足', '顧客クレーム'][Math.floor(Math.random() * 3)],
+        description: 'トラブル対応中',
+        status: 'open',
+        reportedAt: new Date().toISOString()
+      }
+    }
+    
+    events.push(event)
+  }
+  
+  return events
+}
+
+export const mockEvents = generateMockEvents()
 
 // 職人枠数設定
 export const mockWorkerCapacities: WorkerCapacity[] = [
