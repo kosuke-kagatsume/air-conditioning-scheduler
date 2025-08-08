@@ -267,18 +267,50 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
           >
             + 予定作成
           </button>
-          <button
-            style={{
-              padding: '6px 12px',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '13px',
-              color: '#6b7280'
-            }}
-          >
-            月/週/日
-          </button>
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <button
+              onClick={() => setViewType('month')}
+              style={{
+                padding: '6px 12px',
+                background: viewType === 'month' ? '#3b82f6' : 'transparent',
+                color: viewType === 'month' ? 'white' : '#6b7280',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              月
+            </button>
+            <button
+              onClick={() => setViewType('week')}
+              style={{
+                padding: '6px 12px',
+                background: viewType === 'week' ? '#3b82f6' : 'transparent',
+                color: viewType === 'week' ? 'white' : '#6b7280',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              週
+            </button>
+            <button
+              onClick={() => setViewType('day')}
+              style={{
+                padding: '6px 12px',
+                background: viewType === 'day' ? '#3b82f6' : 'transparent',
+                color: viewType === 'day' ? 'white' : '#6b7280',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '13px'
+              }}
+            >
+              日
+            </button>
+          </div>
           <button
             style={{
               padding: '6px 12px',
