@@ -53,7 +53,7 @@ export interface TimeSlot {
 }
 
 // 予定ステータス
-export type EventStatus = 'proposed' | 'accepted' | 'pending' | 'rejected' | 'cancelled' | 'completed'
+export type EventStatus = 'proposed' | 'accepted' | 'pending' | 'rejected' | 'cancelled' | 'completed' | 'onHold'
 
 // 予定
 export interface Event {
