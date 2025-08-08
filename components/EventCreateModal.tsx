@@ -28,7 +28,6 @@ export default function EventCreateModal({ initialDate = '', onClose, onSave }: 
     description: '',
     customFields: {} as Record<string, any>,
     timeSlots: [] as string[],
-    ganttUrl: '',
     physicalCenter: '',
     equipment: '',
     notes: ''
@@ -545,24 +544,6 @@ export default function EventCreateModal({ initialDate = '', onClose, onSave }: 
               </div>
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '6px' }}>
-                ダンドリワークURL
-              </label>
-              <input
-                type="url"
-                value={formData.ganttUrl}
-                onChange={(e) => setFormData({ ...formData, ganttUrl: e.target.value })}
-                placeholder="https://..."
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
-            </div>
 
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#6b7280', marginBottom: '6px' }}>

@@ -9,6 +9,8 @@ export default function DemoPage() {
   const [mounted, setMounted] = useState(false)
   const [viewMode, setViewMode] = useState<'admin' | 'worker'>('admin')
   const [selectedWorkers, setSelectedWorkers] = useState<string[]>([])
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(3)
 
   useEffect(() => {
     setMounted(true)
@@ -99,17 +101,177 @@ export default function DemoPage() {
                   職人
                 </button>
               </div>
-              <Link href="/notifications" style={{
-                padding: '6px 8px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '18px',
-                textDecoration: 'none',
-                display: 'inline-block'
-              }}>
-                🔔
-              </Link>
+              <div style={{ position: 'relative' }}>
+                <button 
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  style={{
+                    padding: '6px 8px',
+                    background: 'transparent',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '18px',
+                    position: 'relative'
+                  }}
+                >
+                  🔔
+                  {unreadCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '2px',
+                      right: '2px',
+                      background: '#ff4444',
+                      color: 'white',
+                      borderRadius: '50%',
+                      width: '18px',
+                      height: '18px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+                
+                {showNotifications && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    right: '0',
+                    width: '320px',
+                    background: 'white',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '12px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                    zIndex: 1000,
+                    marginTop: '8px'
+                  }}>
+                    <div style={{
+                      padding: '16px 20px',
+                      borderBottom: '1px solid #f3f4f6',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      通知
+                      <button 
+                        onClick={() => setUnreadCount(0)}
+                        style={{
+                          fontSize: '12px',
+                          color: '#6b7280',
+                          background: 'none',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        すべて既読
+                      </button>
+                    </div>
+                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                      <div style={{
+                        padding: '12px 20px',
+                        borderBottom: '1px solid #f9fafb',
+                        display: 'flex',
+                        gap: '12px'
+                      }}>
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          background: '#3b82f6',
+                          marginTop: '6px',
+                          flexShrink: 0
+                        }}></div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
+                            新しい予定の提案
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
+                            1月9日(木) 9:00-17:00 エアコン交換工事の予定が提案されました
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                            2時間前
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{
+                        padding: '12px 20px',
+                        borderBottom: '1px solid #f9fafb',
+                        display: 'flex',
+                        gap: '12px'
+                      }}>
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          background: '#ef4444',
+                          marginTop: '6px',
+                          flexShrink: 0
+                        }}></div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
+                            保留中の予定があります
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
+                            田中親方から保留の回答があります。3日以内に対応が必要です。
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                            5時間前
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{
+                        padding: '12px 20px',
+                        display: 'flex',
+                        gap: '12px',
+                        opacity: 0.6
+                      }}>
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          background: '#9ca3af',
+                          marginTop: '6px',
+                          flexShrink: 0
+                        }}></div>
+                        <div>
+                          <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
+                            明日の予定
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
+                            明日14:00から緊急修理対応があります
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#9ca3af' }}>
+                            昨日
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{
+                      padding: '12px 20px',
+                      textAlign: 'center',
+                      borderTop: '1px solid #f3f4f6'
+                    }}>
+                      <Link 
+                        href="/notifications" 
+                        style={{
+                          fontSize: '14px',
+                          color: '#3b82f6',
+                          textDecoration: 'none'
+                        }}
+                        onClick={() => setShowNotifications(false)}
+                      >
+                        すべての通知を見る
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
               <div style={{
                 width: '36px',
                 height: '36px',
