@@ -310,7 +310,7 @@ const generateMockEvents = (): Event[] => {
   
   for (let i = 0; i < 50; i++) {
     const randomDate = dates[Math.floor(Math.random() * dates.length)]
-    const randomStatus = scheduleStatuses[Math.floor(Math.random() * scheduleStatuses.length)]
+    const randomStatus = scheduleStatuses[Math.floor(Math.random() * scheduleStatuses.length)] as Event['status']
     const randomConstructionType = constructionTypes[Math.floor(Math.random() * constructionTypes.length)]
     const randomCity = cities[Math.floor(Math.random() * cities.length)]
     const randomTimeSlot = timeSlots[Math.floor(Math.random() * timeSlots.length)]
