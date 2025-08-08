@@ -36,28 +36,26 @@ export default function DemoPage() {
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '18px',
-                  color: 'white'
-                }}>
-                  📅
-                </div>
-                <h1 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  margin: 0,
-                  color: '#2c3e50'
-                }}>HVAC Scheduler</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '36px',
+                height: '36px',
+                background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '18px',
+                color: 'white'
+              }}>
+                📅
               </div>
+              <h1 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: 0,
+                color: '#2c3e50'
+              }}>HVAC Scheduler</h1>
             </div>
 
             {/* ヘッダー右側 */}
