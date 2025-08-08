@@ -21,6 +21,9 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedDate, setSelectedDate] = useState<string>('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [showStatusModal, setShowStatusModal] = useState(false)
+  const [eventToUpdate, setEventToUpdate] = useState<Event | null>(null)
 
   // フィルタリングされたイベント
   const filteredEvents = useMemo(() => {
@@ -47,8 +50,13 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
       events = events.filter(e => selectedWorkers.includes(e.workerId))
     }
     
+    // ステータスフィルタリング
+    if (statusFilter !== 'all') {
+      events = events.filter(e => e.status === statusFilter)
+    }
+    
     return events
-  }, [canViewAllEvents, isMaster, isWorker, user, selectedWorkers])
+  }, [canViewAllEvents, isMaster, isWorker, user, selectedWorkers, statusFilter])
 
   // 日付関連のユーティリティ
   const getMonthDays = (date: Date) => {
@@ -159,6 +167,51 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
     setSelectedEvent(event)
     if (onEventClick) {
       onEventClick(event)
+    }
+  }
+
+  const handleStatusChange = (event: Event) => {
+    setEventToUpdate(event)
+    setShowStatusModal(true)
+  }
+
+  const updateEventStatus = (newStatus: Event['status']) => {
+    if (eventToUpdate) {
+      // ここで実際にはAPIを呼び出してステータスを更新
+      const index = mockEvents.findIndex(e => e.id === eventToUpdate.id)
+      if (index !== -1) {
+        mockEvents[index].status = newStatus
+      }
+      setShowStatusModal(false)
+      setEventToUpdate(null)
+      // 更新成功のフィードバック
+      alert(`ステータスを「${getStatusLabel(newStatus)}」に変更しました`)
+    }
+  }
+
+  const getStatusColor = (status: Event['status']) => {
+    switch (status) {
+      case 'accepted': return '#22c55e'
+      case 'proposed': return '#3b82f6'
+      case 'pending': return '#f59e0b'
+      case 'onHold': return '#6b7280'
+      case 'completed': return '#8b5cf6'
+      case 'rejected': return '#ef4444'
+      case 'cancelled': return '#dc2626'
+      default: return '#6b7280'
+    }
+  }
+
+  const getStatusLabel = (status: Event['status']) => {
+    switch (status) {
+      case 'accepted': return '確定'
+      case 'proposed': return '提案中'
+      case 'pending': return '保留'
+      case 'onHold': return '保留中'
+      case 'completed': return '完了'
+      case 'rejected': return '却下'
+      case 'cancelled': return 'キャンセル'
+      default: return status
     }
   }
 
@@ -312,49 +365,53 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
             </button>
           </div>
           <button
+            onClick={() => setStatusFilter(statusFilter === 'accepted' ? 'all' : 'accepted')}
             style={{
               padding: '6px 12px',
-              background: 'transparent',
+              background: statusFilter === 'accepted' ? '#22c55e' : 'transparent',
               border: 'none',
               cursor: 'pointer',
               fontSize: '13px',
-              color: '#6b7280'
+              color: statusFilter === 'accepted' ? 'white' : '#6b7280'
             }}
           >
             確定
           </button>
           <button
+            onClick={() => setStatusFilter(statusFilter === 'proposed' ? 'all' : 'proposed')}
             style={{
               padding: '6px 12px',
-              background: 'transparent',
+              background: statusFilter === 'proposed' ? '#3b82f6' : 'transparent',
               border: 'none',
               cursor: 'pointer',
               fontSize: '13px',
-              color: '#6b7280'
+              color: statusFilter === 'proposed' ? 'white' : '#6b7280'
             }}
           >
             提案中
           </button>
           <button
+            onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
             style={{
               padding: '6px 12px',
-              background: 'transparent',
+              background: statusFilter === 'pending' ? '#f59e0b' : 'transparent',
               border: 'none',
               cursor: 'pointer',
               fontSize: '13px',
-              color: '#6b7280'
+              color: statusFilter === 'pending' ? 'white' : '#6b7280'
             }}
           >
             保留
           </button>
           <button
+            onClick={() => setStatusFilter(statusFilter === 'completed' ? 'all' : 'completed')}
             style={{
               padding: '6px 12px',
-              background: 'transparent',
+              background: statusFilter === 'completed' ? '#8b5cf6' : 'transparent',
               border: 'none',
               cursor: 'pointer',
               fontSize: '13px',
-              color: '#6b7280'
+              color: statusFilter === 'completed' ? 'white' : '#6b7280'
             }}
           >
             完了
@@ -446,24 +503,53 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
                             e.stopPropagation()
                             handleEventClick(event)
                           }}
+                          onContextMenu={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleStatusChange(event)
+                          }}
                           style={{
                             fontSize: '11px',
-                            padding: '2px 4px',
-                            borderRadius: '3px',
+                            padding: '4px 6px',
+                            borderRadius: '4px',
                             cursor: 'pointer',
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            background: event.status === 'accepted' ? '#86efac' :
-                              event.status === 'proposed' ? '#93c5fd' :
-                              event.status === 'pending' ? '#fde047' :
-                              event.status === 'rejected' ? '#fca5a5' : '#e5e7eb',
-                            color: '#1f2937'
+                            background: event.status === 'accepted' ? '#dcfce7' :
+                              event.status === 'proposed' ? '#dbeafe' :
+                              event.status === 'pending' ? '#fef3c7' :
+                              event.status === 'completed' ? '#ede9fe' :
+                              event.status === 'onHold' ? '#f3f4f6' :
+                              event.status === 'rejected' ? '#fee2e2' : 
+                              event.status === 'cancelled' ? '#fecaca' : '#e5e7eb',
+                            borderLeft: `3px solid ${getStatusColor(event.status)}`,
+                            color: '#1f2937',
+                            position: 'relative'
                           }}
                         >
-                          {event.startTime} {event.city}
-                          <br />
-                          {event.constructionType}
+                          <div style={{ 
+                            fontSize: '10px', 
+                            marginBottom: '2px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}>
+                            <span style={{
+                              display: 'inline-block',
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '50%',
+                              background: getStatusColor(event.status)
+                            }} />
+                            {event.startTime}
+                          </div>
+                          <div style={{ fontSize: '10px', fontWeight: '500' }}>
+                            {event.constructionType}
+                          </div>
+                          <div style={{ fontSize: '9px', color: '#6b7280' }}>
+                            {event.city}
+                          </div>
                         </div>
                       ))}
                       {dayEvents.length > 3 && (
@@ -672,6 +758,13 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
         <EventDetailModal
           event={selectedEvent}
           onClose={() => setSelectedEvent(null)}
+          onStatusChange={(eventId, status, message) => {
+            // EventDetailModalから直接ステータス変更を受け取る
+            const eventToChange = filteredEvents.find(e => e.id === eventId)
+            if (eventToChange) {
+              handleStatusChange(eventToChange)
+            }
+          }}
         />
       )}
       
@@ -683,6 +776,127 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
             setSelectedDate('')
           }}
         />
+      )}
+
+      {/* ステータス変更モーダル */}
+      {showStatusModal && eventToUpdate && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '24px',
+            width: '90%',
+            maxWidth: '400px'
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              marginBottom: '20px',
+              color: '#1f2937'
+            }}>
+              ステータス変更
+            </h3>
+            
+            <div style={{
+              marginBottom: '20px',
+              padding: '12px',
+              background: '#f9fafb',
+              borderRadius: '8px'
+            }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                予定
+              </div>
+              <div style={{ fontSize: '14px', fontWeight: '500' }}>
+                {eventToUpdate.title}
+              </div>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                {eventToUpdate.date} {eventToUpdate.startTime}-{eventToUpdate.endTime}
+              </div>
+            </div>
+
+            <div style={{
+              marginBottom: '20px'
+            }}>
+              <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '12px' }}>
+                現在のステータス: <span style={{ color: getStatusColor(eventToUpdate.status) }}>
+                  {getStatusLabel(eventToUpdate.status)}
+                </span>
+              </div>
+              
+              <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '8px' }}>
+                新しいステータス:
+              </div>
+              
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                {(['accepted', 'proposed', 'pending', 'onHold', 'completed', 'rejected', 'cancelled'] as Event['status'][]).map(status => (
+                  <button
+                    key={status}
+                    onClick={() => updateEventStatus(status)}
+                    disabled={eventToUpdate.status === status}
+                    style={{
+                      padding: '12px',
+                      borderRadius: '8px',
+                      border: `2px solid ${eventToUpdate.status === status ? '#e5e7eb' : getStatusColor(status)}`,
+                      background: eventToUpdate.status === status ? '#f9fafb' : 'white',
+                      cursor: eventToUpdate.status === status ? 'not-allowed' : 'pointer',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      color: eventToUpdate.status === status ? '#9ca3af' : getStatusColor(status),
+                      opacity: eventToUpdate.status === status ? 0.5 : 1,
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (eventToUpdate.status !== status) {
+                        e.currentTarget.style.background = `${getStatusColor(status)}15`
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (eventToUpdate.status !== status) {
+                        e.currentTarget.style.background = 'white'
+                      }
+                    }}
+                  >
+                    {getStatusLabel(status)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '12px'
+            }}>
+              <button
+                onClick={() => {
+                  setShowStatusModal(false)
+                  setEventToUpdate(null)
+                }}
+                style={{
+                  padding: '8px 20px',
+                  background: 'white',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
