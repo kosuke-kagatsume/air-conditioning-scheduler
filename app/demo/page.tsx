@@ -56,50 +56,6 @@ export default function DemoPage() {
                   color: '#2c3e50'
                 }}>HVAC Scheduler</h1>
               </div>
-
-              {/* Navigation Tabs */}
-              <nav style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  style={{
-                    padding: '8px 16px',
-                    background: 'transparent',
-                    color: '#ff6b6b',
-                    border: 'none',
-                    borderBottom: '2px solid #ff6b6b',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  月
-                </button>
-                <button
-                  style={{
-                    padding: '8px 16px',
-                    background: 'transparent',
-                    color: '#6c7684',
-                    border: 'none',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  週
-                </button>
-                <button
-                  style={{
-                    padding: '8px 16px',
-                    background: 'transparent',
-                    color: '#6c7684',
-                    border: 'none',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  日
-                </button>
-              </nav>
             </div>
 
             {/* ヘッダー右側 */}
