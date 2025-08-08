@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Sidebar from '@/components/Sidebar'
 
 interface Skill {
   id: string
@@ -206,195 +207,12 @@ export default function WorkersPage() {
         </div>
       </header>
 
-      <div style={{ display: 'flex', height: 'calc(100vh - 60px)' }}>
+      <div>
         {/* Sidebar */}
-        <aside style={{
-          width: '240px',
-          flexShrink: 0
-        }}>
-          {/* Menu Section */}
-          <div style={{ marginBottom: '24px' }}>
-            <h3 style={{
-              fontSize: '12px',
-              color: '#6c7684',
-              fontWeight: '500',
-              marginBottom: '12px',
-              paddingLeft: '12px'
-            }}>
-              メニュー
-            </h3>
-            <nav>
-              <Link href="/demo" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                textDecoration: 'none',
-                color: '#2c3e50',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px',
-                borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}>
-                <span>📅</span> カレンダー
-              </Link>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                background: '#fff5f5',
-                borderRadius: '8px',
-                color: '#ff6b6b',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px'
-              }}>
-                <span>👥</span> 職人管理
-              </div>
-              <Link href="/sites" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                textDecoration: 'none',
-                color: '#2c3e50',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px',
-                borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}>
-                <span>🏢</span> 現場管理
-              </Link>
-              <Link href="/dashboard" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                textDecoration: 'none',
-                color: '#2c3e50',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px',
-                borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}>
-                <span>📊</span> ダッシュボード
-              </Link>
-              <Link href="/schedule-change" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                textDecoration: 'none',
-                color: '#2c3e50',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px',
-                borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}>
-                <span>📝</span> 予定変更申請
-              </Link>
-              <Link href="/shifts" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                textDecoration: 'none',
-                color: '#2c3e50',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px',
-                borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}>
-                <span>📋</span> シフト管理
-              </Link>
-              <Link href="/inventory" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                textDecoration: 'none',
-                color: '#2c3e50',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px',
-                borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}>
-                <span>📦</span> 在庫管理
-              </Link>
-              <Link href="/reports" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                textDecoration: 'none',
-                color: '#2c3e50',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px',
-                borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}>
-                <span>📄</span> 作業報告書
-              </Link>
-              <Link href="/settings" style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                padding: '10px 12px',
-                textDecoration: 'none',
-                color: '#2c3e50',
-                fontSize: '14px',
-                fontWeight: '500',
-                marginBottom: '4px',
-                borderRadius: '8px',
-                transition: 'background 0.2s'
-              }}>
-                <span>⚙️</span> 設定
-              </Link>
-            </nav>
-          </div>
-
-          {/* 統計サマリー */}
-          <div>
-            <h3 style={{
-              fontSize: '12px',
-              color: '#6c7684',
-              fontWeight: '500',
-              marginBottom: '12px',
-              paddingLeft: '12px'
-            }}>
-              本日の稼働状況
-            </h3>
-            <div style={{
-              background: 'white',
-              borderRadius: '8px',
-              padding: '12px'
-            }}>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ fontSize: '12px', color: '#6c7684', marginBottom: '4px' }}>稼働中</p>
-                <p style={{ fontSize: '24px', fontWeight: '700', color: '#51cf66' }}>8名</p>
-              </div>
-              <div style={{ marginBottom: '12px' }}>
-                <p style={{ fontSize: '12px', color: '#6c7684', marginBottom: '4px' }}>待機中</p>
-                <p style={{ fontSize: '20px', fontWeight: '600', color: '#ffd93d' }}>3名</p>
-              </div>
-              <div>
-                <p style={{ fontSize: '12px', color: '#6c7684', marginBottom: '4px' }}>平均稼働率</p>
-                <p style={{ fontSize: '20px', fontWeight: '600', color: '#74c0fc' }}>72%</p>
-              </div>
-            </div>
-          </div>
-        </aside>
+        <Sidebar />
 
         {/* Main Content */}
-        <main style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
+        <main style={{ marginLeft: '240px', padding: '20px', minHeight: 'calc(100vh - 60px)' }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',

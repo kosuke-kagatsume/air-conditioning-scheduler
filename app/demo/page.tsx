@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { AuthProvider } from '@/contexts/AuthContext'
 import CalendarView from '@/components/Calendar/CalendarView'
+import Sidebar from '@/components/Sidebar'
 
 export default function DemoPage() {
   const [mounted, setMounted] = useState(false)
@@ -290,226 +291,22 @@ export default function DemoPage() {
         </header>
 
         {/* Main Layout */}
-        <div style={{
-          display: 'flex',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '20px',
-          gap: '20px'
-        }}>
+        <div>
           {/* サイドバー - 管理者用 */}
-          {viewMode === 'admin' && (
-          <aside style={{
-            width: '240px',
-            flexShrink: 0
-          }}>
-            {/* Menu Section */}
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={{
-                fontSize: '12px',
-                color: '#6c7684',
-                fontWeight: '500',
-                marginBottom: '12px',
-                paddingLeft: '12px'
-              }}>
-                メニュー
-              </h3>
-              <nav>
-                <Link href="/demo" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  background: '#fff5f5',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  color: '#ff6b6b',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px'
-                }}>
-                  <span>📅</span> カレンダー
-                </Link>
-                <Link href="/workers" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>👥</span> 職人管理
-                </Link>
-                <Link href="/sites" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>🏢</span> 現場管理
-                </Link>
-                <Link href="/dashboard" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📊</span> ダッシュボード
-                </Link>
-                <Link href="/schedule-change" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📝</span> 予定変更申請
-                </Link>
-                <Link href="/shifts" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📋</span> シフト管理
-                </Link>
-                <Link href="/inventory" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📦</span> 在庫管理
-                </Link>
-                <Link href="/reports" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📄</span> 作業報告書
-                </Link>
-                <Link href="/settings" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>⚙️</span> 設定
-                </Link>
-              </nav>
-            </div>
-
-            {/* Companies Filter */}
-            <div>
-              <h3 style={{
-                fontSize: '12px',
-                color: '#6c7684',
-                fontWeight: '500',
-                marginBottom: '12px',
-                paddingLeft: '12px'
-              }}>
-                協力業者
-              </h3>
-              <div style={{
-                background: 'white',
-                borderRadius: '8px',
-                padding: '12px'
-              }}>
-                {['A社', 'B社', 'C社', 'D社', 'E社'].map((company, index) => (
-                  <label key={company} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    marginBottom: '8px',
-                    cursor: 'pointer'
-                  }}>
-                    <input
-                      type="checkbox"
-                      defaultChecked
-                      style={{
-                        width: '16px',
-                        height: '16px',
-                        accentColor: ['#ff6b6b', '#74c0fc', '#51cf66', '#ffd93d', '#9775fa'][index]
-                      }}
-                    />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                      <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: ['#ff6b6b', '#74c0fc', '#51cf66', '#ffd93d', '#9775fa'][index]
-                      }} />
-                      <span style={{ fontSize: '14px', color: '#2c3e50' }}>{company}</span>
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
-          </aside>
-          )}
+          {viewMode === 'admin' && <Sidebar />}
 
           {/* サイドバー - 職人用 */}
           {viewMode === 'worker' && (
           <aside style={{
+            position: 'fixed',
+            left: 0,
+            top: '60px',
             width: '280px',
+            height: 'calc(100vh - 60px)',
             background: 'white',
-            borderRadius: '12px',
+            borderRight: '1px solid #e1e4e8',
             padding: '20px',
-            marginRight: '20px'
+            overflowY: 'auto'
           }}>
             {/* 職人プロフィール */}
             <div style={{
@@ -724,7 +521,10 @@ export default function DemoPage() {
           )}
 
           {/* メインコンテンツ */}
-          <main style={{ flex: 1 }}>
+          <main style={{ 
+            marginLeft: viewMode === 'admin' ? '240px' : viewMode === 'worker' ? '300px' : '0',
+            padding: '20px'
+          }}>
             {viewMode === 'admin' ? (
               // 管理者ビュー
               <CalendarView 

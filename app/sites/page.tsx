@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { mockEvents } from '@/lib/mockData'
+import Sidebar from '@/components/Sidebar'
 
 type FilterStatus = 'all' | 'proposed' | 'accepted' | 'pending' | 'rejected' | 'completed'
 type SortField = 'date' | 'clientName' | 'city' | 'status'
@@ -171,172 +172,13 @@ export default function SitesPage() {
           </div>
         </header>
 
-        {/* Main Layout */}
+        <Sidebar />
+        
         <div style={{
-          display: 'flex',
-          maxWidth: '1400px',
-          margin: '0 auto',
+          marginLeft: '240px',
           padding: '20px',
-          gap: '20px'
+          minHeight: 'calc(100vh - 60px)'
         }}>
-          {/* サイドバー */}
-          <aside style={{
-            width: '240px',
-            flexShrink: 0
-          }}>
-            {/* Menu Section */}
-            <div style={{ marginBottom: '24px' }}>
-              <h3 style={{
-                fontSize: '12px',
-                color: '#6c7684',
-                fontWeight: '500',
-                marginBottom: '12px',
-                paddingLeft: '12px'
-              }}>
-                メニュー
-              </h3>
-              <nav>
-                <Link href="/demo" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📅</span> カレンダー
-                </Link>
-                <Link href="/workers" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>👥</span> 職人管理
-                </Link>
-                <Link href="/sites" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  background: '#fff5f5',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  color: '#ff6b6b',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px'
-                }}>
-                  <span>🏢</span> 現場管理
-                </Link>
-                <Link href="/dashboard" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📊</span> ダッシュボード
-                </Link>
-                <Link href="/schedule-change" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📝</span> 予定変更申請
-                </Link>
-                <Link href="/shifts" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📋</span> シフト管理
-                </Link>
-                <Link href="/inventory" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📦</span> 在庫管理
-                </Link>
-                <Link href="/reports" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>📄</span> 作業報告書
-                </Link>
-                <Link href="/settings" style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  textDecoration: 'none',
-                  color: '#2c3e50',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  marginBottom: '4px',
-                  borderRadius: '8px',
-                  transition: 'background 0.2s'
-                }}>
-                  <span>⚙️</span> 設定
-                </Link>
-              </nav>
-            </div>
-          </aside>
-
-          {/* Main Content */}
-          <main style={{ flex: 1 }}>
           {/* Page Title and Actions */}
           <div style={{
             display: 'flex',
@@ -779,7 +621,6 @@ export default function SitesPage() {
               </div>
             )}
           </div>
-          </main>
         </div>
       </div>
     </AuthProvider>
