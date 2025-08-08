@@ -550,7 +550,7 @@ export default function DemoPage() {
                   マイスケジュール
                 </h2>
                 <CalendarView 
-                  selectedWorkers={['W-001']} // 自分の予定のみ表示
+                  selectedWorkers={['worker-1']} // 高橋次郎の予定のみ表示
                   onEventClick={(event) => console.log('Event clicked:', event)}
                 />
               </div>

@@ -302,6 +302,291 @@ const generateMockEvents = (): Event[] => {
     timeSlotIds: ['ts1', 'ts2'],
     createdAt: '2025-01-01T09:00:00Z',
     updatedAt: '2025-01-01T09:00:00Z'
+  },
+  // 職人用の追加イベント（高橋次郎）
+  {
+    id: 'event-6',
+    title: 'エアコン定期メンテナンス',
+    date: getDateStr(3),
+    startTime: '09:00',
+    endTime: '11:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都渋谷区代々木2-1-1',
+    city: '渋谷区',
+    constructionType: '点検・メンテナンス',
+    description: 'オフィスビル5階、全フロア点検',
+    clientName: '新宿商事',
+    constructorName: '大和建設',
+    salesPersons: [
+      { id: 'sp1', name: '営業田中', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-staff1',
+    tenantId: 'tenant-1',
+    customFieldValues: {
+      cf1: 8,
+      cf3: '9時厳守',
+      cf4: '東京DC'
+    },
+    timeSlotIds: ['ts1'],
+    createdAt: '2025-01-01T09:00:00Z',
+    updatedAt: '2025-01-01T09:00:00Z'
+  },
+  {
+    id: 'event-7',
+    title: 'エアコン新規設置工事',
+    date: getDateStr(4),
+    startTime: '13:00',
+    endTime: '17:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都港区南青山3-15-8',
+    city: '港区',
+    constructionType: 'エアコン新設',
+    description: '新築マンション、2LDK、2台設置',
+    clientName: '青山様',
+    constructorName: '青山ホーム',
+    salesPersons: [
+      { id: 'sp3', name: '営業高橋', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-manager1',
+    tenantId: 'tenant-1',
+    customFieldValues: {
+      cf1: 2,
+      cf3: '管理人立会い必要'
+    },
+    timeSlotIds: ['ts2'],
+    createdAt: '2025-01-02T09:00:00Z',
+    updatedAt: '2025-01-02T09:00:00Z'
+  },
+  {
+    id: 'event-8',
+    title: '緊急修理対応',
+    date: getDateStr(5),
+    startTime: '10:00',
+    endTime: '12:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都新宿区歌舞伎町1-1-3',
+    city: '新宿区',
+    constructionType: '修理',
+    description: '室外機異音、冷房効かない',
+    clientName: '歌舞伎町ビル管理',
+    constructorName: '東京メンテナンス',
+    salesPersons: [
+      { id: 'sp2', name: '営業佐藤', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-staff1',
+    tenantId: 'tenant-1',
+    trouble: {
+      id: 'trouble-2',
+      type: '顧客クレーム',
+      description: '冷房が効かない、異音がする',
+      status: 'open' as 'open' | 'resolved',
+      reportedAt: '2025-01-08T08:00:00Z'
+    },
+    timeSlotIds: ['ts1'],
+    createdAt: '2025-01-08T08:30:00Z',
+    updatedAt: '2025-01-08T08:30:00Z'
+  },
+  {
+    id: 'event-9',
+    title: 'エアコン交換工事',
+    date: getDateStr(6),
+    startTime: '09:00',
+    endTime: '15:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都品川区大崎2-10-1',
+    city: '品川区',
+    constructionType: 'エアコン交換',
+    description: '古いエアコン撤去、新型設置（3台）',
+    clientName: '大崎オフィス',
+    constructorName: 'オフィス管理サービス',
+    salesPersons: [
+      { id: 'sp1', name: '営業田中', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-admin',
+    tenantId: 'tenant-1',
+    customFieldValues: {
+      cf1: 3,
+      cf3: '土曜日作業',
+      cf4: '東京DC'
+    },
+    timeSlotIds: ['ts1', 'ts2'],
+    createdAt: '2025-01-03T09:00:00Z',
+    updatedAt: '2025-01-03T09:00:00Z'
+  },
+  {
+    id: 'event-10',
+    title: '配管清掃・点検',
+    date: getDateStr(8),
+    startTime: '13:00',
+    endTime: '16:00',
+    status: 'proposed' as EventStatus,
+    address: '東京都世田谷区三軒茶屋2-11-23',
+    city: '世田谷区',
+    constructionType: '点検・メンテナンス',
+    description: 'ドレン配管清掃、フィルター交換',
+    clientName: '三軒茶屋マンション',
+    constructorName: 'マンション管理会社',
+    salesPersons: [
+      { id: 'sp4', name: '営業渡辺', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-staff1',
+    tenantId: 'tenant-1',
+    timeSlotIds: ['ts2'],
+    createdAt: '2025-01-04T09:00:00Z',
+    updatedAt: '2025-01-04T09:00:00Z'
+  },
+  {
+    id: 'event-11',
+    title: 'エアコン新設工事',
+    date: getDateStr(10),
+    startTime: '09:00',
+    endTime: '12:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都豊島区池袋2-40-13',
+    city: '豊島区',
+    constructionType: 'エアコン新設',
+    description: '店舗改装に伴う新規設置（業務用2台）',
+    clientName: '池袋レストラン',
+    constructorName: '飲食店舗施工',
+    salesPersons: [
+      { id: 'sp2', name: '営業佐藤', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-manager1',
+    tenantId: 'tenant-1',
+    customFieldValues: {
+      cf1: 2,
+      cf3: '営業時間外作業'
+    },
+    timeSlotIds: ['ts1'],
+    createdAt: '2025-01-05T09:00:00Z',
+    updatedAt: '2025-01-05T09:00:00Z'
+  },
+  {
+    id: 'event-12',
+    title: '定期メンテナンス',
+    date: getDateStr(11),
+    startTime: '14:00',
+    endTime: '17:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都中央区銀座4-2-15',
+    city: '中央区',
+    constructionType: '点検・メンテナンス',
+    description: '年次定期点検、全館空調システム',
+    clientName: '銀座タワー',
+    constructorName: 'ビル管理サービス',
+    salesPersons: [
+      { id: 'sp3', name: '営業高橋', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-admin',
+    tenantId: 'tenant-1',
+    customFieldValues: {
+      cf1: 15,
+      cf3: '作業証明書発行要'
+    },
+    timeSlotIds: ['ts2'],
+    createdAt: '2025-01-06T09:00:00Z',
+    updatedAt: '2025-01-06T09:00:00Z'
+  },
+  {
+    id: 'event-13',
+    title: '室外機移設工事',
+    date: getDateStr(12),
+    startTime: '09:00',
+    endTime: '12:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都目黒区自由が丘1-29-14',
+    city: '目黒区',
+    constructionType: '配管工事',
+    description: '屋上への室外機移設、配管延長',
+    clientName: '自由が丘ビル',
+    constructorName: 'ビル改修工事',
+    salesPersons: [
+      { id: 'sp1', name: '営業田中', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-staff1',
+    tenantId: 'tenant-1',
+    customFieldValues: {
+      cf1: 1,
+      cf3: 'クレーン使用'
+    },
+    timeSlotIds: ['ts1'],
+    createdAt: '2025-01-07T09:00:00Z',
+    updatedAt: '2025-01-07T09:00:00Z'
+  },
+  {
+    id: 'event-14',
+    title: '緊急対応・ガス漏れ点検',
+    date: getDateStr(14),
+    startTime: '10:00',
+    endTime: '11:30',
+    status: 'accepted' as EventStatus,
+    address: '東京都杉並区高円寺北2-20-1',
+    city: '杉並区',
+    constructionType: '修理',
+    description: 'ガス漏れ警報、緊急点検',
+    clientName: '高円寺アパート',
+    constructorName: '緊急メンテナンス',
+    salesPersons: [
+      { id: 'sp5', name: '営業山田', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-manager1',
+    tenantId: 'tenant-1',
+    trouble: {
+      id: 'trouble-3',
+      type: '安全問題',
+      description: 'ガス漏れ警報作動',
+      status: 'open' as 'open' | 'resolved',
+      reportedAt: '2025-01-14T09:00:00Z'
+    },
+    timeSlotIds: ['ts1'],
+    createdAt: '2025-01-14T09:15:00Z',
+    updatedAt: '2025-01-14T09:15:00Z'
+  },
+  {
+    id: 'event-15',
+    title: 'エアコン完全撤去',
+    date: getDateStr(15),
+    startTime: '13:00',
+    endTime: '16:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都練馬区練馬1-17-1',
+    city: '練馬区',
+    constructionType: '撤去',
+    description: '解体前の全エアコン撤去（5台）',
+    clientName: '練馬ビル',
+    constructorName: '解体工事業者',
+    salesPersons: [
+      { id: 'sp2', name: '営業佐藤', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-admin',
+    tenantId: 'tenant-1',
+    customFieldValues: {
+      cf1: 5,
+      cf3: '廃棄証明書要'
+    },
+    timeSlotIds: ['ts2'],
+    createdAt: '2025-01-08T09:00:00Z',
+    updatedAt: '2025-01-08T09:00:00Z'
   }
 ]
 
