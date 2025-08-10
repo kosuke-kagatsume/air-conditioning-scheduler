@@ -1,0 +1,10 @@
+{
+  "version": "2.0.0",
+  "timestamp": "2025-08-10T13:45:00",
+  "features": {
+    "dandoriLogo": true,
+    "workReports": true,
+    "allPagesUpdated": true
+  },
+  "description": "Dandoriロゴ実装済み、作業報告書完成版"
+}
