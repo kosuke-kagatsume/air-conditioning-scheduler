@@ -6,7 +6,8 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import CalendarView from '@/components/Calendar/CalendarView'
 import Sidebar from '@/components/Sidebar'
 import MobileNav from '@/components/MobileNav'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/PageHeader'
+import DandoriLogo from '@/components/DandoriLogo'
 import { NotificationIcon, MenuIcon, UserIcon } from '@/components/Icons'
 
 export default function DemoPage() {
@@ -54,26 +55,35 @@ export default function DemoPage() {
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '12px' : '12px' }}>
               {isMobile && (
-                <button
-                  onClick={() => setShowMobileMenu(!showMobileMenu)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    fontSize: '24px',
-                    cursor: 'pointer',
-                    padding: '4px'
-                  }}
-                >
-                  <MenuIcon size={24} color="#6b7280" />
-                </button>
+                <>
+                  <button
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      fontSize: '24px',
+                      cursor: 'pointer',
+                      padding: '4px'
+                    }}
+                  >
+                    <MenuIcon size={24} color="#ff6b6b" />
+                  </button>
+                  <span style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#2c3e50'
+                  }}>
+                    Dandori Scheduler
+                  </span>
+                </>
               )}
-              <LogoHeader 
-                size={isMobile ? 28 : 36}
-                showText={!isMobile}
-                href="#"
-              />
+              {!isMobile && (
+                <Link href="#">
+                  <DandoriLogo size={36} />
+                </Link>
+              )}
             </div>
 
             {/* ヘッダー右側 */}

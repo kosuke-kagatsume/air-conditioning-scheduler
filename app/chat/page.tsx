@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/LogoHeader'
 
 interface Message {
   id: string
@@ -224,7 +224,7 @@ function ChatContent() {
             marginBottom: '12px'
           }}>
             <div style={{ color: 'white' }}>
-              <LogoHeader href="/demo" size={36} />
+              <PageHeader href="/demo" size={36} />
             </div>
             <div style={{ color: '#b0b3b8', fontSize: '12px', marginLeft: '48px' }}>
               12人がオンライン

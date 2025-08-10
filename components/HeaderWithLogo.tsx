@@ -1,6 +1,7 @@
 'use client'
 
-import LogoHeader from './LogoHeader'
+import DandoriLogo from './DandoriLogo'
+import Link from 'next/link'
 
 interface HeaderWithLogoProps {
   pageTitle?: string
@@ -28,7 +29,9 @@ export default function HeaderWithLogo({ pageTitle, rightContent }: HeaderWithLo
           width: '240px', // Sidebarと同じ幅に固定
           paddingLeft: '20px'
         }}>
-          <LogoHeader href="/demo" size={36} showText={false} />
+          <Link href="/demo">
+            <DandoriLogo size={36} />
+          </Link>
           {pageTitle && (
             <h1 style={{
               fontSize: '18px',

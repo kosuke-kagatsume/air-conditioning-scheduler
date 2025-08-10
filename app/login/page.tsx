@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/LogoHeader'
 
 export default function Login() {
   const router = useRouter()
@@ -65,7 +65,7 @@ export default function Login() {
               margin: '0 auto 20px',
               cursor: 'pointer'
             }}>
-              <LogoHeader href="/" size={64} />
+              <PageHeader href="/" size={64} />
             </div>
           </Link>
           <h1 style={{ 

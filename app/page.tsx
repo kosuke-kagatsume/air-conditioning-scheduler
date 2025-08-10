@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/LogoHeader'
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -19,7 +19,7 @@ export default function Home() {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <LogoHeader 
+          <PageHeader 
             href="/demo" 
             size={36} 
             fontSize="20px" 
@@ -488,7 +488,7 @@ export default function Home() {
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                <LogoHeader size={36} showText={false} />
+                <PageHeader size={36} showText={false} />
                 <h3 style={{
                   fontSize: '20px',
                   fontWeight: '700',

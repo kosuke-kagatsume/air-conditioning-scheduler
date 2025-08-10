@@ -1,13 +1,27 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import LogoHeader from './LogoHeader'
+import DandoriLogo from './DandoriLogo'
+import { MenuIcon } from './Icons'
 
 interface PageHeaderProps {
   showLogo?: boolean
+  onMenuClick?: () => void
 }
 
-export default function PageHeader({ showLogo = true }: PageHeaderProps) {
+export default function PageHeader({ showLogo = true, onMenuClick }: PageHeaderProps) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   return (
     <header style={{
       background: 'white',
@@ -25,12 +39,52 @@ export default function PageHeader({ showLogo = true }: PageHeaderProps) {
         alignItems: 'center'
       }}>
         {showLogo && (
-          <div style={{
-            width: '180px', // 固定幅でロゴエリアを確保
-            flexShrink: 0   // 縮小を防ぐ
-          }}>
-            <LogoHeader href="/demo" size={36} />
-          </div>
+          <>
+            {isMobile ? (
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <button
+                  onClick={onMenuClick}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    fontSize: '24px',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                >
+                  <MenuIcon size={24} color="#ff6b6b" />
+                </button>
+                <span style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  color: '#2c3e50'
+                }}>
+                  Dandori Scheduler
+                </span>
+              </div>
+            ) : (
+              <div style={{
+                width: '40px',
+                height: '40px',
+                flexShrink: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Link href="/demo" style={{ 
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <DandoriLogo size={36} />
+                </Link>
+              </div>
+            )}
+          </>
         )}
       </div>
     </header>

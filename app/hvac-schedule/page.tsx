@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import Sidebar from '@/components/Sidebar'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/LogoHeader'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
 import { 
   loadHVACSchedules, 
@@ -208,7 +208,7 @@ function HVACScheduleContent() {
         <header className="bg-white shadow-sm">
           <div className="px-6 py-4 flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <LogoHeader href="/demo" size={36} showText={false} />
+              <PageHeader href="/demo" size={36} showText={false} />
               <h1 className="text-2xl font-bold text-gray-900">空調スケジュール管理</h1>
             </div>
             <div className="flex items-center gap-4">
