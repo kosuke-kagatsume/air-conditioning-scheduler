@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { mockEvents } from '@/lib/mockData'
 import Sidebar from '@/components/Sidebar'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/PageHeader'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 type FilterStatus = 'all' | 'proposed' | 'accepted' | 'pending' | 'rejected' | 'completed'
@@ -133,28 +133,7 @@ export default function SitesPage() {
     <AuthProvider>
       <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
         {/* Header */}
-        <header style={{
-          background: 'white',
-          borderBottom: '1px solid #e1e4e8',
-          padding: '12px 20px'
-        }}>
-          <div style={{
-            maxWidth: '1400px',
-            margin: '0 auto',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <Link href="/demo" style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '12px',
-              textDecoration: 'none'
-            }}>
-              <LogoHeader href="/demo" size={36} />
-            </Link>
-          </div>
-        </header>
+<PageHeader />
 
         <Sidebar />
         

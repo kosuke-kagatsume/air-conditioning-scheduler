@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/PageHeader'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 interface InventoryItem {
@@ -256,30 +256,7 @@ function InventoryContent() {
   return (
     <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
       {/* Header */}
-      <header style={{
-        background: 'white',
-        borderBottom: '1px solid #e1e4e8',
-        padding: '12px 20px',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 100
-      }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Link href="/demo" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-              <LogoHeader href="/demo" size={32} />
-            </Link>
-          </div>
-        </div>
-      </header>
+<PageHeader />
 
       {/* Main Layout */}
       <div>

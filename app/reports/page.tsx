@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/PageHeader'
 import Sidebar from '@/components/Sidebar'
 import { ReportIcon, CalendarIcon, PlusIcon, NotificationIcon, UserIcon } from '@/components/Icons'
 
@@ -140,72 +140,7 @@ export default function ReportsPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
       {/* ヘッダー */}
-      <header style={{
-        background: 'white',
-        borderBottom: '1px solid #e5e7eb',
-        padding: '12px 20px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100
-      }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <LogoHeader href="/demo" size={36} />
-          </div>
-          
-          {/* ヘッダー右側 */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button 
-              style={{
-                padding: '6px 8px',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center'
-              }}
-            >
-              <NotificationIcon size={20} color="#6b7280" />
-              <span style={{
-                position: 'absolute',
-                top: '2px',
-                right: '2px',
-                background: '#ff4444',
-                color: 'white',
-                borderRadius: '50%',
-                width: '16px',
-                height: '16px',
-                fontSize: '10px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                3
-              </span>
-            </button>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: '#f3f4f6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer'
-            }}>
-              <UserIcon size={20} color="#6b7280" />
-            </div>
-          </div>
-        </div>
-      </header>
+<PageHeader />
 
       {/* サイドバー */}
       <Sidebar />

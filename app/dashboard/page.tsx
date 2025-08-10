@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { mockEvents, mockUsers } from '@/lib/mockData'
 import Sidebar from '@/components/Sidebar'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/PageHeader'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 type DateRange = '7days' | '30days' | '90days' | '1year'
@@ -99,22 +99,7 @@ export default function DashboardPage() {
   return (
     <AuthProvider>
       <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-        {/* Header */}
-        <header style={{
-          background: 'white',
-          borderBottom: '1px solid #e1e4e8',
-          padding: '12px 20px'
-        }}>
-          <div style={{
-            maxWidth: '1400px',
-            margin: '0 auto',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <LogoHeader href="/demo" size={36} />
-          </div>
-        </header>
+        <PageHeader />
 
         {/* Main Layout */}
         <div>

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
-import LogoHeader from '@/components/LogoHeader'
+import PageHeader from '@/components/PageHeader'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 interface Skill {
@@ -173,23 +173,7 @@ export default function WorkersPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-      {/* Header */}
-      <header className="nav-modern" style={{ background: 'white' }}>
-        <div style={{
-          maxWidth: '1400px',
-          margin: '0 auto',
-          padding: '12px 20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Link href="/demo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <LogoHeader href="/demo" size={36} />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PageHeader />
 
       <div>
         {/* Sidebar */}
