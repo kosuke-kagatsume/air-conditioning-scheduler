@@ -30,53 +30,27 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside style={{
-      position: 'fixed',
-      left: 0,
-      top: '60px',
-      width: '240px',
-      height: 'calc(100vh - 60px)',
-      background: '#ffffff',
-      borderRight: '1px solid #e1e4e8',
-      padding: '20px',
-      overflowY: 'auto'
-    }}>
+    <aside className="fixed left-0 top-14 w-60 h-[calc(100vh-3.5rem)] bg-white border-r border-gray-200 p-5 overflow-y-auto hidden md:block">
       {/* Menu Section */}
-      <div style={{ marginBottom: '24px' }}>
-        <h3 style={{
-          fontSize: '12px',
-          color: '#6c7684',
-          fontWeight: '500',
-          marginBottom: '12px',
-          paddingLeft: '12px'
-        }}>
+      <div className="mb-6">
+        <h3 className="text-xs text-gray-500 font-medium mb-3 pl-3">
           メニュー
         </h3>
-        <nav>
+        <nav className="space-y-1">
           {menuItems.map((item) => {
             const isActive = pathname === item.href
             const { Icon } = item
             return (
               <Link 
                 key={item.href}
-                href={item.href} 
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: '10px 12px',
-                  background: isActive ? 'linear-gradient(90deg, #FF8C4210 0%, transparent 100%)' : 'transparent',
-                  borderRadius: '8px',
-                  textDecoration: 'none',
-                  color: isActive ? '#FF8C42' : '#6b7280',
-                  fontSize: '14px',
-                  fontWeight: isActive ? '600' : '500',
-                  marginBottom: '4px',
-                  transition: 'all 0.2s',
-                  borderLeft: isActive ? '3px solid #FF8C42' : '3px solid transparent'
-                }}
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  isActive 
+                    ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 border-l-3 border-orange-600' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                }`}
               >
-                <Icon size={18} color={isActive ? '#FF8C42' : '#6b7280'} />
+                <Icon size={18} color={isActive ? '#ea580c' : '#6b7280'} />
                 <span>{item.label}</span>
               </Link>
             )

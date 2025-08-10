@@ -34,7 +34,7 @@ export default function DemoPage() {
         <PageHeader onMenuClick={() => setShowMobileMenu(!showMobileMenu)} />
         
         {/* サブヘッダー（操作バー） */}
-        <div className="bg-white/90 backdrop-blur border-b px-4 py-3 sticky top-14 z-40">
+        <div className="bg-white/90 backdrop-blur border-b px-4 py-3 sticky top-14 z-40 md:ml-60">
           <div className="mx-auto max-w-7xl flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* 管理者・職人切り替え */}
@@ -118,7 +118,7 @@ export default function DemoPage() {
         <Sidebar />
         
         {/* メインコンテンツ */}
-        <div className="md:ml-60 pt-4">
+        <div className="md:ml-60 pt-20">
           <div className="px-4">
             <CalendarView 
               selectedWorkers={selectedWorkers}
