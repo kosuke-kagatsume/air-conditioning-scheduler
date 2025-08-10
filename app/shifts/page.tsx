@@ -5,6 +5,8 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { mockUsers } from '@/lib/mockData'
+import DandoriLogo from '@/components/DandoriLogo'
+import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 interface Shift {
   id: string
@@ -191,25 +193,13 @@ function ShiftsContent() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Link href="/demo" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                background: 'linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                color: 'white'
-              }}>
-                📅
-              </div>
+              <DandoriLogo size={32} />
               <h1 style={{
                 fontSize: '18px',
                 fontWeight: '700',
                 margin: 0,
                 color: '#2c3e50'
-              }}>HVAC Scheduler</h1>
+              }}>Dandori Scheduler</h1>
             </Link>
           </div>
         </div>

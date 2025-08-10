@@ -24,6 +24,17 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [eventToUpdate, setEventToUpdate] = useState<Event | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // モバイル検出
+  React.useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // フィルタリングされたイベント
   const filteredEvents = useMemo(() => {
@@ -175,6 +186,25 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
     setShowStatusModal(true)
   }
 
+  // タッチイベント用のロングプレス検出
+  const [touchTimer, setTouchTimer] = useState<NodeJS.Timeout | null>(null)
+  
+  const handleTouchStart = (event: Event) => {
+    if (isMobile) {
+      const timer = setTimeout(() => {
+        handleStatusChange(event)
+      }, 500) // 500ms長押しでステータス変更モーダルを表示
+      setTouchTimer(timer)
+    }
+  }
+  
+  const handleTouchEnd = () => {
+    if (touchTimer) {
+      clearTimeout(touchTimer)
+      setTouchTimer(null)
+    }
+  }
+
   const updateEventStatus = (newStatus: Event['status']) => {
     if (eventToUpdate) {
       // ここで実際にはAPIを呼び出してステータスを更新
@@ -216,16 +246,33 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
   }
 
   return (
-    <div style={{ background: 'white', borderRadius: '12px', padding: '20px' }}>
+    <div style={{ 
+      background: 'white', 
+      borderRadius: isMobile ? '0' : '12px', 
+      padding: isMobile ? '12px' : '20px',
+      marginBottom: isMobile ? '60px' : '0'
+    }}>
       {/* カレンダーヘッダー */}
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ marginBottom: isMobile ? '12px' : '20px' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: isMobile ? '12px' : '16px',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
+          gap: isMobile ? '8px' : '0'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: isMobile ? '8px' : '12px',
+            width: isMobile ? '100%' : 'auto'
+          }}>
             <button
               onClick={navigatePrev}
               style={{
-                width: '32px',
-                height: '32px',
+                width: isMobile ? '36px' : '32px',
+                height: isMobile ? '36px' : '32px',
                 border: '1px solid #e5e7eb',
                 borderRadius: '6px',
                 background: 'white',
@@ -240,8 +287,8 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
             <button
               onClick={navigateNext}
               style={{
-                width: '32px',
-                height: '32px',
+                width: isMobile ? '36px' : '32px',
+                height: isMobile ? '36px' : '32px',
                 border: '1px solid #e5e7eb',
                 borderRadius: '6px',
                 background: 'white',
@@ -254,83 +301,132 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
               ›
             </button>
             <h2 style={{
-              fontSize: '20px',
+              fontSize: isMobile ? '16px' : '20px',
               fontWeight: '600',
               color: '#1f2937',
-              margin: '0 12px'
+              margin: isMobile ? '0 8px' : '0 12px',
+              flex: isMobile ? 1 : 'initial',
+              textAlign: isMobile ? 'center' : 'left'
             }}>
               {viewType === 'month' && `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月`}
               {viewType === 'week' && `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月 第${Math.ceil(currentDate.getDate() / 7)}週`}
               {viewType === 'day' && `${currentDate.getFullYear()}年${currentDate.getMonth() + 1}月${currentDate.getDate()}日`}
             </h2>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <button
-              onClick={navigateToday}
-              style={{
-                padding: '6px 12px',
-                border: '1px solid #e5e7eb',
-                borderRadius: '6px',
-                background: 'white',
-                cursor: 'pointer',
-                fontSize: '14px',
-                color: '#374151'
-              }}
-            >
-              今日
-            </button>
-
-            {canCreateEvent && (
+            {isMobile && (
               <button
-                onClick={() => setShowCreateModal(true)}
+                onClick={navigateToday}
                 style={{
-                  padding: '6px 16px',
-                  background: '#ff6b6b',
-                  color: 'white',
+                  padding: '8px 12px',
+                  border: '1px solid #e5e7eb',
                   borderRadius: '6px',
-                  border: 'none',
+                  background: 'white',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
+                  color: '#374151'
                 }}
               >
-                <span>+</span>
-                <span>予定作成</span>
+                今日
               </button>
             )}
           </div>
+          
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button
+                onClick={navigateToday}
+                style={{
+                  padding: '6px 12px',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '6px',
+                  background: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: '#374151'
+                }}
+              >
+                今日
+              </button>
+
+              {canCreateEvent && (
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  style={{
+                    padding: '6px 16px',
+                    background: '#ff6b6b',
+                    color: 'white',
+                    borderRadius: '6px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>+</span>
+                  <span>予定作成</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ビュー切り替えボタン（上部） */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '12px' }}>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            style={{
-              padding: '6px 12px',
-              background: '#f3f4f6',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              color: '#374151'
-            }}
-          >
-            + 予定作成
-          </button>
+        <div style={{ 
+          display: 'flex', 
+          gap: isMobile ? '8px' : '12px', 
+          marginBottom: '12px',
+          overflowX: isMobile ? 'auto' : 'visible',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: isMobile ? '4px' : '0'
+        }}>
+          {isMobile && canCreateEvent && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              style={{
+                padding: '8px 12px',
+                background: '#ff6b6b',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              + 予定
+            </button>
+          )}
+          {!isMobile && (
+            <button
+              onClick={() => setShowCreateModal(true)}
+              style={{
+                padding: '6px 12px',
+                background: '#f3f4f6',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                color: '#374151'
+              }}
+            >
+              + 予定作成
+            </button>
+          )}
           <div style={{ display: 'flex', gap: '4px' }}>
             <button
               onClick={() => setViewType('month')}
               style={{
-                padding: '6px 12px',
+                padding: isMobile ? '8px 12px' : '6px 12px',
                 background: viewType === 'month' ? '#3b82f6' : 'transparent',
                 color: viewType === 'month' ? 'white' : '#6b7280',
                 border: '1px solid #e5e7eb',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '13px'
+                fontSize: '13px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}
             >
               月
@@ -338,13 +434,15 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
             <button
               onClick={() => setViewType('week')}
               style={{
-                padding: '6px 12px',
+                padding: isMobile ? '8px 12px' : '6px 12px',
                 background: viewType === 'week' ? '#3b82f6' : 'transparent',
                 color: viewType === 'week' ? 'white' : '#6b7280',
                 border: '1px solid #e5e7eb',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '13px'
+                fontSize: '13px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}
             >
               週
@@ -352,13 +450,15 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
             <button
               onClick={() => setViewType('day')}
               style={{
-                padding: '6px 12px',
+                padding: isMobile ? '8px 12px' : '6px 12px',
                 background: viewType === 'day' ? '#3b82f6' : 'transparent',
                 color: viewType === 'day' ? 'white' : '#6b7280',
                 border: '1px solid #e5e7eb',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '13px'
+                fontSize: '13px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
               }}
             >
               日
@@ -367,12 +467,15 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
           <button
             onClick={() => setStatusFilter(statusFilter === 'accepted' ? 'all' : 'accepted')}
             style={{
-              padding: '6px 12px',
+              padding: isMobile ? '8px 12px' : '6px 12px',
               background: statusFilter === 'accepted' ? '#22c55e' : 'transparent',
-              border: 'none',
+              border: statusFilter === 'accepted' ? '1px solid #22c55e' : '1px solid #e5e7eb',
+              borderRadius: '6px',
               cursor: 'pointer',
               fontSize: '13px',
-              color: statusFilter === 'accepted' ? 'white' : '#6b7280'
+              color: statusFilter === 'accepted' ? 'white' : '#6b7280',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
             確定
@@ -380,12 +483,15 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
           <button
             onClick={() => setStatusFilter(statusFilter === 'proposed' ? 'all' : 'proposed')}
             style={{
-              padding: '6px 12px',
+              padding: isMobile ? '8px 12px' : '6px 12px',
               background: statusFilter === 'proposed' ? '#3b82f6' : 'transparent',
-              border: 'none',
+              border: statusFilter === 'proposed' ? '1px solid #3b82f6' : '1px solid #e5e7eb',
+              borderRadius: '6px',
               cursor: 'pointer',
               fontSize: '13px',
-              color: statusFilter === 'proposed' ? 'white' : '#6b7280'
+              color: statusFilter === 'proposed' ? 'white' : '#6b7280',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
             提案中
@@ -393,12 +499,15 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
           <button
             onClick={() => setStatusFilter(statusFilter === 'pending' ? 'all' : 'pending')}
             style={{
-              padding: '6px 12px',
+              padding: isMobile ? '8px 12px' : '6px 12px',
               background: statusFilter === 'pending' ? '#f59e0b' : 'transparent',
-              border: 'none',
+              border: statusFilter === 'pending' ? '1px solid #f59e0b' : '1px solid #e5e7eb',
+              borderRadius: '6px',
               cursor: 'pointer',
               fontSize: '13px',
-              color: statusFilter === 'pending' ? 'white' : '#6b7280'
+              color: statusFilter === 'pending' ? 'white' : '#6b7280',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
             保留
@@ -406,12 +515,15 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
           <button
             onClick={() => setStatusFilter(statusFilter === 'completed' ? 'all' : 'completed')}
             style={{
-              padding: '6px 12px',
+              padding: isMobile ? '8px 12px' : '6px 12px',
               background: statusFilter === 'completed' ? '#8b5cf6' : 'transparent',
-              border: 'none',
+              border: statusFilter === 'completed' ? '1px solid #8b5cf6' : '1px solid #e5e7eb',
+              borderRadius: '6px',
               cursor: 'pointer',
               fontSize: '13px',
-              color: statusFilter === 'completed' ? 'white' : '#6b7280'
+              color: statusFilter === 'completed' ? 'white' : '#6b7280',
+              whiteSpace: 'nowrap',
+              flexShrink: 0
             }}
           >
             完了
@@ -423,149 +535,266 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
       <div>
         {viewType === 'month' && (
           <div>
-            {/* 曜日ヘッダー */}
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(7, 1fr)', 
-              gap: '1px',
-              background: '#e5e7eb',
-              borderRadius: '8px 8px 0 0',
-              overflow: 'hidden'
-            }}>
-              {['日', '月', '火', '水', '木', '金', '土'].map((day, i) => (
-                <div
-                  key={day}
-                  style={{
-                    textAlign: 'center',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    padding: '12px 0',
-                    background: '#f9fafb',
-                    color: i === 0 ? '#ef4444' : i === 6 ? '#3b82f6' : '#374151'
-                  }}
-                >
-                  {day}
+            {/* モバイル用シンプルカレンダー */}
+            {isMobile ? (
+              <div style={{ width: '100%', background: 'white' }}>
+                {/* 曜日ヘッダー */}
+                <div style={{ 
+                  display: 'flex',
+                  width: '100%',
+                  borderBottom: '1px solid #e5e7eb'
+                }}>
+                  {['日', '月', '火', '水', '木', '金', '土'].map((day, i) => (
+                    <div
+                      key={day}
+                      style={{
+                        flex: 1,
+                        padding: '8px 0',
+                        fontSize: '11px',
+                        fontWeight: '500',
+                        textAlign: 'center',
+                        color: i === 0 ? '#ef4444' : i === 6 ? '#3b82f6' : '#374151',
+                        background: 'white'
+                      }}
+                    >
+                      {day}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            
-            {/* 日付グリッド */}
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: 'repeat(7, 1fr)', 
-              gap: '1px',
-              background: '#e5e7eb'
-            }}>
-              {monthDays.map((day, index) => {
-                const dayEvents = filteredEvents.filter(e => e.date === day.dateStr)
-                const isToday = day.dateStr === todayStr
                 
-                return (
-                  <div
-                    key={index}
-                    style={{
-                      minHeight: '100px',
-                      padding: '8px',
-                      cursor: 'pointer',
-                      background: day.isCurrentMonth ? 'white' : '#f9fafb',
-                      position: 'relative'
-                    }}
-                    onClick={() => handleDateClick(day.dateStr)}
-                  >
-                    {isToday && (
-                      <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: '3px',
-                        background: '#3b82f6'
-                      }} />
-                    )}
-                    <div style={{
-                      fontSize: '14px',
-                      fontWeight: isToday ? '600' : '400',
-                      marginBottom: '4px',
-                      color: !day.isCurrentMonth ? '#9ca3af' : 
-                        day.date.getDay() === 0 ? '#ef4444' : 
-                        day.date.getDay() === 6 ? '#3b82f6' : 
-                        '#1f2937'
-                    }}>
-                      {day.date.getDate()}
-                    </div>
-                    
-                    {/* イベント表示 */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      {dayEvents.slice(0, 3).map(event => (
+                {/* 日付グリッド - フレックスボックス使用 */}
+                {Array.from({ length: Math.ceil(monthDays.length / 7) }).map((_, weekIndex) => (
+                  <div key={weekIndex} style={{ 
+                    display: 'flex',
+                    width: '100%'
+                  }}>
+                    {Array.from({ length: 7 }).map((_, dayIndex) => {
+                      const day = monthDays[weekIndex * 7 + dayIndex]
+                      if (!day) {
+                        return (
+                          <div key={dayIndex} style={{
+                            flex: 1,
+                            height: '45px',
+                            border: '1px solid #e5e7eb',
+                            borderTop: 'none',
+                            borderLeft: dayIndex === 0 ? '1px solid #e5e7eb' : 'none'
+                          }} />
+                        )
+                      }
+                      const dayEvents = filteredEvents.filter(e => e.date === day.dateStr)
+                      const isToday = day.dateStr === todayStr
+                      
+                      return (
                         <div
-                          key={event.id}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleEventClick(event)
-                          }}
-                          onContextMenu={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            handleStatusChange(event)
-                          }}
+                          key={dayIndex}
                           style={{
-                            fontSize: '11px',
-                            padding: '4px 6px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            background: event.status === 'accepted' ? '#dcfce7' :
-                              event.status === 'proposed' ? '#dbeafe' :
-                              event.status === 'pending' ? '#fef3c7' :
-                              event.status === 'completed' ? '#ede9fe' :
-                              event.status === 'onHold' ? '#f3f4f6' :
-                              event.status === 'rejected' ? '#fee2e2' : 
-                              event.status === 'cancelled' ? '#fecaca' : '#e5e7eb',
-                            borderLeft: `3px solid ${getStatusColor(event.status)}`,
-                            color: '#1f2937',
-                            position: 'relative'
+                            flex: 1,
+                            height: '45px',
+                            padding: '2px',
+                            border: '1px solid #e5e7eb',
+                            borderTop: 'none',
+                            borderLeft: dayIndex === 0 ? '1px solid #e5e7eb' : 'none',
+                            background: day.isCurrentMonth ? 'white' : '#f9fafb',
+                            position: 'relative',
+                            cursor: 'pointer'
                           }}
+                          onClick={() => handleDateClick(day.dateStr)}
                         >
-                          <div style={{ 
-                            fontSize: '10px', 
-                            marginBottom: '2px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '4px'
-                          }}>
-                            <span style={{
-                              display: 'inline-block',
-                              width: '6px',
-                              height: '6px',
-                              borderRadius: '50%',
-                              background: getStatusColor(event.status)
+                          {isToday && (
+                            <div style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: '2px',
+                              background: '#3b82f6'
                             }} />
-                            {event.startTime}
+                          )}
+                          <div style={{
+                            fontSize: '10px',
+                            fontWeight: isToday ? '600' : '400',
+                            textAlign: 'center',
+                            color: !day.isCurrentMonth ? '#9ca3af' : 
+                              day.date.getDay() === 0 ? '#ef4444' : 
+                              day.date.getDay() === 6 ? '#3b82f6' : 
+                              '#1f2937'
+                          }}>
+                            {day.date.getDate()}
                           </div>
-                          <div style={{ fontSize: '10px', fontWeight: '500' }}>
-                            {event.constructionType}
-                          </div>
-                          <div style={{ fontSize: '9px', color: '#6b7280' }}>
-                            {event.city}
-                          </div>
+                          {dayEvents.length > 0 && (
+                            <div style={{
+                              display: 'flex',
+                              justifyContent: 'center',
+                              marginTop: '2px',
+                              gap: '1px'
+                            }}>
+                              {dayEvents.slice(0, 3).map((event, i) => (
+                                <div
+                                  key={i}
+                                  style={{
+                                    width: '4px',
+                                    height: '4px',
+                                    borderRadius: '50%',
+                                    background: getStatusColor(event.status)
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      ))}
-                      {dayEvents.length > 3 && (
-                        <div style={{ 
-                          fontSize: '10px', 
-                          color: '#6b7280', 
-                          textAlign: 'center' 
-                        }}>
-                          +{dayEvents.length - 3}
-                        </div>
-                      )}
-                    </div>
+                      )
+                    })}
                   </div>
-                )
-              })}
-            </div>
+                ))}
+              </div>
+            ) : (
+              // デスクトップ用の既存のレイアウト
+              <>
+                {/* 曜日ヘッダー */}
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(7, 1fr)', 
+                  gap: '1px',
+                  background: '#e5e7eb',
+                  borderRadius: '8px 8px 0 0',
+                  overflow: 'hidden'
+                }}>
+                  {['日', '月', '火', '水', '木', '金', '土'].map((day, i) => (
+                    <div
+                      key={day}
+                      style={{
+                        textAlign: 'center',
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        padding: '12px 0',
+                        background: '#f9fafb',
+                        color: i === 0 ? '#ef4444' : i === 6 ? '#3b82f6' : '#374151'
+                      }}
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+                
+                {/* 日付グリッド */}
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(7, 1fr)', 
+                  gap: '1px',
+                  background: '#e5e7eb'
+                }}>
+                  {monthDays.map((day, index) => {
+                    const dayEvents = filteredEvents.filter(e => e.date === day.dateStr)
+                    const isToday = day.dateStr === todayStr
+                    
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          minHeight: '100px',
+                          padding: '8px',
+                          cursor: 'pointer',
+                          background: day.isCurrentMonth ? 'white' : '#f9fafb',
+                          position: 'relative'
+                        }}
+                        onClick={() => handleDateClick(day.dateStr)}
+                      >
+                        {isToday && (
+                          <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: '3px',
+                            background: '#3b82f6'
+                          }} />
+                        )}
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: isToday ? '600' : '400',
+                          marginBottom: '4px',
+                          color: !day.isCurrentMonth ? '#9ca3af' : 
+                            day.date.getDay() === 0 ? '#ef4444' : 
+                            day.date.getDay() === 6 ? '#3b82f6' : 
+                            '#1f2937'
+                        }}>
+                          {day.date.getDate()}
+                        </div>
+                        
+                        {/* イベント表示 */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                          {dayEvents.slice(0, 3).map(event => (
+                            <div
+                              key={event.id}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEventClick(event)
+                              }}
+                              onContextMenu={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                handleStatusChange(event)
+                              }}
+                              style={{
+                                fontSize: '11px',
+                                padding: '4px 6px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                background: event.status === 'accepted' ? '#dcfce7' :
+                                  event.status === 'proposed' ? '#dbeafe' :
+                                  event.status === 'pending' ? '#fef3c7' :
+                                  event.status === 'completed' ? '#ede9fe' :
+                                  event.status === 'onHold' ? '#f3f4f6' :
+                                  event.status === 'rejected' ? '#fee2e2' : 
+                                  event.status === 'cancelled' ? '#fecaca' : '#e5e7eb',
+                                borderLeft: `3px solid ${getStatusColor(event.status)}`,
+                                color: '#1f2937',
+                                position: 'relative'
+                              }}
+                            >
+                              <div style={{ 
+                                fontSize: '10px', 
+                                marginBottom: '2px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                              }}>
+                                <span style={{
+                                  display: 'inline-block',
+                                  width: '6px',
+                                  height: '6px',
+                                  borderRadius: '50%',
+                                  background: getStatusColor(event.status)
+                                }} />
+                                {event.startTime}
+                              </div>
+                              <div style={{ fontSize: '10px', fontWeight: '500' }}>
+                                {event.constructionType}
+                              </div>
+                              <div style={{ fontSize: '9px', color: '#6b7280' }}>
+                                {event.city}
+                              </div>
+                            </div>
+                          ))}
+                          {dayEvents.length > 3 && (
+                            <div style={{ 
+                              fontSize: '10px', 
+                              color: '#6b7280', 
+                              textAlign: 'center' 
+                            }}>
+                              +{dayEvents.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </>
+            )}
           </div>
         )}
 

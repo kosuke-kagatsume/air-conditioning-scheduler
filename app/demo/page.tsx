@@ -5,6 +5,9 @@ import Link from 'next/link'
 import { AuthProvider } from '@/contexts/AuthContext'
 import CalendarView from '@/components/Calendar/CalendarView'
 import Sidebar from '@/components/Sidebar'
+import MobileNav from '@/components/MobileNav'
+import DandoriLogo from '@/components/DandoriLogo'
+import { NotificationIcon, MenuIcon, UserIcon } from '@/components/Icons'
 
 export default function DemoPage() {
   const [mounted, setMounted] = useState(false)
@@ -15,9 +18,17 @@ export default function DemoPage() {
   const [showWorkReportModal, setShowWorkReportModal] = useState(false)
   const [showScheduleChangeModal, setShowScheduleChangeModal] = useState(false)
   const [showContactAdminModal, setShowContactAdminModal] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   if (!mounted) {
@@ -31,7 +42,10 @@ export default function DemoPage() {
         <header style={{
           background: 'white',
           borderBottom: '1px solid #e1e4e8',
-          padding: '12px 20px'
+          padding: isMobile ? '8px 12px' : '12px 20px',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100
         }}>
           <div style={{
             maxWidth: '1400px',
@@ -40,30 +54,34 @@ export default function DemoPage() {
             justifyContent: 'space-between',
             alignItems: 'center'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                width: '36px',
-                height: '36px',
-                background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                color: 'white'
-              }}>
-                📅
-              </div>
-              <h1 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                margin: 0,
-                color: '#2c3e50'
-              }}>HVAC Scheduler</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '12px' }}>
+              {isMobile && (
+                <button
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    fontSize: '24px',
+                    cursor: 'pointer',
+                    padding: '4px'
+                  }}
+                >
+                  <MenuIcon size={24} color="#6b7280" />
+                </button>
+              )}
+              <DandoriLogo size={isMobile ? 28 : 36} />
+              {!isMobile && (
+                <h1 style={{
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  margin: 0,
+                  color: '#2c3e50'
+                }}>Dandori Scheduler</h1>
+              )}
             </div>
 
             {/* ヘッダー右側 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '16px' }}>
               <div style={{
                 display: 'flex',
                 background: '#f3f4f6',
@@ -73,11 +91,11 @@ export default function DemoPage() {
                 <button 
                   onClick={() => setViewMode('admin')}
                   style={{
-                    padding: '6px 16px',
+                    padding: isMobile ? '4px 12px' : '6px 16px',
                     background: viewMode === 'admin' ? 'white' : 'transparent',
                     border: 'none',
                     borderRadius: '6px',
-                    fontSize: '14px',
+                    fontSize: isMobile ? '12px' : '14px',
                     cursor: 'pointer',
                     color: viewMode === 'admin' ? '#1f2937' : '#6b7280',
                     fontWeight: viewMode === 'admin' ? '500' : '400',
@@ -89,11 +107,11 @@ export default function DemoPage() {
                 <button 
                   onClick={() => setViewMode('worker')}
                   style={{
-                    padding: '6px 16px',
+                    padding: isMobile ? '4px 12px' : '6px 16px',
                     background: viewMode === 'worker' ? 'white' : 'transparent',
                     border: 'none',
                     borderRadius: '6px',
-                    fontSize: '14px',
+                    fontSize: isMobile ? '12px' : '14px',
                     cursor: 'pointer',
                     color: viewMode === 'worker' ? '#1f2937' : '#6b7280',
                     fontWeight: viewMode === 'worker' ? '500' : '400',
@@ -115,7 +133,7 @@ export default function DemoPage() {
                     position: 'relative'
                   }}
                 >
-                  🔔
+                  <NotificationIcon size={20} color="#6b7280" />
                   {unreadCount > 0 && (
                     <span style={{
                       position: 'absolute',
@@ -278,16 +296,13 @@ export default function DemoPage() {
                 width: '36px',
                 height: '36px',
                 borderRadius: '50%',
-                background: '#ff6b6b',
+                background: '#f3f4f6',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: 'white',
-                fontSize: '14px',
-                fontWeight: '600',
                 cursor: 'pointer'
               }}>
-                {viewMode === 'admin' ? 'A' : '田'}
+                <UserIcon size={20} color="#6b7280" />
               </div>
             </div>
           </div>

@@ -1,0 +1,370 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザーモデル（管理者・職人共通）
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  name              String
+  role              UserRole  @default(WORKER)
+  phone             String?
+  emergencyPhone    String?
+  avatar            String?
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  company           Company?  @relation(fields: [companyId], references: [id])
+  companyId         String?
+  
+  managedEvents     Event[]   @relation("EventManager")
+  assignedEvents    Event[]   @relation("EventWorker")
+  workReports       WorkReport[]
+  scheduleChanges   ScheduleChangeRequest[]
+  notifications     Notification[]
+  workerProfile     WorkerProfile?
+  
+  @@index([email])
+  @@index([companyId])
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  MASTER_WORKER  // 親方
+  WORKER         // 子方
+}
+
+// 会社・組織
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users       User[]
+  sites       Site[]
+  events      Event[]
+}
+
+// 職人プロフィール（追加情報）
+model WorkerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // スキル・資格
+  skills          Skill[]
+  certifications  String[]
+  
+  // 稼働情報
+  maxDailySlots   Int      @default(3)
+  currentSlots    Int      @default(0)
+  
+  // 対応可能エリア
+  workAreas       String[]
+  
+  // 対応可能時間
+  availableMorning  Boolean @default(true)
+  availableNight    Boolean @default(false)
+  availableWeekend  Boolean @default(true)
+  availableHoliday  Boolean @default(false)
+  
+  // 評価
+  rating          Float?   @default(0)
+  completedJobs   Int      @default(0)
+  
+  // 保険
+  hasLiabilityInsurance  Boolean @default(false)
+  hasAccidentInsurance   Boolean @default(false)
+  insuranceExpiryDate    DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// スキル
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  level       SkillLevel @default(BASIC)
+  
+  // Relations
+  workers     WorkerProfile[]
+}
+
+enum SkillLevel {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+// 現場
+model Site {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  city        String
+  prefecture  String
+  postalCode  String?
+  latitude    Float?
+  longitude   Float?
+  clientName  String
+  clientPhone String?
+  
+  // Relations
+  company     Company  @relation(fields: [companyId], references: [id])
+  companyId   String
+  events      Event[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([companyId])
+}
+
+// 予定・イベント
+model Event {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  date            DateTime
+  startTime       String
+  endTime         String?
+  status          EventStatus @default(PROPOSED)
+  constructionType String
+  
+  // Relations
+  site            Site     @relation(fields: [siteId], references: [id])
+  siteId          String
+  
+  company         Company  @relation(fields: [companyId], references: [id])
+  companyId       String
+  
+  manager         User?    @relation("EventManager", fields: [managerId], references: [id])
+  managerId       String?
+  
+  assignedWorker  User?    @relation("EventWorker", fields: [workerId], references: [id])
+  workerId        String?
+  
+  workReports     WorkReport[]
+  changeRequests  ScheduleChangeRequest[]
+  
+  // メタデータ
+  estimatedHours  Float?
+  actualHours     Float?
+  notes           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([date])
+  @@index([workerId])
+  @@index([siteId])
+  @@index([status])
+}
+
+enum EventStatus {
+  PROPOSED    // 提案中
+  ACCEPTED    // 確定
+  PENDING     // 保留
+  ON_HOLD     // 一時停止
+  COMPLETED   // 完了
+  CANCELLED   // キャンセル
+  REJECTED    // 却下
+}
+
+// 作業報告書
+model WorkReport {
+  id              String   @id @default(cuid())
+  eventId         String
+  event           Event    @relation(fields: [eventId], references: [id])
+  
+  workerId        String
+  worker          User     @relation(fields: [workerId], references: [id])
+  
+  // 作業内容
+  workContent     String
+  startTime       DateTime
+  endTime         DateTime
+  breakTime       Int?     // 休憩時間（分）
+  
+  // 作業詳細
+  tasksCompleted  String[]
+  issues          String?
+  nextSteps       String?
+  
+  // 添付ファイル
+  photos          String[] // URLの配列
+  documents       String[] // URLの配列
+  
+  // 材料・部品
+  materialsUsed   Json?    // JSON形式で材料リストを保存
+  
+  // 承認
+  isApproved      Boolean  @default(false)
+  approvedBy      String?
+  approvedAt      DateTime?
+  approverComment String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([eventId])
+  @@index([workerId])
+}
+
+// 予定変更申請
+model ScheduleChangeRequest {
+  id              String   @id @default(cuid())
+  eventId         String
+  event           Event    @relation(fields: [eventId], references: [id])
+  
+  requesterId     String
+  requester       User     @relation(fields: [requesterId], references: [id])
+  
+  // 変更内容
+  changeType      ChangeType
+  originalDate    DateTime?
+  newDate         DateTime?
+  originalTime    String?
+  newTime         String?
+  reason          String
+  
+  // 承認
+  status          RequestStatus @default(PENDING)
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  reviewComment   String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([eventId])
+  @@index([requesterId])
+  @@index([status])
+}
+
+enum ChangeType {
+  DATE_CHANGE
+  TIME_CHANGE
+  CANCELLATION
+  WORKER_CHANGE
+  OTHER
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// 通知
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  type        NotificationType
+  title       String
+  message     String
+  data        Json?    // 追加データ（イベントIDなど）
+  
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([isRead])
+}
+
+enum NotificationType {
+  EVENT_CREATED
+  EVENT_UPDATED
+  EVENT_CANCELLED
+  EVENT_REMINDER
+  SCHEDULE_CHANGE_REQUEST
+  SCHEDULE_CHANGE_APPROVED
+  SCHEDULE_CHANGE_REJECTED
+  WORK_REPORT_SUBMITTED
+  WORK_REPORT_APPROVED
+  SYSTEM_ANNOUNCEMENT
+}
+
+// 在庫管理
+model Inventory {
+  id              String   @id @default(cuid())
+  name            String
+  category        String
+  model           String?
+  manufacturer    String?
+  quantity        Int      @default(0)
+  minQuantity     Int      @default(1)
+  unit            String   @default("個")
+  location        String?
+  
+  // 価格情報
+  purchasePrice   Float?
+  sellingPrice    Float?
+  
+  // 画像
+  imageUrl        String?
+  
+  // メタデータ
+  barcode         String?  @unique
+  notes           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([category])
+  @@index([barcode])
+}
+
+// シフト管理
+model Shift {
+  id              String   @id @default(cuid())
+  workerId        String
+  date            DateTime
+  startTime       String
+  endTime         String
+  breakTime       Int?     // 休憩時間（分）
+  
+  status          ShiftStatus @default(SCHEDULED)
+  notes           String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@unique([workerId, date])
+  @@index([workerId])
+  @@index([date])
+  @@index([status])
+}
+
+enum ShiftStatus {
+  SCHEDULED
+  WORKING
+  COMPLETED
+  ABSENT
+  CANCELLED
+}

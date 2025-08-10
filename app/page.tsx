@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import DandoriLogo from '@/components/DandoriLogo'
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -19,25 +20,13 @@ export default function Home() {
           alignItems: 'center'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              background: 'linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              color: 'white'
-            }}>
-              📅
-            </div>
+            <DandoriLogo size={36} />
             <h1 style={{
               fontSize: '20px',
               fontWeight: '700',
               margin: 0,
               color: '#2c3e50'
-            }}>HVAC Scheduler</h1>
+            }}>Dandori Scheduler</h1>
           </div>
           
           {/* Desktop menu */}
@@ -98,7 +87,7 @@ export default function Home() {
             marginBottom: '20px',
             color: '#2c3e50'
           }}>
-            空調工事現場の予定を
+            工事現場の予定を
             <br />
             <span className="gradient-text">もっとシンプルに</span>
           </h2>
@@ -161,7 +150,7 @@ export default function Home() {
                     {i % 7 === 0 && i < 28 && (
                       <div style={{ fontWeight: '600', marginBottom: '4px' }}>{i / 7 + 1}</div>
                     )}
-                    {i === 10 && <div className="event-item event-red">空調設置 A社</div>}
+                    {i === 10 && <div className="event-item event-red">設備工事 A社</div>}
                     {i === 15 && <div className="event-item event-blue">メンテナンス B社</div>}
                     {i === 22 && <div className="event-item event-green">点検作業 C社</div>}
                   </div>
@@ -502,26 +491,15 @@ export default function Home() {
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                <div style={{
-                  width: '36px',
-                  height: '36px',
-                  background: 'linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px'
-                }}>
-                  📅
-                </div>
+                <DandoriLogo size={36} />
                 <h3 style={{
                   fontSize: '20px',
                   fontWeight: '700',
                   margin: 0
-                }}>HVAC Scheduler</h3>
+                }}>Dandori Scheduler</h3>
               </div>
               <p style={{ opacity: 0.8, lineHeight: '1.6' }}>
-                空調工事現場のための<br />
+                工事現場のための<br />
                 シンプルなスケジュール管理
               </p>
             </div>
@@ -546,7 +524,7 @@ export default function Home() {
             
             <div>
               <h4 style={{ marginBottom: '16px', fontSize: '18px' }}>お問い合わせ</h4>
-              <p style={{ opacity: 0.8, marginBottom: '8px' }}>support@hvac-scheduler.jp</p>
+              <p style={{ opacity: 0.8, marginBottom: '8px' }}>support@dandori-scheduler.jp</p>
               <p style={{ opacity: 0.8 }}>平日 9:00-18:00</p>
             </div>
           </div>
@@ -557,7 +535,7 @@ export default function Home() {
             textAlign: 'center',
             opacity: 0.6
           }}>
-            <p>&copy; 2025 HVAC Scheduler. All rights reserved.</p>
+            <p>&copy; 2025 Dandori Scheduler. All rights reserved.</p>
           </div>
         </div>
       </footer>

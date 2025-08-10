@@ -2,20 +2,31 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { 
+  CalendarIcon, 
+  WorkersIcon, 
+  SitesIcon, 
+  DashboardIcon, 
+  ScheduleChangeIcon,
+  ShiftIcon,
+  InventoryIcon,
+  ReportIcon,
+  SettingsIcon
+} from '@/components/Icons'
 
 export default function Sidebar() {
   const pathname = usePathname()
   
   const menuItems = [
-    { href: '/demo', icon: '📅', label: 'カレンダー' },
-    { href: '/workers', icon: '👥', label: '職人管理' },
-    { href: '/sites', icon: '🏢', label: '現場管理' },
-    { href: '/dashboard', icon: '📊', label: 'ダッシュボード' },
-    { href: '/schedule-change', icon: '📝', label: '予定変更申請' },
-    { href: '/shifts', icon: '📋', label: 'シフト管理' },
-    { href: '/inventory', icon: '📦', label: '在庫管理' },
-    { href: '/reports', icon: '📄', label: '作業報告書' },
-    { href: '/settings', icon: '⚙️', label: '設定' }
+    { href: '/demo', Icon: CalendarIcon, label: 'カレンダー' },
+    { href: '/workers', Icon: WorkersIcon, label: '職人管理' },
+    { href: '/sites', Icon: SitesIcon, label: '現場管理' },
+    { href: '/dashboard', Icon: DashboardIcon, label: 'ダッシュボード' },
+    { href: '/schedule-change', Icon: ScheduleChangeIcon, label: '予定変更申請' },
+    { href: '/shifts', Icon: ShiftIcon, label: 'シフト管理' },
+    { href: '/inventory', Icon: InventoryIcon, label: '在庫管理' },
+    { href: '/reports', Icon: ReportIcon, label: '作業報告書' },
+    { href: '/settings', Icon: SettingsIcon, label: '設定' }
   ]
 
   return (
@@ -44,6 +55,7 @@ export default function Sidebar() {
         <nav>
           {menuItems.map((item) => {
             const isActive = pathname === item.href
+            const { Icon } = item
             return (
               <Link 
                 key={item.href}
@@ -53,17 +65,19 @@ export default function Sidebar() {
                   alignItems: 'center',
                   gap: '12px',
                   padding: '10px 12px',
-                  background: isActive ? '#fff5f5' : 'transparent',
+                  background: isActive ? 'linear-gradient(90deg, #FF8C4210 0%, transparent 100%)' : 'transparent',
                   borderRadius: '8px',
                   textDecoration: 'none',
-                  color: isActive ? '#ff6b6b' : '#2c3e50',
+                  color: isActive ? '#FF8C42' : '#6b7280',
                   fontSize: '14px',
-                  fontWeight: '500',
+                  fontWeight: isActive ? '600' : '500',
                   marginBottom: '4px',
-                  transition: 'background 0.2s'
+                  transition: 'all 0.2s',
+                  borderLeft: isActive ? '3px solid #FF8C42' : '3px solid transparent'
                 }}
               >
-                <span>{item.icon}</span> {item.label}
+                <Icon size={18} color={isActive ? '#FF8C42' : '#6b7280'} />
+                <span>{item.label}</span>
               </Link>
             )
           })}

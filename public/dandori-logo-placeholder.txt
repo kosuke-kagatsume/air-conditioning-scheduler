@@ -1,0 +1,6 @@
+# Dandori Logo Placeholder
+
+The actual logo image should be saved as /public/dandori-logo.png
+
+Please save the logo image provided by the user to this location.
+The logo is being referenced in the app header.

@@ -54,7 +54,7 @@ export const mockUsers: User[] = [
   {
     id: 'user-admin',
     name: '山田太郎',
-    email: 'admin@hvac.jp',
+    email: 'admin@dandori.jp',
     role: 'admin',
     tenantId: 'tenant-1',
     phoneNumber: '090-1234-5678',
@@ -63,7 +63,7 @@ export const mockUsers: User[] = [
   {
     id: 'user-manager1',
     name: '佐藤花子',
-    email: 'sato@hvac.jp',
+    email: 'sato@dandori.jp',
     role: 'manager1',
     tenantId: 'tenant-1',
     phoneNumber: '090-2345-6789',
@@ -72,7 +72,7 @@ export const mockUsers: User[] = [
   {
     id: 'user-staff1',
     name: '鈴木一郎',
-    email: 'suzuki@hvac.jp',
+    email: 'suzuki@dandori.jp',
     role: 'staff',
     tenantId: 'tenant-1',
     phoneNumber: '090-3456-7890',

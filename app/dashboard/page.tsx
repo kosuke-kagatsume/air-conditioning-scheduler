@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { mockEvents, mockUsers } from '@/lib/mockData'
 import Sidebar from '@/components/Sidebar'
+import DandoriLogo from '@/components/DandoriLogo'
+import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 type DateRange = '7days' | '30days' | '90days' | '1year'
 
@@ -116,25 +118,13 @@ export default function DashboardPage() {
               gap: '12px',
               textDecoration: 'none'
             }}>
-              <div style={{
-                width: '36px',
-                height: '36px',
-                background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
-                borderRadius: '10px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '18px',
-                color: 'white'
-              }}>
-                📅
-              </div>
+              <DandoriLogo size={36} />
               <h1 style={{
                 fontSize: '18px',
                 fontWeight: '600',
                 margin: 0,
                 color: '#2c3e50'
-              }}>HVAC Scheduler</h1>
+              }}>Dandori Scheduler</h1>
             </Link>
           </div>
         </header>

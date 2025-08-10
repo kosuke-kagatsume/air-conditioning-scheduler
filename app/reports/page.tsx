@@ -1,159 +1,152 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import DandoriLogo from '@/components/DandoriLogo'
 import Sidebar from '@/components/Sidebar'
+import { ReportIcon, CalendarIcon, PlusIcon, NotificationIcon, UserIcon } from '@/components/Icons'
 
+// 作業報告書の型定義
 interface WorkReport {
   id: string
   eventId: string
+  eventTitle: string
+  siteName: string
   date: string
-  clientName: string
-  address: string
-  constructionType: string
   startTime: string
   endTime: string
+  worker: string
+  status: 'draft' | 'submitted' | 'approved' | 'revision'
   workContent: string
-  materials: { name: string; quantity: number; unit: string }[]
+  issues?: string
   photos: string[]
-  issues: string
-  nextSteps: string
-  workerSignature: string
-  clientSignature: string
-  status: 'draft' | 'submitted' | 'approved'
+  materials: Array<{
+    name: string
+    quantity: number
+    unit: string
+  }>
   createdAt: string
-  location?: { lat: number; lng: number }
 }
 
-function ReportsContent() {
-  const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState<'create' | 'list'>('create')
-  const [reports, setReports] = useState<WorkReport[]>([
+export default function ReportsPage() {
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<'list' | 'create'>('list')
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [selectedReport, setSelectedReport] = useState<WorkReport | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+
+  // モック作業報告書データ
+  const mockReports: WorkReport[] = [
     {
-      id: '1',
-      eventId: 'E001',
-      date: '2025-08-07',
-      clientName: '山田様',
-      address: '東京都渋谷区渋谷2-1-1',
-      constructionType: 'エアコン新設',
+      id: 'wr-001',
+      eventId: 'evt-001',
+      eventTitle: 'エアコン新設工事',
+      siteName: '渋谷オフィスビル',
+      date: '2025-08-08',
       startTime: '09:00',
-      endTime: '12:00',
-      workContent: 'リビングルームにエアコン2台設置完了',
-      materials: [
-        { name: 'エアコン本体', quantity: 2, unit: '台' },
-        { name: '配管', quantity: 10, unit: 'm' },
-        { name: 'ビス', quantity: 20, unit: '本' }
-      ],
-      photos: [],
-      issues: '特になし',
-      nextSteps: '1週間後に動作確認',
-      workerSignature: '田中太郎',
-      clientSignature: '山田花子',
+      endTime: '17:00',
+      worker: '田中太郎',
       status: 'approved',
-      createdAt: '2025-08-07T12:30:00'
-    }
-  ])
-
-  // 新規報告書のフォームデータ
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    clientName: '',
-    address: '',
-    constructionType: '',
-    startTime: '',
-    endTime: '',
-    workContent: '',
-    materials: [{ name: '', quantity: 0, unit: '' }],
-    photos: [] as string[],
-    issues: '',
-    nextSteps: '',
-    location: undefined as { lat: number; lng: number } | undefined
-  })
-
-  const [showCamera, setShowCamera] = useState(false)
-  const [signature, setSignature] = useState({ worker: '', client: '' })
-
-  const handleAddMaterial = () => {
-    setFormData({
-      ...formData,
-      materials: [...formData.materials, { name: '', quantity: 0, unit: '' }]
-    })
-  }
-
-  const handleRemoveMaterial = (index: number) => {
-    setFormData({
-      ...formData,
-      materials: formData.materials.filter((_, i) => i !== index)
-    })
-  }
-
-  const handleMaterialChange = (index: number, field: string, value: any) => {
-    const newMaterials = [...formData.materials]
-    newMaterials[index] = { ...newMaterials[index], [field]: value }
-    setFormData({ ...formData, materials: newMaterials })
-  }
-
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (files) {
-      // 実際の実装では、ファイルをアップロードして URL を取得
-      const photoUrls = Array.from(files).map(file => URL.createObjectURL(file))
-      setFormData({ ...formData, photos: [...formData.photos, ...photoUrls] })
-    }
-  }
-
-  const handleGetLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFormData({
-            ...formData,
-            location: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            }
-          })
-          alert('位置情報を取得しました')
-        },
-        (error) => {
-          alert('位置情報の取得に失敗しました')
-        }
-      )
-    }
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const newReport: WorkReport = {
-      id: Date.now().toString(),
-      eventId: 'E' + Date.now(),
-      ...formData,
-      workerSignature: signature.worker,
-      clientSignature: signature.client,
+      workContent: 'オフィス3階にエアコン3台を新規設置。配管工事、電気工事、試運転まで完了。',
+      photos: ['/photo1.jpg', '/photo2.jpg'],
+      materials: [
+        { name: 'エアコン室内機', quantity: 3, unit: '台' },
+        { name: '冷媒配管 2分3分', quantity: 45, unit: 'm' },
+        { name: 'ドレンホース', quantity: 30, unit: 'm' }
+      ],
+      createdAt: '2025-08-08T18:30:00'
+    },
+    {
+      id: 'wr-002',
+      eventId: 'evt-002',
+      eventTitle: '定期メンテナンス',
+      siteName: '品川商業施設',
+      date: '2025-08-07',
+      startTime: '10:00',
+      endTime: '12:00',
+      worker: '高橋次郎',
+      status: 'submitted',
+      workContent: 'エアコンフィルター清掃、冷媒ガス圧力チェック、ドレン配管清掃を実施。',
+      issues: 'ドレン配管に軽度の詰まりあり。清掃により解消。',
+      photos: ['/photo3.jpg'],
+      materials: [
+        { name: 'フィルター洗浄剤', quantity: 1, unit: '本' }
+      ],
+      createdAt: '2025-08-07T13:00:00'
+    },
+    {
+      id: 'wr-003',
+      eventId: 'evt-003',
+      eventTitle: '緊急修理対応',
+      siteName: '新宿マンション',
+      date: '2025-08-06',
+      startTime: '14:00',
+      endTime: '16:30',
+      worker: '佐藤健一',
+      status: 'revision',
+      workContent: '室外機の異音対応。コンプレッサー不具合のため部品交換。',
+      issues: 'コンプレッサー経年劣化。交換推奨。',
+      photos: [],
+      materials: [
+        { name: 'コンプレッサー', quantity: 1, unit: '個' },
+        { name: '冷媒R32', quantity: 2, unit: 'kg' }
+      ],
+      createdAt: '2025-08-06T17:00:00'
+    },
+    {
+      id: 'wr-004',
+      eventId: 'evt-004',
+      eventTitle: '配管工事',
+      siteName: '渋谷オフィスビル',
+      date: '2025-08-05',
+      startTime: '08:00',
+      endTime: '15:00',
+      worker: '田中太郎',
       status: 'draft',
-      createdAt: new Date().toISOString(),
-      materials: formData.materials.filter(m => m.name)
+      workContent: '新規配管ルートの設置。',
+      photos: [],
+      materials: [],
+      createdAt: '2025-08-05T16:00:00'
     }
-    setReports([newReport, ...reports])
-    alert('作業報告書を保存しました')
-    setActiveTab('list')
+  ]
+
+  const getStatusBadge = (status: WorkReport['status']) => {
+    const styles = {
+      draft: { bg: '#f3f4f6', color: '#6b7280', label: '下書き' },
+      submitted: { bg: '#dbeafe', color: '#2563eb', label: '提出済み' },
+      approved: { bg: '#dcfce7', color: '#16a34a', label: '承認済み' },
+      revision: { bg: '#fef3c7', color: '#d97706', label: '要修正' }
+    }
+    const style = styles[status]
+    return (
+      <span style={{
+        padding: '4px 12px',
+        borderRadius: '12px',
+        background: style.bg,
+        color: style.color,
+        fontSize: '12px',
+        fontWeight: '600'
+      }}>
+        {style.label}
+      </span>
+    )
   }
 
-  const handleSubmitReport = (reportId: string) => {
-    setReports(reports.map(r =>
-      r.id === reportId ? { ...r, status: 'submitted' } : r
-    ))
-    alert('報告書を提出しました')
-  }
+  const filteredReports = filterStatus === 'all' 
+    ? mockReports 
+    : mockReports.filter(r => r.status === filterStatus)
 
   return (
     <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-      {/* Header */}
+      {/* ヘッダー */}
       <header style={{
         background: 'white',
-        borderBottom: '1px solid #e1e4e8',
-        padding: '12px 20px'
+        borderBottom: '1px solid #e5e7eb',
+        padding: '12px 20px',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100
       }}>
         <div style={{
           maxWidth: '1400px',
@@ -162,173 +155,407 @@ function ReportsContent() {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <Link href="/demo" style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '12px',
-            textDecoration: 'none'
-          }}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              background: 'linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '18px',
-              color: 'white'
-            }}>
-              📅
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <DandoriLogo size={36} />
             <h1 style={{
               fontSize: '18px',
               fontWeight: '600',
               margin: 0,
-              color: '#2c3e50'
-            }}>HVAC Scheduler</h1>
-          </Link>
+              color: '#1f2937'
+            }}>Dandori Scheduler</h1>
+          </div>
+          
+          {/* ヘッダー右側 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button 
+              style={{
+                padding: '6px 8px',
+                background: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
+              <NotificationIcon size={20} color="#6b7280" />
+              <span style={{
+                position: 'absolute',
+                top: '2px',
+                right: '2px',
+                background: '#ff4444',
+                color: 'white',
+                borderRadius: '50%',
+                width: '16px',
+                height: '16px',
+                fontSize: '10px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                3
+              </span>
+            </button>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: '#f3f4f6',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer'
+            }}>
+              <UserIcon size={20} color="#6b7280" />
+            </div>
+          </div>
         </div>
       </header>
 
+      {/* サイドバー */}
       <Sidebar />
-      
+
+      {/* メインコンテンツ */}
       <div style={{
         marginLeft: '240px',
-        padding: '20px',
-        minHeight: 'calc(100vh - 60px)'
+        padding: '24px'
       }}>
-        <div style={{ width: '100%' }}>
+        {/* 統計カード */}
         <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '16px',
           marginBottom: '24px'
         }}>
-          <h2 style={{
-            fontSize: '24px',
-            fontWeight: '600',
-            color: '#1f2937'
-          }}>
-            作業報告書
-          </h2>
-
-          {/* タブ切り替え */}
           <div style={{
-            display: 'flex',
-            background: '#f3f4f6',
-            borderRadius: '8px',
-            padding: '2px'
+            background: 'white',
+            padding: '20px',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
-            <button
-              onClick={() => setActiveTab('create')}
-              style={{
-                padding: '8px 20px',
-                background: activeTab === 'create' ? 'white' : 'transparent',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: activeTab === 'create' ? '500' : '400',
-                color: activeTab === 'create' ? '#1f2937' : '#6b7280',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              新規作成
-            </button>
-            <button
-              onClick={() => setActiveTab('list')}
-              style={{
-                padding: '8px 20px',
-                background: activeTab === 'list' ? 'white' : 'transparent',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: activeTab === 'list' ? '500' : '400',
-                color: activeTab === 'list' ? '#1f2937' : '#6b7280',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-            >
-              報告書一覧
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                background: '#dcfce7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <ReportIcon size={20} color="#16a34a" />
+              </div>
+              <div>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>今月の提出数</p>
+                <p style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>42件</p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            background: 'white',
+            padding: '20px',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                background: '#dbeafe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <ReportIcon size={20} color="#2563eb" />
+              </div>
+              <div>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>承認待ち</p>
+                <p style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>8件</p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            background: 'white',
+            padding: '20px',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                background: '#fef3c7',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <ReportIcon size={20} color="#d97706" />
+              </div>
+              <div>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>要修正</p>
+                <p style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>3件</p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{
+            background: 'white',
+            padding: '20px',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '8px',
+                background: '#f3f4f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <ReportIcon size={20} color="#6b7280" />
+              </div>
+              <div>
+                <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '2px' }}>下書き</p>
+                <p style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>5件</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {activeTab === 'create' ? (
-          /* 新規作成フォーム */
-          <form onSubmit={handleSubmit} style={{
+        {/* フィルターとアクションバー */}
+        <div style={{
+          background: 'white',
+          padding: '16px 20px',
+          borderRadius: '12px',
+          marginBottom: '24px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {['all', 'draft', 'submitted', 'approved', 'revision'].map(status => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                style={{
+                  padding: '8px 16px',
+                  background: filterStatus === status ? '#FF8C42' : '#f3f4f6',
+                  color: filterStatus === status ? 'white' : '#6b7280',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {status === 'all' ? '全て' :
+                 status === 'draft' ? '下書き' :
+                 status === 'submitted' ? '提出済み' :
+                 status === 'approved' ? '承認済み' : '要修正'}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 20px',
+              background: '#FF8C42',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600'
+            }}
+          >
+            <PlusIcon size={16} color="white" />
+            新規作成
+          </button>
+        </div>
+
+        {/* 報告書リスト */}
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          overflow: 'hidden',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                  作成日
+                </th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                  現場名
+                </th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                  作業内容
+                </th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                  作業者
+                </th>
+                <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                  ステータス
+                </th>
+                <th style={{ padding: '12px 16px', textAlign: 'center', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
+                  操作
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredReports.map((report, index) => (
+                <tr 
+                  key={report.id} 
+                  style={{ 
+                    borderBottom: index < filteredReports.length - 1 ? '1px solid #f3f4f6' : 'none',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                >
+                  <td style={{ padding: '16px', fontSize: '14px', color: '#6b7280' }}>
+                    {new Date(report.date).toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' })}
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <div>
+                      <p style={{ fontSize: '14px', fontWeight: '500', color: '#1f2937' }}>
+                        {report.siteName}
+                      </p>
+                      <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
+                        {report.eventTitle}
+                      </p>
+                    </div>
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <p style={{ 
+                      fontSize: '14px', 
+                      color: '#6b7280',
+                      maxWidth: '300px',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {report.workContent}
+                    </p>
+                  </td>
+                  <td style={{ padding: '16px', fontSize: '14px', color: '#1f2937' }}>
+                    {report.worker}
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    {getStatusBadge(report.status)}
+                  </td>
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <button
+                        onClick={() => setSelectedReport(report)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#f3f4f6',
+                          color: '#6b7280',
+                          border: 'none',
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: '500'
+                        }}
+                      >
+                        詳細
+                      </button>
+                      {report.status === 'draft' && (
+                        <button
+                          style={{
+                            padding: '6px 12px',
+                            background: '#2563eb',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: '500'
+                          }}
+                        >
+                          提出
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* 作成モーダル */}
+      {showCreateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
             background: 'white',
-            borderRadius: '12px',
-            padding: '24px'
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '600px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
           }}>
-            {/* 基本情報 */}
-            <div style={{ marginBottom: '32px' }}>
-              <h3 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '16px',
-                paddingBottom: '8px',
-                borderBottom: '2px solid #e5e7eb'
-              }}>
-                基本情報
-              </h3>
+            <h2 style={{
+              fontSize: '20px',
+              fontWeight: '700',
+              marginBottom: '20px',
+              color: '#1f2937'
+            }}>
+              作業報告書を作成
+            </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                    作業日 <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
-                  />
-                </div>
+            <div style={{ display: 'grid', gap: '16px' }}>
+              <div>
+                <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px', display: 'block' }}>
+                  作業日
+                </label>
+                <input
+                  type="date"
+                  style={{
+                    width: '100%',
+                    padding: '8px 12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px'
+                  }}
+                />
+              </div>
 
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                    工事内容 <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <select
-                    value={formData.constructionType}
-                    onChange={(e) => setFormData({ ...formData, constructionType: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      background: 'white'
-                    }}
-                    required
-                  >
-                    <option value="">選択してください</option>
-                    <option value="エアコン新設">エアコン新設</option>
-                    <option value="エアコン交換">エアコン交換</option>
-                    <option value="メンテナンス">メンテナンス</option>
-                    <option value="修理">修理</option>
-                    <option value="点検">点検</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                    開始時刻 <span style={{ color: '#ef4444' }}>*</span>
+                  <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px', display: 'block' }}>
+                    開始時刻
                   </label>
                   <input
                     type="time"
-                    value={formData.startTime}
-                    onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                     style={{
                       width: '100%',
                       padding: '8px 12px',
@@ -336,18 +563,14 @@ function ReportsContent() {
                       borderRadius: '8px',
                       fontSize: '14px'
                     }}
-                    required
                   />
                 </div>
-
                 <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                    終了時刻 <span style={{ color: '#ef4444' }}>*</span>
+                  <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px', display: 'block' }}>
+                    終了時刻
                   </label>
                   <input
                     type="time"
-                    value={formData.endTime}
-                    onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                     style={{
                       width: '100%',
                       padding: '8px 12px',
@@ -355,97 +578,36 @@ function ReportsContent() {
                       borderRadius: '8px',
                       fontSize: '14px'
                     }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                    顧客名 <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.clientName}
-                    onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                    作業場所 <span style={{ color: '#ef4444' }}>*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
                   />
                 </div>
               </div>
 
-              {/* 位置情報 */}
-              <div style={{ marginTop: '16px' }}>
-                <button
-                  type="button"
-                  onClick={handleGetLocation}
+              <div>
+                <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px', display: 'block' }}>
+                  現場名
+                </label>
+                <select
                   style={{
-                    padding: '8px 16px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
+                    width: '100%',
+                    padding: '8px 12px',
+                    border: '1px solid #d1d5db',
                     borderRadius: '8px',
                     fontSize: '14px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
+                    background: 'white'
                   }}
                 >
-                  📍 現在地を記録
-                </button>
-                {formData.location && (
-                  <span style={{ fontSize: '12px', color: '#22c55e', marginLeft: '12px' }}>
-                    ✓ 位置情報記録済み
-                  </span>
-                )}
+                  <option>選択してください</option>
+                  <option>渋谷オフィスビル</option>
+                  <option>新宿マンション</option>
+                  <option>品川商業施設</option>
+                </select>
               </div>
-            </div>
 
-            {/* 作業内容 */}
-            <div style={{ marginBottom: '32px' }}>
-              <h3 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '16px',
-                paddingBottom: '8px',
-                borderBottom: '2px solid #e5e7eb'
-              }}>
-                作業内容
-              </h3>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                  作業詳細 <span style={{ color: '#ef4444' }}>*</span>
+              <div>
+                <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px', display: 'block' }}>
+                  作業内容
                 </label>
                 <textarea
-                  value={formData.workContent}
-                  onChange={(e) => setFormData({ ...formData, workContent: e.target.value })}
                   rows={4}
                   style={{
                     width: '100%',
@@ -456,469 +618,249 @@ function ReportsContent() {
                     resize: 'vertical'
                   }}
                   placeholder="実施した作業内容を詳しく記入してください"
-                  required
                 />
               </div>
 
-              {/* 使用材料 */}
               <div>
+                <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '4px', display: 'block' }}>
+                  写真を追加
+                </label>
                 <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '12px'
-                }}>
-                  <label style={{ fontSize: '13px', fontWeight: '500' }}>
-                    使用材料
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleAddMaterial}
-                    style={{
-                      padding: '4px 12px',
-                      background: 'transparent',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      color: '#3b82f6',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    + 材料追加
-                  </button>
-                </div>
-
-                {formData.materials.map((material, index) => (
-                  <div key={index} style={{
-                    display: 'grid',
-                    gridTemplateColumns: '2fr 1fr 1fr auto',
-                    gap: '8px',
-                    marginBottom: '8px'
-                  }}>
-                    <input
-                      type="text"
-                      value={material.name}
-                      onChange={(e) => handleMaterialChange(index, 'name', e.target.value)}
-                      placeholder="材料名"
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '8px',
-                        fontSize: '14px'
-                      }}
-                    />
-                    <input
-                      type="number"
-                      value={material.quantity}
-                      onChange={(e) => handleMaterialChange(index, 'quantity', Number(e.target.value))}
-                      placeholder="数量"
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '8px',
-                        fontSize: '14px'
-                      }}
-                    />
-                    <input
-                      type="text"
-                      value={material.unit}
-                      onChange={(e) => handleMaterialChange(index, 'unit', e.target.value)}
-                      placeholder="単位"
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '8px',
-                        fontSize: '14px'
-                      }}
-                    />
-                    {formData.materials.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveMaterial(index)}
-                        style={{
-                          padding: '8px',
-                          background: '#fee2e2',
-                          color: '#ef4444',
-                          border: 'none',
-                          borderRadius: '8px',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        削除
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* 写真アップロード */}
-            <div style={{ marginBottom: '32px' }}>
-              <h3 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '16px',
-                paddingBottom: '8px',
-                borderBottom: '2px solid #e5e7eb'
-              }}>
-                作業写真
-              </h3>
-
-              <div style={{
-                border: '2px dashed #d1d5db',
-                borderRadius: '8px',
-                padding: '24px',
-                textAlign: 'center',
-                background: '#f9fafb'
-              }}>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={handlePhotoUpload}
-                  style={{ display: 'none' }}
-                  id="photo-upload"
-                />
-                <label htmlFor="photo-upload" style={{
-                  display: 'inline-block',
-                  padding: '10px 20px',
-                  background: '#3b82f6',
-                  color: 'white',
+                  border: '2px dashed #d1d5db',
                   borderRadius: '8px',
+                  padding: '20px',
+                  textAlign: 'center',
                   cursor: 'pointer',
-                  fontSize: '14px'
+                  background: '#f9fafb'
                 }}>
-                  📷 写真を選択
-                </label>
-                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>
-                  または、ここにドラッグ＆ドロップ
-                </p>
-              </div>
-
-              {formData.photos.length > 0 && (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
-                  gap: '12px',
-                  marginTop: '16px'
-                }}>
-                  {formData.photos.map((photo, index) => (
-                    <div key={index} style={{
-                      position: 'relative',
-                      paddingBottom: '100%',
-                      background: `url(${photo}) center/cover`,
-                      borderRadius: '8px',
-                      border: '1px solid #e5e7eb'
-                    }} />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* 問題点・次回対応 */}
-            <div style={{ marginBottom: '32px' }}>
-              <h3 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '16px',
-                paddingBottom: '8px',
-                borderBottom: '2px solid #e5e7eb'
-              }}>
-                特記事項
-              </h3>
-
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                  問題点・課題
-                </label>
-                <textarea
-                  value={formData.issues}
-                  onChange={(e) => setFormData({ ...formData, issues: e.target.value })}
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    resize: 'vertical'
-                  }}
-                  placeholder="作業中に発生した問題や課題があれば記入"
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                  次回対応事項
-                </label>
-                <textarea
-                  value={formData.nextSteps}
-                  onChange={(e) => setFormData({ ...formData, nextSteps: e.target.value })}
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '8px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    resize: 'vertical'
-                  }}
-                  placeholder="次回の作業や確認事項があれば記入"
-                />
-              </div>
-            </div>
-
-            {/* 署名 */}
-            <div style={{ marginBottom: '32px' }}>
-              <h3 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#374151',
-                marginBottom: '16px',
-                paddingBottom: '8px',
-                borderBottom: '2px solid #e5e7eb'
-              }}>
-                確認署名
-              </h3>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                    作業者署名
-                  </label>
-                  <div style={{
-                    padding: '20px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    background: '#f9fafb',
-                    textAlign: 'center'
-                  }}>
-                    <input
-                      type="text"
-                      value={signature.worker}
-                      onChange={(e) => setSignature({ ...signature, worker: e.target.value })}
-                      placeholder="ここに署名"
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: 'none',
-                        background: 'transparent',
-                        fontSize: '18px',
-                        fontFamily: 'cursive',
-                        textAlign: 'center'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', marginBottom: '6px' }}>
-                    お客様署名
-                  </label>
-                  <div style={{
-                    padding: '20px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    background: '#f9fafb',
-                    textAlign: 'center'
-                  }}>
-                    <input
-                      type="text"
-                      value={signature.client}
-                      onChange={(e) => setSignature({ ...signature, client: e.target.value })}
-                      placeholder="お客様に署名いただく"
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        border: 'none',
-                        background: 'transparent',
-                        fontSize: '18px',
-                        fontFamily: 'cursive',
-                        textAlign: 'center'
-                      }}
-                    />
-                  </div>
+                  <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                    クリックして写真を選択<br />
+                    またはドラッグ＆ドロップ
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* ボタン */}
             <div style={{
               display: 'flex',
-              justifyContent: 'flex-end',
               gap: '12px',
-              paddingTop: '20px',
-              borderTop: '1px solid #e5e7eb'
+              marginTop: '24px',
+              justifyContent: 'flex-end'
             }}>
               <button
-                type="button"
+                onClick={() => setShowCreateModal(false)}
                 style={{
-                  padding: '10px 24px',
-                  background: 'white',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px',
+                  padding: '10px 20px',
+                  background: '#f3f4f6',
                   color: '#6b7280',
-                  cursor: 'pointer'
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                キャンセル
+              </button>
+              <button
+                style={{
+                  padding: '10px 20px',
+                  background: '#FF8C42',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600'
                 }}
               >
                 下書き保存
               </button>
-              <button
-                type="submit"
-                style={{
-                  padding: '10px 24px',
-                  background: '#3b82f6',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  cursor: 'pointer'
-                }}
-              >
-                報告書を作成
-              </button>
-            </div>
-          </form>
-        ) : (
-          /* 報告書一覧 */
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '24px'
-          }}>
-            <div style={{ marginBottom: '20px' }}>
-              <input
-                type="text"
-                placeholder="報告書を検索..."
-                style={{
-                  width: '100%',
-                  maxWidth: '400px',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {reports.map(report => (
-                <div key={report.id} style={{
-                  padding: '16px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  background: '#f9fafb'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'start',
-                    marginBottom: '12px'
-                  }}>
-                    <div>
-                      <h4 style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1f2937',
-                        marginBottom: '4px'
-                      }}>
-                        {report.constructionType} - {report.clientName}
-                      </h4>
-                      <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                        {new Date(report.date).toLocaleDateString('ja-JP')} {report.startTime} - {report.endTime}
-                      </div>
-                      <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                        {report.address}
-                      </div>
-                    </div>
-                    <div style={{
-                      padding: '4px 12px',
-                      borderRadius: '12px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      background: report.status === 'approved' ? '#dcfce7' :
-                        report.status === 'submitted' ? '#fef3c7' : '#f3f4f6',
-                      color: report.status === 'approved' ? '#15803d' :
-                        report.status === 'submitted' ? '#a16207' : '#6b7280'
-                    }}>
-                      {report.status === 'approved' ? '承認済み' :
-                        report.status === 'submitted' ? '提出済み' : '下書き'}
-                    </div>
-                  </div>
-
-                  <div style={{
-                    fontSize: '14px',
-                    color: '#374151',
-                    marginBottom: '12px'
-                  }}>
-                    {report.workContent}
-                  </div>
-
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <div style={{ fontSize: '12px', color: '#9ca3af' }}>
-                      作成: {new Date(report.createdAt).toLocaleString('ja-JP')}
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      <button style={{
-                        padding: '6px 12px',
-                        background: 'white',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        cursor: 'pointer'
-                      }}>
-                        詳細
-                      </button>
-                      <button style={{
-                        padding: '6px 12px',
-                        background: 'white',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        cursor: 'pointer'
-                      }}>
-                        PDF
-                      </button>
-                      {report.status === 'draft' && (
-                        <button
-                          onClick={() => handleSubmitReport(report.id)}
-                          style={{
-                            padding: '6px 12px',
-                            background: '#3b82f6',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '12px',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          提出
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
-        )}
         </div>
-      </div>
-    </div>
-  )
-}
+      )}
 
-export default function ReportsPage() {
-  return (
-    <AuthProvider>
-      <ReportsContent />
-    </AuthProvider>
+      {/* 詳細モーダル */}
+      {selectedReport && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '700px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflowY: 'auto'
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'start',
+              marginBottom: '20px'
+            }}>
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: '700',
+                color: '#1f2937'
+              }}>
+                作業報告書詳細
+              </h2>
+              {getStatusBadge(selectedReport.status)}
+            </div>
+
+            <div style={{ display: 'grid', gap: '20px' }}>
+              <div style={{
+                padding: '16px',
+                background: '#f9fafb',
+                borderRadius: '8px'
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>
+                  基本情報
+                </h3>
+                <div style={{ display: 'grid', gap: '8px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px' }}>
+                    <span style={{ fontSize: '14px', color: '#6b7280' }}>作業日:</span>
+                    <span style={{ fontSize: '14px', color: '#1f2937' }}>
+                      {new Date(selectedReport.date).toLocaleDateString('ja-JP')}
+                    </span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px' }}>
+                    <span style={{ fontSize: '14px', color: '#6b7280' }}>作業時間:</span>
+                    <span style={{ fontSize: '14px', color: '#1f2937' }}>
+                      {selectedReport.startTime} - {selectedReport.endTime}
+                    </span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px' }}>
+                    <span style={{ fontSize: '14px', color: '#6b7280' }}>現場:</span>
+                    <span style={{ fontSize: '14px', color: '#1f2937' }}>
+                      {selectedReport.siteName}
+                    </span>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '8px' }}>
+                    <span style={{ fontSize: '14px', color: '#6b7280' }}>作業者:</span>
+                    <span style={{ fontSize: '14px', color: '#1f2937' }}>
+                      {selectedReport.worker}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                  作業内容
+                </h3>
+                <p style={{ fontSize: '14px', color: '#4b5563', lineHeight: '1.6' }}>
+                  {selectedReport.workContent}
+                </p>
+              </div>
+
+              {selectedReport.issues && (
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                    特記事項
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#dc2626', lineHeight: '1.6' }}>
+                    {selectedReport.issues}
+                  </p>
+                </div>
+              )}
+
+              {selectedReport.materials.length > 0 && (
+                <div>
+                  <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                    使用材料
+                  </h3>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid #e5e7eb' }}>
+                        <th style={{ padding: '8px', textAlign: 'left', fontSize: '12px', color: '#6b7280' }}>品名</th>
+                        <th style={{ padding: '8px', textAlign: 'right', fontSize: '12px', color: '#6b7280' }}>数量</th>
+                        <th style={{ padding: '8px', textAlign: 'left', fontSize: '12px', color: '#6b7280' }}>単位</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedReport.materials.map((material, index) => (
+                        <tr key={index} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                          <td style={{ padding: '8px', fontSize: '14px' }}>{material.name}</td>
+                          <td style={{ padding: '8px', textAlign: 'right', fontSize: '14px' }}>{material.quantity}</td>
+                          <td style={{ padding: '8px', fontSize: '14px' }}>{material.unit}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              marginTop: '24px',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={() => setSelectedReport(null)}
+                style={{
+                  padding: '10px 20px',
+                  background: '#f3f4f6',
+                  color: '#6b7280',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                閉じる
+              </button>
+              {selectedReport.status === 'submitted' && (
+                <>
+                  <button
+                    style={{
+                      padding: '10px 20px',
+                      background: '#dc2626',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}
+                  >
+                    差戻し
+                  </button>
+                  <button
+                    style={{
+                      padding: '10px 20px',
+                      background: '#16a34a',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}
+                  >
+                    承認
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

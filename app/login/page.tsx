@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
+import DandoriLogo from '@/components/DandoriLogo'
 
 export default function Login() {
   const router = useRouter()
@@ -33,7 +34,7 @@ export default function Login() {
   // デモアカウントで自動入力
   const fillDemoAccount = (type: 'admin' | 'worker') => {
     if (type === 'admin') {
-      setEmail('admin@hvac.jp')
+      setEmail('admin@dandori.jp')
       setPassword('demo123')
     } else {
       setEmail('tanaka@worker.jp')
@@ -61,19 +62,10 @@ export default function Login() {
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
             <div style={{
-              width: '64px',
-              height: '64px',
-              background: 'linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 100%)',
-              borderRadius: '16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '32px',
-              color: 'white',
               margin: '0 auto 20px',
               cursor: 'pointer'
             }}>
-              📅
+              <DandoriLogo size={64} />
             </div>
           </Link>
           <h1 style={{ 
@@ -82,13 +74,13 @@ export default function Login() {
             color: '#2c3e50',
             marginBottom: '8px'
           }}>
-            HVAC Scheduler
+            Dandori Scheduler
           </h1>
           <p style={{ 
             fontSize: '16px', 
             color: '#6c7684' 
           }}>
-            空調工事現場スケジューラー
+            工事現場スケジューラー
           </p>
         </div>
 
