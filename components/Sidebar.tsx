@@ -30,7 +30,7 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="fixed left-0 top-14 w-60 h-[calc(100vh-3.5rem)] bg-white border-r border-gray-200 p-5 overflow-y-auto hidden md:block">
+    <aside className="fixed left-0 top-14 w-60 h-[calc(100vh-3.5rem)] bg-white border-r border-gray-200 p-5 overflow-y-auto block">
       {/* Menu Section */}
       <div className="mb-6">
         <h3 className="text-xs text-gray-500 font-medium mb-3 pl-3">
