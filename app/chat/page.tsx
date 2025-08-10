@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import DandoriLogo from '@/components/DandoriLogo'
+import LogoHeader from '@/components/LogoHeader'
 
 interface Message {
   id: string
@@ -223,16 +223,11 @@ function ChatContent() {
             gap: '12px',
             marginBottom: '12px'
           }}>
-            <Link href="/demo" style={{ textDecoration: 'none' }}>
-              <DandoriLogo size={36} />
-            </Link>
-            <div>
-              <div style={{ color: 'white', fontWeight: '600', fontSize: '16px' }}>
-                Dandori Team
-              </div>
-              <div style={{ color: '#b0b3b8', fontSize: '12px' }}>
-                12人がオンライン
-              </div>
+            <div style={{ color: 'white' }}>
+              <LogoHeader href="/demo" size={36} />
+            </div>
+            <div style={{ color: '#b0b3b8', fontSize: '12px', marginLeft: '48px' }}>
+              12人がオンライン
             </div>
           </div>
 

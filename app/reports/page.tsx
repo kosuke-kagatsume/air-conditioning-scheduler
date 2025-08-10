@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import DandoriLogo from '@/components/DandoriLogo'
+import LogoHeader from '@/components/LogoHeader'
 import Sidebar from '@/components/Sidebar'
 import { ReportIcon, CalendarIcon, PlusIcon, NotificationIcon, UserIcon } from '@/components/Icons'
 
@@ -156,13 +156,7 @@ export default function ReportsPage() {
           alignItems: 'center'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <DandoriLogo size={36} />
-            <h1 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              margin: 0,
-              color: '#1f2937'
-            }}>Dandori Scheduler</h1>
+            <LogoHeader href="/demo" size={36} />
           </div>
           
           {/* ヘッダー右側 */}

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import DandoriLogo from '@/components/DandoriLogo'
+import LogoHeader from '@/components/LogoHeader'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 interface InventoryItem {
@@ -275,13 +275,7 @@ function InventoryContent() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Link href="/demo" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-              <DandoriLogo size={32} />
-              <h1 style={{
-                fontSize: '18px',
-                fontWeight: '700',
-                margin: 0,
-                color: '#2c3e50'
-              }}>Dandori Scheduler</h1>
+              <LogoHeader href="/demo" size={32} />
             </Link>
           </div>
         </div>

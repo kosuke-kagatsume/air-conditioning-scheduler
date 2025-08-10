@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import DandoriLogo from '@/components/DandoriLogo'
+import LogoHeader from '@/components/LogoHeader'
 
 export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -19,15 +19,12 @@ export default function Home() {
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <DandoriLogo size={36} />
-            <h1 style={{
-              fontSize: '20px',
-              fontWeight: '700',
-              margin: 0,
-              color: '#2c3e50'
-            }}>Dandori Scheduler</h1>
-          </div>
+          <LogoHeader 
+            href="/demo" 
+            size={36} 
+            fontSize="20px" 
+            fontWeight="700" 
+          />
           
           {/* Desktop menu */}
           <div className="hide-mobile" style={{ display: 'flex', gap: '8px' }}>
@@ -491,7 +488,7 @@ export default function Home() {
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-                <DandoriLogo size={36} />
+                <LogoHeader size={36} showText={false} />
                 <h3 style={{
                   fontSize: '20px',
                   fontWeight: '700',

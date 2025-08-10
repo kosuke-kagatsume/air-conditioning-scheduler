@@ -6,7 +6,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import CalendarView from '@/components/Calendar/CalendarView'
 import Sidebar from '@/components/Sidebar'
 import MobileNav from '@/components/MobileNav'
-import DandoriLogo from '@/components/DandoriLogo'
+import LogoHeader from '@/components/LogoHeader'
 import { NotificationIcon, MenuIcon, UserIcon } from '@/components/Icons'
 
 export default function DemoPage() {
@@ -69,15 +69,11 @@ export default function DemoPage() {
                   <MenuIcon size={24} color="#6b7280" />
                 </button>
               )}
-              <DandoriLogo size={isMobile ? 28 : 36} />
-              {!isMobile && (
-                <h1 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  margin: 0,
-                  color: '#2c3e50'
-                }}>Dandori Scheduler</h1>
-              )}
+              <LogoHeader 
+                size={isMobile ? 28 : 36}
+                showText={!isMobile}
+                href="#"
+              />
             </div>
 
             {/* ヘッダー右側 */}
