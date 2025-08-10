@@ -30,7 +30,22 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside className="fixed left-0 top-14 w-60 h-[calc(100vh-3.5rem)] bg-white border-r border-gray-200 p-5 overflow-y-auto block">
+    <aside 
+      className="fixed left-0 top-14 w-60 h-[calc(100vh-3.5rem)] bg-white border-r border-gray-200 p-5 overflow-y-auto z-30"
+      style={{
+        boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
+        display: 'block',
+        visibility: 'visible',
+        backgroundColor: '#ffffff',
+        borderRight: '1px solid #e5e7eb',
+        position: 'fixed',
+        left: 0,
+        top: '56px',
+        width: '240px',
+        height: 'calc(100vh - 56px)',
+        zIndex: 30
+      } as React.CSSProperties}
+    >
       {/* Menu Section */}
       <div className="mb-6">
         <h3 className="text-xs text-gray-500 font-medium mb-3 pl-3">
