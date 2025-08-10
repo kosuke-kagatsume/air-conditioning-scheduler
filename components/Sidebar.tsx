@@ -46,8 +46,8 @@ export default function Sidebar() {
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
                   isActive 
-                    ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 border-l-3 border-orange-600' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 border-l-4 border-orange-600' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-l-4 border-transparent'
                 }`}
               >
                 <Icon size={18} color={isActive ? '#ea580c' : '#6b7280'} />
