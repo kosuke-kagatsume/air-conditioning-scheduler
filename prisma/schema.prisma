@@ -37,6 +37,8 @@ model User {
   
   @@index([email])
   @@index([companyId])
+  @@index([role, isActive])
+  @@index([createdAt])
 }
 
 enum UserRole {
