@@ -507,8 +507,8 @@ function HVACScheduleContent() {
 
 export default function HVACSchedulePage() {
   return (
-    <AuthProvider>
+    <>
       <HVACScheduleContent />
-    </AuthProvider>
+    </>
   )
 }

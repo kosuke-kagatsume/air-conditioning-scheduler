@@ -1,124 +1,46 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import PageHeader from '@/components/PageHeader'
-import Sidebar from '@/components/Sidebar'
-import { ReportIcon, CalendarIcon, PlusIcon, NotificationIcon, UserIcon } from '@/components/Icons'
-
-// 作業報告書の型定義
-interface WorkReport {
-  id: string
-  eventId: string
-  eventTitle: string
-  siteName: string
-  date: string
-  startTime: string
-  endTime: string
-  worker: string
-  status: 'draft' | 'submitted' | 'approved' | 'revision'
-  workContent: string
-  issues?: string
-  photos: string[]
-  materials: Array<{
-    name: string
-    quantity: number
-    unit: string
-  }>
-  createdAt: string
-}
+import AppLayout from '@/components/AppLayout'
+import { ReportIcon, CalendarIcon, PlusIcon } from '@/components/Icons'
+import { mockReports, mockEvents } from '@/lib/mockData'
+import type { WorkReport } from '@/lib/mockData'
 
 export default function ReportsPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<'list' | 'create'>('list')
   const [filterStatus, setFilterStatus] = useState<string>('all')
-  const [selectedReport, setSelectedReport] = useState<WorkReport | null>(null)
+  const [selectedReport, setSelectedReport] = useState<any | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
 
-  // モック作業報告書データ
-  const mockReports: WorkReport[] = [
-    {
-      id: 'wr-001',
-      eventId: 'evt-001',
-      eventTitle: 'エアコン新設工事',
-      siteName: '渋谷オフィスビル',
-      date: '2025-08-08',
-      startTime: '09:00',
-      endTime: '17:00',
-      worker: '田中太郎',
-      status: 'approved',
-      workContent: 'オフィス3階にエアコン3台を新規設置。配管工事、電気工事、試運転まで完了。',
-      photos: ['/photo1.jpg', '/photo2.jpg'],
-      materials: [
-        { name: 'エアコン室内機', quantity: 3, unit: '台' },
-        { name: '冷媒配管 2分3分', quantity: 45, unit: 'm' },
-        { name: 'ドレンホース', quantity: 30, unit: 'm' }
-      ],
-      createdAt: '2025-08-08T18:30:00'
-    },
-    {
-      id: 'wr-002',
-      eventId: 'evt-002',
-      eventTitle: '定期メンテナンス',
-      siteName: '品川商業施設',
-      date: '2025-08-07',
-      startTime: '10:00',
-      endTime: '12:00',
-      worker: '高橋次郎',
-      status: 'submitted',
-      workContent: 'エアコンフィルター清掃、冷媒ガス圧力チェック、ドレン配管清掃を実施。',
-      issues: 'ドレン配管に軽度の詰まりあり。清掃により解消。',
-      photos: ['/photo3.jpg'],
-      materials: [
-        { name: 'フィルター洗浄剤', quantity: 1, unit: '本' }
-      ],
-      createdAt: '2025-08-07T13:00:00'
-    },
-    {
-      id: 'wr-003',
-      eventId: 'evt-003',
-      eventTitle: '緊急修理対応',
-      siteName: '新宿マンション',
-      date: '2025-08-06',
-      startTime: '14:00',
-      endTime: '16:30',
-      worker: '佐藤健一',
-      status: 'revision',
-      workContent: '室外機の異音対応。コンプレッサー不具合のため部品交換。',
-      issues: 'コンプレッサー経年劣化。交換推奨。',
-      photos: [],
-      materials: [
-        { name: 'コンプレッサー', quantity: 1, unit: '個' },
-        { name: '冷媒R32', quantity: 2, unit: 'kg' }
-      ],
-      createdAt: '2025-08-06T17:00:00'
-    },
-    {
-      id: 'wr-004',
-      eventId: 'evt-004',
-      eventTitle: '配管工事',
-      siteName: '渋谷オフィスビル',
-      date: '2025-08-05',
-      startTime: '08:00',
-      endTime: '15:00',
-      worker: '田中太郎',
-      status: 'draft',
-      workContent: '新規配管ルートの設置。',
-      photos: [],
-      materials: [],
-      createdAt: '2025-08-05T16:00:00'
-    }
-  ]
+  // デモ報告書データを使用
+  const [reports, setReports] = useState<any[]>([])
+  
+  useEffect(() => {
+    // イベント情報と結合して表示用データを作成
+    const enrichedReports = mockReports.map(report => {
+      const event = mockEvents.find(e => e.id === report.eventId)
+      return {
+        ...report,
+        eventTitle: event?.title || `作業 #${report.eventId}`,
+        siteName: event?.clientName || '現場'
+      }
+    })
+    setReports(enrichedReports)
+  }, [])
+
+  // 元のダミーデータは削除（既に上で実データに置き換え）
 
   const getStatusBadge = (status: WorkReport['status']) => {
-    const styles = {
+    const styles: Record<string, { bg: string; color: string; label: string }> = {
       draft: { bg: '#f3f4f6', color: '#6b7280', label: '下書き' },
       submitted: { bg: '#dbeafe', color: '#2563eb', label: '提出済み' },
       approved: { bg: '#dcfce7', color: '#16a34a', label: '承認済み' },
-      revision: { bg: '#fef3c7', color: '#d97706', label: '要修正' }
+      rejected: { bg: '#fef3c7', color: '#d97706', label: '却下' }
     }
-    const style = styles[status]
+    const style = styles[status] || styles.draft
     return (
       <span style={{
         padding: '4px 12px',
@@ -134,21 +56,15 @@ export default function ReportsPage() {
   }
 
   const filteredReports = filterStatus === 'all' 
-    ? mockReports 
-    : mockReports.filter(r => r.status === filterStatus)
+    ? reports 
+    : reports.filter(r => r.status === filterStatus)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-      {/* ヘッダー */}
-<PageHeader />
-
-      {/* サイドバー */}
-      <Sidebar />
-
-      {/* メインコンテンツ */}
+    <AppLayout>
       <div style={{
-        marginLeft: '240px',
-        padding: '24px'
+        padding: '24px',
+        background: '#f5f6f8',
+        minHeight: 'calc(100vh - 56px)'
       }}>
         {/* 統計カード */}
         <div style={{
@@ -427,7 +343,7 @@ export default function ReportsPage() {
             </tbody>
           </table>
         </div>
-      </div>
+      
 
       {/* 作成モーダル */}
       {showCreateModal && (
@@ -720,7 +636,7 @@ export default function ReportsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedReport.materials.map((material, index) => (
+                      {selectedReport.materials?.map((material: any, index: number) => (
                         <tr key={index} style={{ borderBottom: '1px solid #f3f4f6' }}>
                           <td style={{ padding: '8px', fontSize: '14px' }}>{material.name}</td>
                           <td style={{ padding: '8px', textAlign: 'right', fontSize: '14px' }}>{material.quantity}</td>
@@ -790,6 +706,7 @@ export default function ReportsPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AppLayout>
   )
 }

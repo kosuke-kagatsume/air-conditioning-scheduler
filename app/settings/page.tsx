@@ -1,17 +1,21 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import AppLayout from '@/components/AppLayout'
 
 export default function SettingsPage() {
   const router = useRouter()
 
   return (
-    <div style={{
-      padding: '20px',
-      maxWidth: '1200px',
-      margin: '0 auto',
-      paddingBottom: '80px'
-    }}>
+    <AppLayout>
+      <div style={{
+        padding: '20px',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        paddingBottom: '80px',
+        background: '#f5f6f8',
+        minHeight: 'calc(100vh - 56px)'
+      }}>
       <div style={{
         background: 'white',
         borderRadius: '12px',
@@ -117,6 +121,7 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
-    </div>
+      </div>
+    </AppLayout>
   )
 }

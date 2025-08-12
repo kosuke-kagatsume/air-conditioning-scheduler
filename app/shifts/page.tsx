@@ -1,12 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Sidebar from '@/components/Sidebar'
-import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import { mockUsers } from '@/lib/mockData'
-import PageHeader from '@/components/PageHeader'
-import { NotificationIcon, UserIcon } from '@/components/Icons'
+import AppLayout from '@/components/AppLayout'
+import { useAuth } from '@/contexts/AuthContext'
+import { mockUsers, mockShiftData, mockExtendedWorkers } from '@/lib/mockData'
+import type { ShiftData } from '@/lib/mockData'
 
 interface Shift {
   id: string
@@ -41,56 +40,65 @@ function ShiftsContent() {
   const [showRequestModal, setShowRequestModal] = useState(false)
   const [activeTab, setActiveTab] = useState<'schedule' | 'requests'>('schedule')
 
-  // サンプルシフトデータ
-  const [shifts] = useState<Shift[]>([
-    {
-      id: '1',
-      workerId: 'worker1',
-      workerName: '田中太郎',
-      date: '2025-08-07',
-      startTime: '08:00',
-      endTime: '17:00',
-      type: 'regular',
-      status: 'confirmed',
-      location: '渋谷現場'
-    },
-    {
-      id: '2',
-      workerId: 'worker2',
-      workerName: '鈴木一郎',
-      date: '2025-08-07',
-      startTime: '09:00',
-      endTime: '18:00',
-      type: 'regular',
-      status: 'scheduled',
-      location: '新宿現場'
-    },
-    {
-      id: '3',
-      workerId: 'worker3',
-      workerName: '佐藤三郎',
-      date: '2025-08-08',
-      startTime: '08:00',
-      endTime: '20:00',
-      type: 'overtime',
-      status: 'scheduled',
-      location: '品川現場'
+  // デモシフトデータを使用
+  const [shifts, setShifts] = useState<any[]>([])
+  const [shiftRequests, setShiftRequests] = useState<ShiftRequest[]>([])
+  
+  useEffect(() => {
+    // シフトデータを変換
+    const adaptedShifts = mockShiftData.map(shift => ({
+      id: shift.id,
+      workerId: shift.workerId,
+      workerName: shift.workerName,
+      date: shift.date,
+      startTime: shift.startTime,
+      endTime: shift.endTime,
+      type: shift.overtime > 0 ? 'overtime' : 'regular',
+      status: shift.status === 'completed' ? 'completed' : shift.status === 'confirmed' ? 'confirmed' : 'scheduled',
+      location: shift.location,
+      notes: shift.notes
+    }))
+    setShifts(adaptedShifts)
+    
+    // シフト申請データを生成
+    generateShiftRequests()
+  }, [])
+  
+  const generateShiftRequests = () => {
+    const requests: ShiftRequest[] = []
+    const today = new Date()
+    
+    for (let i = 0; i < 12; i++) {
+      const requestDate = new Date(today)
+      requestDate.setDate(today.getDate() + Math.floor(Math.random() * 14) + 1)
+      
+      const worker = mockExtendedWorkers[Math.floor(Math.random() * mockExtendedWorkers.length)]
+      const types = ['leave', 'swap', 'overtime']
+      const type = types[Math.floor(Math.random() * types.length)] as 'leave' | 'swap' | 'overtime'
+      
+      requests.push({
+        id: `req-${i + 1}`,
+        workerId: worker.id,
+        workerName: worker.name,
+        date: requestDate.toISOString().split('T')[0],
+        type,
+        reason: generateRequestReason(type),
+        status: ['pending', 'approved', 'rejected'][Math.floor(Math.random() * 3)] as 'pending' | 'approved' | 'rejected',
+        requestedAt: new Date(Date.now() - Math.floor(Math.random() * 7 * 24 * 60 * 60 * 1000)),
+        swapWithId: type === 'swap' ? mockExtendedWorkers[Math.floor(Math.random() * mockExtendedWorkers.length)].id : undefined
+      })
     }
-  ])
-
-  // シフト申請データ
-  const [shiftRequests, setShiftRequests] = useState<ShiftRequest[]>([
-    {
-      id: '1',
-      workerId: 'worker1',
-      workerName: '田中太郎',
-      date: '2025-08-15',
-      type: 'leave',
-      reason: '体調不良のため',
-      status: 'pending',
-      requestedAt: new Date()
+    setShiftRequests(requests)
+  }
+  
+  const generateRequestReason = (type: 'leave' | 'swap' | 'overtime'): string => {
+    const reasons = {
+      leave: ['用事のため', '体調不良', '家族の用事', '医院受診', '子供の行事'],
+      swap: ['他の約束と重なった', '緑急対応のため', '研修参加', '家族の用事'],
+      overtime: ['進捗が遅れている', '顧客からの特急依頼', '有急修理対応', '品質確保のため']
     }
-  ])
+    return reasons[type][Math.floor(Math.random() * reasons[type].length)]
+  }
 
   const workers = mockUsers.filter(u => ['master', 'worker'].includes(u.role))
 
@@ -172,472 +180,460 @@ function ShiftsContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-      {/* Header */}
-<PageHeader />
+    <main style={{ padding: '20px', minHeight: 'calc(100vh - 56px)', background: '#f5f6f8' }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '24px'
+      }}>
+        <h2 style={{
+          fontSize: '24px',
+          fontWeight: '600',
+          color: '#1f2937'
+        }}>
+          シフト管理
+        </h2>
 
-      {/* Main Layout */}
-      <div>
-        {/* サイドバー */}
-        <Sidebar />
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            onClick={() => setShowRequestModal(true)}
+            style={{
+              padding: '10px 20px',
+              background: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          >
+            シフト申請
+          </button>
+          <button style={{
+            padding: '10px 20px',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            fontSize: '14px',
+            cursor: 'pointer'
+          }}>
+            シフト作成
+          </button>
+        </div>
+      </div>
 
-        {/* Main Content */}
-        <main style={{ marginLeft: '240px', padding: '20px', minHeight: 'calc(100vh - 60px)', marginTop: '60px' }}>
+      {/* タブ */}
+      <div style={{
+        display: 'flex',
+        gap: '4px',
+        marginBottom: '20px'
+      }}>
+        <button
+          onClick={() => setActiveTab('schedule')}
+          style={{
+            padding: '10px 24px',
+            background: activeTab === 'schedule' ? 'white' : 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'schedule' ? '2px solid #3b82f6' : '2px solid transparent',
+            fontSize: '14px',
+            fontWeight: activeTab === 'schedule' ? '600' : '400',
+            color: activeTab === 'schedule' ? '#1f2937' : '#6b7280',
+            cursor: 'pointer'
+          }}
+        >
+          シフト表
+        </button>
+        <button
+          onClick={() => setActiveTab('requests')}
+          style={{
+            padding: '10px 24px',
+            background: activeTab === 'requests' ? 'white' : 'transparent',
+            border: 'none',
+            borderBottom: activeTab === 'requests' ? '2px solid #3b82f6' : '2px solid transparent',
+            fontSize: '14px',
+            fontWeight: activeTab === 'requests' ? '600' : '400',
+            color: activeTab === 'requests' ? '#1f2937' : '#6b7280',
+            cursor: 'pointer',
+            position: 'relative'
+          }}
+        >
+          申請管理
+          {shiftRequests.filter(r => r.status === 'pending').length > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              width: '20px',
+              height: '20px',
+              background: '#ef4444',
+              color: 'white',
+              borderRadius: '10px',
+              fontSize: '11px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              {shiftRequests.filter(r => r.status === 'pending').length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {activeTab === 'schedule' ? (
+        /* シフト表 */
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          padding: '20px'
+        }}>
+          {/* コントロール */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '24px'
+            marginBottom: '20px'
           }}>
-            <h2 style={{
-              fontSize: '24px',
-              fontWeight: '600',
-              color: '#1f2937'
-            }}>
-              シフト管理
-            </h2>
-
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <button
-                onClick={() => setShowRequestModal(true)}
+                onClick={() => handleNavigate('prev')}
                 style={{
-                  padding: '10px 20px',
+                  padding: '6px 12px',
                   background: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  fontSize: '14px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
                   cursor: 'pointer'
                 }}
               >
-                シフト申請
+                ←
               </button>
-              <button style={{
-                padding: '10px 20px',
-                background: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '14px',
-                cursor: 'pointer'
-              }}>
-                シフト作成
+              <span style={{ fontSize: '16px', fontWeight: '600' }}>
+                {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月
+                {viewMode === 'week' && ` 第${Math.ceil(currentDate.getDate() / 7)}週`}
+              </span>
+              <button
+                onClick={() => handleNavigate('next')}
+                style={{
+                  padding: '6px 12px',
+                  background: 'white',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                →
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setViewMode('week')}
+                style={{
+                  padding: '6px 16px',
+                  background: viewMode === 'week' ? '#3b82f6' : 'white',
+                  color: viewMode === 'week' ? 'white' : '#6b7280',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                週表示
+              </button>
+              <button
+                onClick={() => setViewMode('month')}
+                style={{
+                  padding: '6px 16px',
+                  background: viewMode === 'month' ? '#3b82f6' : 'white',
+                  color: viewMode === 'month' ? 'white' : '#6b7280',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '6px',
+                  cursor: 'pointer'
+                }}
+              >
+                月表示
               </button>
             </div>
           </div>
 
-          {/* タブ */}
-          <div style={{
-            display: 'flex',
-            gap: '4px',
-            marginBottom: '20px'
-          }}>
-            <button
-              onClick={() => setActiveTab('schedule')}
-              style={{
-                padding: '10px 24px',
-                background: activeTab === 'schedule' ? 'white' : 'transparent',
-                border: 'none',
-                borderBottom: activeTab === 'schedule' ? '2px solid #3b82f6' : '2px solid transparent',
-                fontSize: '14px',
-                fontWeight: activeTab === 'schedule' ? '600' : '400',
-                color: activeTab === 'schedule' ? '#1f2937' : '#6b7280',
-                cursor: 'pointer'
-              }}
-            >
-              シフト表
-            </button>
-            <button
-              onClick={() => setActiveTab('requests')}
-              style={{
-                padding: '10px 24px',
-                background: activeTab === 'requests' ? 'white' : 'transparent',
-                border: 'none',
-                borderBottom: activeTab === 'requests' ? '2px solid #3b82f6' : '2px solid transparent',
-                fontSize: '14px',
-                fontWeight: activeTab === 'requests' ? '600' : '400',
-                color: activeTab === 'requests' ? '#1f2937' : '#6b7280',
-                cursor: 'pointer',
-                position: 'relative'
-              }}
-            >
-              申請管理
-              {shiftRequests.filter(r => r.status === 'pending').length > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '8px',
-                  right: '8px',
-                  width: '20px',
-                  height: '20px',
-                  background: '#ef4444',
-                  color: 'white',
-                  borderRadius: '10px',
-                  fontSize: '11px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  {shiftRequests.filter(r => r.status === 'pending').length}
-                </span>
-              )}
-            </button>
-          </div>
-
-          {activeTab === 'schedule' ? (
-            /* シフト表 */
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '20px'
-            }}>
-              {/* コントロール */}
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '20px'
-              }}>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <button
-                    onClick={() => handleNavigate('prev')}
-                    style={{
-                      padding: '6px 12px',
-                      background: 'white',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    ←
-                  </button>
-                  <span style={{ fontSize: '16px', fontWeight: '600' }}>
-                    {currentDate.getFullYear()}年{currentDate.getMonth() + 1}月
-                    {viewMode === 'week' && ` 第${Math.ceil(currentDate.getDate() / 7)}週`}
-                  </span>
-                  <button
-                    onClick={() => handleNavigate('next')}
-                    style={{
-                      padding: '6px 12px',
-                      background: 'white',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    →
-                  </button>
-                </div>
-
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={() => setViewMode('week')}
-                    style={{
-                      padding: '6px 16px',
-                      background: viewMode === 'week' ? '#3b82f6' : 'white',
-                      color: viewMode === 'week' ? 'white' : '#6b7280',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    週表示
-                  </button>
-                  <button
-                    onClick={() => setViewMode('month')}
-                    style={{
-                      padding: '6px 16px',
-                      background: viewMode === 'month' ? '#3b82f6' : 'white',
-                      color: viewMode === 'month' ? 'white' : '#6b7280',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '6px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    月表示
-                  </button>
-                </div>
-              </div>
-
-              {/* シフトテーブル */}
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: '#f9fafb' }}>
-                      <th style={{
-                        padding: '12px',
-                        textAlign: 'left',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        borderBottom: '2px solid #e5e7eb',
-                        minWidth: '120px',
-                        position: 'sticky',
-                        left: 0,
-                        background: '#f9fafb'
-                      }}>
-                        職人名
-                      </th>
-                      {weekDays.map(day => (
-                        <th key={day.toISOString()} style={{
-                          padding: '12px',
-                          textAlign: 'center',
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          borderBottom: '2px solid #e5e7eb',
-                          minWidth: '140px'
-                        }}>
-                          <div>{day.getMonth() + 1}/{day.getDate()}</div>
-                          <div style={{
-                            fontSize: '11px',
-                            color: day.getDay() === 0 ? '#ef4444' : day.getDay() === 6 ? '#3b82f6' : '#6b7280'
-                          }}>
-                            {getDayOfWeek(day)}
-                          </div>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {workers.map(worker => (
-                      <tr key={worker.id}>
-                        <td style={{
-                          padding: '12px',
-                          borderBottom: '1px solid #e5e7eb',
-                          fontWeight: '500',
-                          fontSize: '14px',
-                          position: 'sticky',
-                          left: 0,
-                          background: 'white'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{
-                              width: '32px',
-                              height: '32px',
-                              background: '#3b82f6',
-                              borderRadius: '50%',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontSize: '12px'
-                            }}>
-                              {worker.name[0]}
-                            </div>
-                            <div>
-                              <div>{worker.name}</div>
-                              <div style={{ fontSize: '11px', color: '#6b7280' }}>
-                                {worker.role === 'master' ? '親方' : '職人'}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        {weekDays.map(day => {
-                          const dateStr = formatDate(day)
-                          const dayShifts = getShiftsForDate(worker.id, dateStr)
-                          
-                          return (
-                            <td key={day.toISOString()} style={{
-                              padding: '8px',
-                              borderBottom: '1px solid #e5e7eb',
-                              background: day.getDay() === 0 || day.getDay() === 6 ? '#f9fafb' : 'white'
-                            }}>
-                              {dayShifts.map(shift => (
-                                <div key={shift.id} style={{
-                                  padding: '6px 8px',
-                                  background: `${getStatusColor(shift.status)}15`,
-                                  borderLeft: `3px solid ${getStatusColor(shift.status)}`,
-                                  borderRadius: '4px',
-                                  marginBottom: '4px'
-                                }}>
-                                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
-                                    {shift.startTime} - {shift.endTime}
-                                  </div>
-                                  {shift.location && (
-                                    <div style={{ fontSize: '11px', color: '#6b7280' }}>
-                                      {shift.location}
-                                    </div>
-                                  )}
-                                  <div style={{
-                                    fontSize: '10px',
-                                    color: getStatusColor(shift.status),
-                                    marginTop: '2px'
-                                  }}>
-                                    {getStatusLabel(shift.status)}
-                                  </div>
-                                </div>
-                              ))}
-                              {dayShifts.length === 0 && (
-                                <div style={{
-                                  padding: '20px',
-                                  textAlign: 'center',
-                                  color: '#d1d5db',
-                                  fontSize: '20px'
-                                }}>
-                                  -
-                                </div>
-                              )}
-                            </td>
-                          )
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* 凡例 */}
-              <div style={{
-                marginTop: '20px',
-                paddingTop: '20px',
-                borderTop: '1px solid #e5e7eb',
-                display: 'flex',
-                gap: '24px',
-                fontSize: '12px'
-              }}>
-                {[
-                  { status: 'scheduled', label: '予定' },
-                  { status: 'confirmed', label: '確定' },
-                  { status: 'completed', label: '完了' },
-                  { status: 'absent', label: '欠勤' }
-                ].map(item => (
-                  <div key={item.status} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <div style={{
-                      width: '12px',
-                      height: '12px',
-                      background: getStatusColor(item.status),
-                      borderRadius: '2px'
-                    }} />
-                    <span>{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            /* 申請管理 */
-            <div style={{
-              background: 'white',
-              borderRadius: '12px',
-              padding: '20px'
-            }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {shiftRequests.map(request => (
-                  <div key={request.id} style={{
-                    padding: '16px',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
+          {/* シフトテーブル */}
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: '#f9fafb' }}>
+                  <th style={{
+                    padding: '12px',
+                    textAlign: 'left',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    borderBottom: '2px solid #e5e7eb',
+                    minWidth: '120px',
+                    position: 'sticky',
+                    left: 0,
                     background: '#f9fafb'
                   }}>
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'start'
+                    職人名
+                  </th>
+                  {weekDays.map(day => (
+                    <th key={day.toISOString()} style={{
+                      padding: '12px',
+                      textAlign: 'center',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      borderBottom: '2px solid #e5e7eb',
+                      minWidth: '140px'
                     }}>
-                      <div>
+                      <div>{day.getMonth() + 1}/{day.getDate()}</div>
+                      <div style={{
+                        fontSize: '11px',
+                        color: day.getDay() === 0 ? '#ef4444' : day.getDay() === 6 ? '#3b82f6' : '#6b7280'
+                      }}>
+                        {getDayOfWeek(day)}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {workers.map(worker => (
+                  <tr key={worker.id}>
+                    <td style={{
+                      padding: '12px',
+                      borderBottom: '1px solid #e5e7eb',
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      position: 'sticky',
+                      left: 0,
+                      background: 'white'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <div style={{
+                          width: '32px',
+                          height: '32px',
+                          background: '#3b82f6',
+                          borderRadius: '50%',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '12px',
-                          marginBottom: '8px'
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontSize: '12px'
                         }}>
-                          <span style={{
-                            padding: '4px 12px',
-                            borderRadius: '12px',
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            background: request.status === 'pending' ? '#fef3c7' :
-                              request.status === 'approved' ? '#dcfce7' : '#fee2e2',
-                            color: request.status === 'pending' ? '#a16207' :
-                              request.status === 'approved' ? '#15803d' : '#dc2626'
-                          }}>
-                            {request.status === 'pending' ? '承認待ち' :
-                              request.status === 'approved' ? '承認済み' : '却下'}
-                          </span>
-                          <span style={{
-                            padding: '4px 12px',
-                            borderRadius: '12px',
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            background: '#f3f4f6',
-                            color: '#374151'
-                          }}>
-                            {request.type === 'leave' ? '休暇申請' :
-                              request.type === 'swap' ? 'シフト交換' : '残業申請'}
-                          </span>
+                          {worker.name[0]}
                         </div>
-                        <h4 style={{
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          color: '#1f2937',
-                          marginBottom: '4px'
-                        }}>
-                          {request.workerName}
-                        </h4>
-                        <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                          対象日: {request.date}
-                        </div>
-                        <div style={{
-                          marginTop: '8px',
-                          padding: '8px',
-                          background: 'white',
-                          borderRadius: '4px'
-                        }}>
-                          <div style={{ fontSize: '12px', fontWeight: '500', marginBottom: '4px' }}>
-                            理由:
-                          </div>
-                          <div style={{ fontSize: '13px', color: '#374151' }}>
-                            {request.reason}
+                        <div>
+                          <div>{worker.name}</div>
+                          <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                            {worker.role === 'master' ? '親方' : '職人'}
                           </div>
                         </div>
                       </div>
+                    </td>
+                    {weekDays.map(day => {
+                      const dateStr = formatDate(day)
+                      const dayShifts = getShiftsForDate(worker.id, dateStr)
+                      
+                      return (
+                        <td key={day.toISOString()} style={{
+                          padding: '8px',
+                          borderBottom: '1px solid #e5e7eb',
+                          background: day.getDay() === 0 || day.getDay() === 6 ? '#f9fafb' : 'white'
+                        }}>
+                          {dayShifts.map(shift => (
+                            <div key={shift.id} style={{
+                              padding: '6px 8px',
+                              background: `${getStatusColor(shift.status)}15`,
+                              borderLeft: `3px solid ${getStatusColor(shift.status)}`,
+                              borderRadius: '4px',
+                              marginBottom: '4px'
+                            }}>
+                              <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                                {shift.startTime} - {shift.endTime}
+                              </div>
+                              {shift.location && (
+                                <div style={{ fontSize: '11px', color: '#6b7280' }}>
+                                  {shift.location}
+                                </div>
+                              )}
+                              <div style={{
+                                fontSize: '10px',
+                                color: getStatusColor(shift.status),
+                                marginTop: '2px'
+                              }}>
+                                {getStatusLabel(shift.status)}
+                              </div>
+                            </div>
+                          ))}
+                          {dayShifts.length === 0 && (
+                            <div style={{
+                              padding: '20px',
+                              textAlign: 'center',
+                              color: '#d1d5db',
+                              fontSize: '20px'
+                            }}>
+                              -
+                            </div>
+                          )}
+                        </td>
+                      )
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-                      {request.status === 'pending' && user?.role === 'admin' && (
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                          <button
-                            onClick={() => handleApproveRequest(request.id, false)}
-                            style={{
-                              padding: '6px 16px',
-                              background: 'white',
-                              border: '1px solid #ef4444',
-                              borderRadius: '6px',
-                              fontSize: '13px',
-                              color: '#ef4444',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            却下
-                          </button>
-                          <button
-                            onClick={() => handleApproveRequest(request.id, true)}
-                            style={{
-                              padding: '6px 16px',
-                              background: '#22c55e',
-                              border: 'none',
-                              borderRadius: '6px',
-                              fontSize: '13px',
-                              color: 'white',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            承認
-                          </button>
-                        </div>
-                      )}
+          {/* 凡例 */}
+          <div style={{
+            marginTop: '20px',
+            paddingTop: '20px',
+            borderTop: '1px solid #e5e7eb',
+            display: 'flex',
+            gap: '24px',
+            fontSize: '12px'
+          }}>
+            {[
+              { status: 'scheduled', label: '予定' },
+              { status: 'confirmed', label: '確定' },
+              { status: 'completed', label: '完了' },
+              { status: 'absent', label: '欠勤' }
+            ].map(item => (
+              <div key={item.status} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  background: getStatusColor(item.status),
+                  borderRadius: '2px'
+                }} />
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* 申請管理 */
+        <div style={{
+          background: 'white',
+          borderRadius: '12px',
+          padding: '20px'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {shiftRequests.map(request => (
+              <div key={request.id} style={{
+                padding: '16px',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                background: '#f9fafb'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'start'
+                }}>
+                  <div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      marginBottom: '8px'
+                    }}>
+                      <span style={{
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        background: request.status === 'pending' ? '#fef3c7' :
+                          request.status === 'approved' ? '#dcfce7' : '#fee2e2',
+                        color: request.status === 'pending' ? '#a16207' :
+                          request.status === 'approved' ? '#15803d' : '#dc2626'
+                      }}>
+                        {request.status === 'pending' ? '承認待ち' :
+                          request.status === 'approved' ? '承認済み' : '却下'}
+                      </span>
+                      <span style={{
+                        padding: '4px 12px',
+                        borderRadius: '12px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        background: '#f3f4f6',
+                        color: '#374151'
+                      }}>
+                        {request.type === 'leave' ? '休暇申請' :
+                          request.type === 'swap' ? 'シフト交換' : '残業申請'}
+                      </span>
+                    </div>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1f2937',
+                      marginBottom: '4px'
+                    }}>
+                      {request.workerName}
+                    </h4>
+                    <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                      対象日: {request.date}
+                    </div>
+                    <div style={{
+                      marginTop: '8px',
+                      padding: '8px',
+                      background: 'white',
+                      borderRadius: '4px'
+                    }}>
+                      <div style={{ fontSize: '12px', fontWeight: '500', marginBottom: '4px' }}>
+                        理由:
+                      </div>
+                      <div style={{ fontSize: '13px', color: '#374151' }}>
+                        {request.reason}
+                      </div>
                     </div>
                   </div>
-                ))}
 
-                {shiftRequests.length === 0 && (
-                  <div style={{
-                    padding: '40px',
-                    textAlign: 'center',
-                    color: '#6b7280'
-                  }}>
-                    申請はありません
-                  </div>
-                )}
+                  {request.status === 'pending' && user?.role === 'admin' && (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        onClick={() => handleApproveRequest(request.id, false)}
+                        style={{
+                          padding: '6px 16px',
+                          background: 'white',
+                          border: '1px solid #ef4444',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          color: '#ef4444',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        却下
+                      </button>
+                      <button
+                        onClick={() => handleApproveRequest(request.id, true)}
+                        style={{
+                          padding: '6px 16px',
+                          background: '#22c55e',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '13px',
+                          color: 'white',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        承認
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </main>
-      </div>
+            ))}
+
+            {shiftRequests.length === 0 && (
+              <div style={{
+                padding: '40px',
+                textAlign: 'center',
+                color: '#6b7280'
+              }}>
+                申請はありません
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* シフト申請モーダル */}
       {showRequestModal && (
@@ -757,14 +753,14 @@ function ShiftsContent() {
           </form>
         </div>
       )}
-    </div>
+    </main>
   )
 }
 
 export default function ShiftsPage() {
   return (
-    <AuthProvider>
+    <AppLayout>
       <ShiftsContent />
-    </AuthProvider>
+    </AppLayout>
   )
 }

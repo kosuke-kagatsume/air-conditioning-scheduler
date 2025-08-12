@@ -7,6 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots",
+    "pre-deploy": "./scripts/pre-deploy.sh",
+    "deploy": "vercel --prod",
+    "deploy:preview": "vercel",
+    "info": "echo '🚀 デモURL: https://air-conditioning-scheduler-ce7y5xgad-kosukes-projects-c6ad92ba.vercel.app/login/demo'",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
@@ -29,6 +36,7 @@
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

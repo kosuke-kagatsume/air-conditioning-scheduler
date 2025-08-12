@@ -98,7 +98,7 @@ export default function Home() {
             みんなで共有できるカレンダーアプリ
           </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/demo" className="btn-primary" style={{
+            <Link href="/login/demo" className="btn-primary" style={{
               padding: '16px 32px',
               fontSize: '18px',
               display: 'inline-flex',
@@ -506,7 +506,7 @@ export default function Home() {
               <ul style={{ listStyle: 'none' }}>
                 <li style={{ marginBottom: '8px' }}><Link href="/features" style={{ opacity: 0.8 }}>機能</Link></li>
                 <li style={{ marginBottom: '8px' }}><Link href="/pricing" style={{ opacity: 0.8 }}>料金</Link></li>
-                <li style={{ marginBottom: '8px' }}><Link href="/demo" style={{ opacity: 0.8 }}>デモ</Link></li>
+                <li style={{ marginBottom: '8px' }}><Link href="/login/demo" style={{ opacity: 0.8 }}>デモ</Link></li>
               </ul>
             </div>
             

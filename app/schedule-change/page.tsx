@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import { mockEvents } from '@/lib/mockData'
-import Sidebar from '@/components/Sidebar'
-import PageHeader from '@/components/PageHeader'
+import { mockEvents, mockScheduleChangeRequests } from '@/lib/mockData'
+import type { ScheduleChangeRequest } from '@/lib/mockData'
+import AppLayout from '@/components/AppLayout'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 interface ChangeRequest {
@@ -36,35 +36,30 @@ function ScheduleChangeContent() {
   const [newEndTime, setNewEndTime] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all')
 
-  // サンプルの変更申請データ
-  const [changeRequests, setChangeRequests] = useState<ChangeRequest[]>([
-    {
-      id: '1',
-      eventId: mockEvents[0].id,
-      originalEvent: mockEvents[0],
-      requestType: 'reschedule',
-      requestedBy: '田中太郎',
-      requestedAt: new Date(Date.now() - 1000 * 60 * 60 * 24),
-      status: 'approved',
-      newDate: '2025-08-10',
-      newStartTime: '10:00',
-      newEndTime: '13:00',
-      reason: '施主様の都合により日程変更',
-      approvedBy: '山田管理者',
-      approvedAt: new Date(Date.now() - 1000 * 60 * 60 * 12),
-      comments: '承認しました。職人への連絡完了済み。'
-    },
-    {
-      id: '2',
-      eventId: mockEvents[1].id,
-      originalEvent: mockEvents[1],
-      requestType: 'cancel',
-      requestedBy: '鈴木一郎',
-      requestedAt: new Date(Date.now() - 1000 * 60 * 60 * 48),
-      status: 'pending',
-      reason: '機材の調達が間に合わないため',
-    }
-  ])
+  // デモデータを使用
+  const [changeRequests, setChangeRequests] = useState<any[]>([])
+  
+  useEffect(() => {
+    // デモデータをイベント情報と結合
+    const enrichedRequests = mockScheduleChangeRequests.map(request => {
+      const event = mockEvents.find(e => e.id === request.eventId)
+      return {
+        ...request,
+        originalEvent: event,
+        requestType: request.requestedDate !== request.originalDate ? 'reschedule' : 'modify',
+        requestedBy: request.requesterName,
+        requestedAt: new Date(request.createdAt),
+        newDate: request.requestedDate,
+        newStartTime: request.requestedTime.split('-')[0],
+        newEndTime: request.requestedTime.split('-')[1],
+        reason: request.reason,
+        approvedBy: request.processedBy,
+        approvedAt: request.processedAt ? new Date(request.processedAt) : undefined,
+        comments: request.adminComment
+      }
+    })
+    setChangeRequests(enrichedRequests)
+  }, [])
 
   const handleSubmitRequest = (e: React.FormEvent) => {
     e.preventDefault()
@@ -146,16 +141,10 @@ function ScheduleChangeContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-      {/* Header */}
-<PageHeader />
-
-      <Sidebar />
-      
+    <AppLayout>
       <div style={{
-        marginLeft: '240px',
         padding: '20px',
-        minHeight: 'calc(100vh - 60px)'
+        minHeight: 'calc(100vh - 56px)'
       }}>
         <div style={{ width: '100%' }}>
         <div style={{
@@ -575,14 +564,14 @@ function ScheduleChangeContent() {
         )}
         </div>
       </div>
-    </div>
+    </AppLayout>
   )
 }
 
 export default function ScheduleChangePage() {
   return (
-    <AuthProvider>
+    <>
       <ScheduleChangeContent />
-    </AuthProvider>
+    </>
   )
 }

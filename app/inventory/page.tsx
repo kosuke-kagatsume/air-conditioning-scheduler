@@ -1,26 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Sidebar from '@/components/Sidebar'
+import AppLayout from '@/components/AppLayout'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-import PageHeader from '@/components/PageHeader'
-import { NotificationIcon, UserIcon } from '@/components/Icons'
+import { mockInventory } from '@/lib/mockData'
+import type { InventoryItem as InventoryItemType } from '@/lib/mockData'
 
 interface InventoryItem {
   id: string
   name: string
   category: 'equipment' | 'parts' | 'tools' | 'consumables'
-  sku: string
-  currentStock: number
-  minStock: number
-  maxStock: number
+  quantity: number
+  minQuantity: number
   unit: string
   location: string
   supplier: string
-  lastRestocked: Date
+  lastUpdated: string
   price: number
-  status: 'in-stock' | 'low-stock' | 'out-of-stock' | 'ordered'
+  status: 'sufficient' | 'low' | 'out_of_stock' | 'ordered'
+  note?: string
 }
 
 interface StockMovement {
@@ -50,6 +49,12 @@ interface PurchaseOrder {
 
 function InventoryContent() {
   const { user } = useAuth()
+  const [inventoryItems, setInventoryItems] = useState<InventoryItemType[]>([])
+  
+  useEffect(() => {
+    // デモデータを設定
+    setInventoryItems(mockInventory)
+  }, [])
   const [activeTab, setActiveTab] = useState<'items' | 'movements' | 'orders'>('items')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
@@ -58,99 +63,7 @@ function InventoryContent() {
   const [showStockModal, setShowStockModal] = useState(false)
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
 
-  // サンプル在庫データ
-  const [inventory] = useState<InventoryItem[]>([
-    {
-      id: '1',
-      name: 'エアコン室内機 (6畳用)',
-      category: 'equipment',
-      sku: 'AC-IN-6',
-      currentStock: 15,
-      minStock: 5,
-      maxStock: 30,
-      unit: '台',
-      location: '東京倉庫 A-1',
-      supplier: 'ダイキン工業',
-      lastRestocked: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-      price: 45000,
-      status: 'in-stock'
-    },
-    {
-      id: '2',
-      name: 'エアコン室外機 (6畳用)',
-      category: 'equipment',
-      sku: 'AC-OUT-6',
-      currentStock: 12,
-      minStock: 5,
-      maxStock: 30,
-      unit: '台',
-      location: '東京倉庫 A-2',
-      supplier: 'ダイキン工業',
-      lastRestocked: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
-      price: 35000,
-      status: 'in-stock'
-    },
-    {
-      id: '3',
-      name: '冷媒配管 (2分3分)',
-      category: 'parts',
-      sku: 'PIPE-23',
-      currentStock: 150,
-      minStock: 50,
-      maxStock: 300,
-      unit: 'm',
-      location: '東京倉庫 B-1',
-      supplier: '配管サプライ',
-      lastRestocked: new Date(Date.now() - 1000 * 60 * 60 * 24 * 14),
-      price: 800,
-      status: 'in-stock'
-    },
-    {
-      id: '4',
-      name: 'ドレンホース',
-      category: 'parts',
-      sku: 'DRAIN-01',
-      currentStock: 3,
-      minStock: 10,
-      maxStock: 50,
-      unit: '巻',
-      location: '東京倉庫 B-2',
-      supplier: '配管サプライ',
-      lastRestocked: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30),
-      price: 1500,
-      status: 'low-stock'
-    },
-    {
-      id: '5',
-      name: 'トルクレンチ',
-      category: 'tools',
-      sku: 'TOOL-TW-01',
-      currentStock: 8,
-      minStock: 3,
-      maxStock: 15,
-      unit: '本',
-      location: '東京倉庫 C-1',
-      supplier: 'ツールマート',
-      lastRestocked: new Date(Date.now() - 1000 * 60 * 60 * 24 * 60),
-      price: 12000,
-      status: 'in-stock'
-    },
-    {
-      id: '6',
-      name: '冷媒ガス R32',
-      category: 'consumables',
-      sku: 'GAS-R32',
-      currentStock: 0,
-      minStock: 5,
-      maxStock: 20,
-      unit: '本',
-      location: '東京倉庫 D-1',
-      supplier: 'ガスサプライヤー',
-      lastRestocked: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3),
-      price: 8000,
-      status: 'out-of-stock'
-    }
-  ])
+  // サンプル在庫データは削除（上でmockInventoryを使用）
 
   // 在庫移動履歴
   const [movements] = useState<StockMovement[]>([
@@ -234,9 +147,8 @@ function InventoryContent() {
     }
   }
 
-  const filteredInventory = inventory.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredInventory = inventoryItems.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesCategory = filterCategory === 'all' || item.category === filterCategory
     const matchesStatus = filterStatus === 'all' || item.status === filterStatus
     return matchesSearch && matchesCategory && matchesStatus
@@ -254,17 +166,7 @@ function InventoryContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-      {/* Header */}
-<PageHeader />
-
-      {/* Main Layout */}
-      <div>
-        {/* サイドバー */}
-        <Sidebar />
-
-        {/* Main Content */}
-        <main style={{ marginLeft: '240px', padding: '20px', minHeight: 'calc(100vh - 60px)', marginTop: '60px' }}>
+    <main style={{ padding: '20px', minHeight: 'calc(100vh - 56px)', background: '#f5f6f8' }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -504,7 +406,7 @@ function InventoryContent() {
                               {item.name}
                             </div>
                             <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                              SKU: {item.sku} | {item.location}
+                              {item.location}
                             </div>
                           </div>
                         </td>
@@ -520,7 +422,7 @@ function InventoryContent() {
                         </td>
                         <td style={{ padding: '16px', textAlign: 'center' }}>
                           <div style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>
-                            {item.currentStock}
+                            {item.quantity}
                           </div>
                           <div style={{ fontSize: '12px', color: '#6b7280' }}>
                             {item.unit}
@@ -535,8 +437,7 @@ function InventoryContent() {
                               color: '#6b7280',
                               marginBottom: '4px'
                             }}>
-                              <span>最小: {item.minStock}</span>
-                              <span>最大: {item.maxStock}</span>
+                              <span>最小: {item.minQuantity}</span>
                             </div>
                             <div style={{
                               height: '8px',
@@ -546,9 +447,9 @@ function InventoryContent() {
                             }}>
                               <div style={{
                                 height: '100%',
-                                width: `${getStockPercentage(item.currentStock, item.maxStock)}%`,
-                                background: item.currentStock <= item.minStock ? '#ef4444' :
-                                  item.currentStock <= item.minStock * 1.5 ? '#eab308' : '#22c55e',
+                                width: `${Math.min((item.quantity / (item.minQuantity * 3)) * 100, 100)}%`,
+                                background: item.quantity <= item.minQuantity ? '#ef4444' :
+                                  item.quantity <= item.minQuantity * 1.5 ? '#eab308' : '#22c55e',
                                 transition: 'width 0.3s'
                               }} />
                             </div>
@@ -735,8 +636,7 @@ function InventoryContent() {
               </div>
             </div>
           )}
-        </main>
-      </div>
+        
 
       {/* 在庫調整モーダル */}
       {showStockModal && selectedItem && (
@@ -777,7 +677,7 @@ function InventoryContent() {
                 現在の在庫
               </div>
               <div style={{ fontSize: '24px', fontWeight: '600' }}>
-                {selectedItem.currentStock} {selectedItem.unit}
+                {selectedItem.quantity} {selectedItem.unit}
               </div>
             </div>
 
@@ -883,14 +783,16 @@ function InventoryContent() {
           </div>
         </div>
       )}
-    </div>
+    </main>
   )
 }
 
 export default function InventoryPage() {
   return (
-    <AuthProvider>
-      <InventoryContent />
-    </AuthProvider>
+    <>
+      <AppLayout>
+        <InventoryContent />
+      </AppLayout>
+    </>
   )
 }

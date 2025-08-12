@@ -30,23 +30,7 @@ export default function Sidebar() {
   ]
 
   return (
-    <aside 
-      className="fixed left-0 top-14 w-60 h-[calc(100vh-3.5rem)] bg-white border-r border-gray-200 p-5 overflow-y-auto z-30"
-      style={{
-        boxShadow: '2px 0 10px rgba(0,0,0,0.1)',
-        display: 'block',
-        visibility: 'visible',
-        backgroundColor: '#ffffff',
-        borderRight: '1px solid #e5e7eb',
-        position: 'fixed',
-        left: 0,
-        top: '56px',
-        width: '240px',
-        height: 'calc(100vh - 56px)',
-        zIndex: 30
-      } as React.CSSProperties}
-    >
-      {/* Menu Section */}
+    <aside className="fixed left-0 top-14 w-60 h-[calc(100vh-3.5rem)] bg-white border-r border-gray-200 p-5 overflow-y-auto">
       <div className="mb-6">
         <h3 className="text-xs text-gray-500 font-medium mb-3 pl-3">
           メニュー
@@ -59,9 +43,9 @@ export default function Sidebar() {
               <Link 
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive 
-                    ? 'bg-gradient-to-r from-orange-50 to-transparent text-orange-600 border-l-4 border-orange-600' 
+                    ? 'bg-orange-50 text-orange-600 border-l-4 border-orange-600' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-l-4 border-transparent'
                 }`}
               >

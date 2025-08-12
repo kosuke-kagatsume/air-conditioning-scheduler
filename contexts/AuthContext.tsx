@@ -29,6 +29,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // ローカルストレージから認証情報を復元
   useEffect(() => {
+    // デモログインからのユーザー情報を優先
+    const demoUser = localStorage.getItem('user')
+    if (demoUser) {
+      const userData = JSON.parse(demoUser)
+      setUser({
+        ...userData,
+        tenantId: '1',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      setCurrentTenant(mockTenants[0])
+      return
+    }
+
+    // 通常のログイン情報
     const savedUser = localStorage.getItem('currentUser')
     const savedTenantId = localStorage.getItem('currentTenantId')
     

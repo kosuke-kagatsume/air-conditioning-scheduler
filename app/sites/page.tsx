@@ -2,10 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { AuthProvider } from '@/contexts/AuthContext'
 import { mockEvents } from '@/lib/mockData'
-import Sidebar from '@/components/Sidebar'
-import PageHeader from '@/components/PageHeader'
+import AppLayout from '@/components/AppLayout'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
 
 type FilterStatus = 'all' | 'proposed' | 'accepted' | 'pending' | 'rejected' | 'completed'
@@ -130,17 +128,11 @@ export default function SitesPage() {
   }
 
   return (
-    <AuthProvider>
-      <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-        {/* Header */}
-<PageHeader />
-
-        <Sidebar />
-        
+    <>
+      <AppLayout>
         <div style={{
-          marginLeft: '240px',
           padding: '20px',
-          minHeight: 'calc(100vh - 60px)'
+          minHeight: 'calc(100vh - 56px)'
         }}>
           {/* Page Title and Actions */}
           <div style={{
@@ -585,7 +577,7 @@ export default function SitesPage() {
             )}
           </div>
         </div>
-      </div>
-    </AuthProvider>
+      </AppLayout>
+    </>
   )
 }

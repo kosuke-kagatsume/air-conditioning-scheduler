@@ -2,11 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { AuthProvider } from '@/contexts/AuthContext'
 import { mockEvents, mockUsers } from '@/lib/mockData'
-import Sidebar from '@/components/Sidebar'
-import PageHeader from '@/components/PageHeader'
-import { NotificationIcon, UserIcon } from '@/components/Icons'
+import AppLayout from '@/components/AppLayout'
 
 type DateRange = '7days' | '30days' | '90days' | '1year'
 
@@ -97,17 +94,9 @@ export default function DashboardPage() {
     }))
 
   return (
-    <AuthProvider>
-      <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-        <PageHeader />
-
-        {/* Main Layout */}
-        <div>
-          {/* サイドバー */}
-          <Sidebar />
-
-          {/* Main Content */}
-          <main style={{ marginLeft: '240px', padding: '20px', minHeight: 'calc(100vh - 60px)' }}>
+    <>
+      <AppLayout>
+        <main style={{ padding: '20px', minHeight: 'calc(100vh - 56px)', background: '#f5f6f8' }}>
           {/* Page Header */}
           <div style={{
             display: 'flex',
@@ -492,8 +481,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </main>
-        </div>
-      </div>
-    </AuthProvider>
+      </AppLayout>
+    </>
   )
 }

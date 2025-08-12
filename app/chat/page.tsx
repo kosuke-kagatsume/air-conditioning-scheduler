@@ -866,8 +866,8 @@ function ChatContent() {
 
 export default function ChatPage() {
   return (
-    <AuthProvider>
+    <>
       <ChatContent />
-    </AuthProvider>
+    </>
   )
 }

@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Sidebar from '@/components/Sidebar'
-import PageHeader from '@/components/PageHeader'
+import AppLayout from '@/components/AppLayout'
 import { NotificationIcon, UserIcon } from '@/components/Icons'
+import { mockExtendedWorkers } from '@/lib/mockData'
+import type { ExtendedWorker } from '@/lib/mockData'
 
 interface Skill {
   id: string
@@ -78,40 +79,39 @@ const areasList = [
 ]
 
 export default function WorkersPage() {
-  const [workers, setWorkers] = useState<Worker[]>([
-    {
-      id: '1',
-      name: '山田太郎',
-      company: 'A社',
-      color: '#ff6b6b',
-      viewPermission: true,
-      approvalPermission: true,
-      email: 'yamada@a-company.jp',
-      phone: '090-1234-5678',
-      emergencyPhone: '090-1234-5679',
-      maxSlots: 3,
-      currentSlots: 2,
-      skills: [
-        { id: '1', name: '第二種電気工事士', level: 'advanced' },
-        { id: '2', name: '冷媒取扱技術者', level: 'advanced' },
-        { id: '3', name: 'フルハーネス特別教育', level: 'intermediate' }
-      ],
-      workAreas: ['東京23区', '東京都下', '神奈川県'],
-      availableHours: {
-        morning: true,
-        night: false,
-        weekend: true,
-        holiday: false
-      },
-      rating: 4.8,
-      completedProjects: 256,
-      joinDate: new Date(2020, 3, 1),
-      insurance: {
-        liability: true,
-        accident: true,
-        expiryDate: new Date(2026, 2, 31)
-      }
-    },
+  const [workers, setWorkers] = useState<any[]>([])
+  
+  useEffect(() => {
+    // デモデータを設定
+    const adaptedWorkers = mockExtendedWorkers.map(worker => ({
+      id: worker.id,
+      name: worker.name,
+      company: worker.company,
+      color: worker.color,
+      viewPermission: worker.role === 'master' || Math.random() > 0.3,
+      approvalPermission: worker.role === 'master' || Math.random() > 0.7,
+      email: worker.email,
+      phone: worker.phoneNumber,
+      emergencyPhone: worker.emergencyContact.phone,
+      maxSlots: Math.floor(Math.random() * 3) + 2,
+      currentSlots: Math.floor(Math.random() * 3) + 1,
+      skills: worker.skills.slice(0, 3).map((skill, index) => ({
+        id: (index + 1).toString(),
+        name: skill.name,
+        level: skill.level === 'expert' ? 'advanced' : skill.level
+      })),
+      workAreas: worker.workAreas.slice(0, 3),
+      availableHours: worker.availability,
+      rating: worker.rating,
+      completedProjects: worker.completedJobs,
+      joinDate: worker.joinDate,
+      insurance: worker.insurance
+    }))
+    setWorkers(adaptedWorkers)
+  }, [])
+
+  // 元のダミーデータは削除
+  /*
     {
       id: '2',
       name: '佐藤次郎',
@@ -144,7 +144,7 @@ export default function WorkersPage() {
         expiryDate: new Date(2025, 11, 31)
       }
     }
-  ])
+  */
 
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -172,15 +172,8 @@ export default function WorkersPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f6f8' }}>
-      <PageHeader />
-
-      <div>
-        {/* Sidebar */}
-        <Sidebar />
-
-        {/* Main Content */}
-        <main style={{ marginLeft: '240px', padding: '20px', minHeight: 'calc(100vh - 60px)' }}>
+    <AppLayout>
+      <main style={{ padding: '20px' }}>
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -298,7 +291,7 @@ export default function WorkersPage() {
 
                       {/* スキル */}
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
-                        {worker.skills.slice(0, 3).map((skill, i) => (
+                        {worker.skills.slice(0, 3).map((skill: any, i: number) => (
                           <span key={i} style={{
                             fontSize: '11px',
                             padding: '2px 8px',
@@ -339,7 +332,6 @@ export default function WorkersPage() {
             })}
           </div>
         </main>
-      </div>
 
       {/* Edit Modal */}
       {isEditModalOpen && selectedWorker && (
@@ -920,6 +912,6 @@ export default function WorkersPage() {
           </div>
         </div>
       )}
-    </div>
+    </AppLayout>
   )
 }

@@ -1,4 +1,25 @@
 import { User, Event, Notification, WorkerCapacity, Tenant, DashboardData, EventStatus, SalesPerson } from '@/types'
+import { 
+  generateExtendedMockEvents,
+  generateMockReports,
+  generateMockScheduleChangeRequests,
+  generateMockInventory,
+  generateMockNotifications,
+  WorkReport,
+  ScheduleChangeRequest,
+  InventoryItem,
+  ExtendedNotification
+} from './mockDataExtended'
+import { 
+  generateExtendedWorkers,
+  generateShiftData,
+  ExtendedWorker,
+  ShiftData
+} from './mockWorkersExtended'
+import { 
+  generateWorkerSchedules,
+  WorkerSchedule
+} from './mockWorkerSchedule'
 
 // テナント（元請会社）データ
 export const mockTenants: Tenant[] = [
@@ -658,7 +679,8 @@ const generateMockEvents = (): Event[] => {
   return events
 }
 
-export const mockEvents = generateMockEvents()
+// 既存のイベントと拡張イベントを結合
+export const mockEvents = [...generateMockEvents(), ...generateExtendedMockEvents()]
 
 // 職人枠数設定
 export const mockWorkerCapacities: WorkerCapacity[] = [
@@ -769,3 +791,20 @@ export const mockDashboardData: DashboardData = {
     { month: '1月', count: 5 }
   ]
 }
+
+// 拡張デモデータのエクスポート
+export const mockReports = generateMockReports()
+export const mockScheduleChangeRequests = generateMockScheduleChangeRequests()
+export const mockInventory = generateMockInventory()
+export const mockExtendedNotifications = generateMockNotifications()
+
+// 拡張職人データとシフトデータ
+const extendedWorkers = generateExtendedWorkers()
+export const mockExtendedWorkers = extendedWorkers
+export const mockShiftData = generateShiftData(extendedWorkers)
+export const mockWorkerSchedules = generateWorkerSchedules()
+
+// Re-export types
+export type { WorkReport, ScheduleChangeRequest, InventoryItem, ExtendedNotification } from './mockDataExtended'
+export type { ExtendedWorker, ShiftData } from './mockWorkersExtended'
+export type { WorkerSchedule } from './mockWorkerSchedule'
