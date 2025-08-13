@@ -28,13 +28,13 @@ export default function Home() {
           
           {/* Desktop menu */}
           <div className="hide-mobile" style={{ display: 'flex', gap: '8px' }}>
-            <Link href="/features" className="nav-tab">
+            <Link href="/features" className="nav-tab" prefetch={false}>
               機能
             </Link>
-            <Link href="/pricing" className="nav-tab">
+            <Link href="/pricing" className="nav-tab" prefetch={false}>
               料金
             </Link>
-            <Link href="/about" className="nav-tab">
+            <Link href="/about" className="nav-tab" prefetch={false}>
               会社概要
             </Link>
             <div style={{ marginLeft: '16px', display: 'flex', gap: '12px' }}>
@@ -47,7 +47,7 @@ export default function Home() {
               <Link href="/register" className="btn-primary" style={{
                 padding: '8px 20px',
                 fontSize: '14px'
-              }}>
+              }} prefetch={false}>
                 無料で始める
               </Link>
             </div>
@@ -111,7 +111,7 @@ export default function Home() {
             <Link href="/register" className="btn-secondary" style={{
               padding: '16px 32px',
               fontSize: '18px'
-            }}>
+            }} prefetch={false}>
               無料で始める
             </Link>
           </div>
@@ -467,7 +467,7 @@ export default function Home() {
             display: 'inline-block',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
             transition: 'all 0.3s ease'
-          }}>
+          }} prefetch={false}>
             無料トライアルを始める
           </Link>
         </div>
@@ -504,8 +504,8 @@ export default function Home() {
             <div>
               <h4 style={{ marginBottom: '16px', fontSize: '18px' }}>サービス</h4>
               <ul style={{ listStyle: 'none' }}>
-                <li style={{ marginBottom: '8px' }}><Link href="/features" style={{ opacity: 0.8 }}>機能</Link></li>
-                <li style={{ marginBottom: '8px' }}><Link href="/pricing" style={{ opacity: 0.8 }}>料金</Link></li>
+                <li style={{ marginBottom: '8px' }}><Link href="/features" style={{ opacity: 0.8 }} prefetch={false}>機能</Link></li>
+                <li style={{ marginBottom: '8px' }}><Link href="/pricing" style={{ opacity: 0.8 }} prefetch={false}>料金</Link></li>
                 <li style={{ marginBottom: '8px' }}><Link href="/login/demo" style={{ opacity: 0.8 }}>デモ</Link></li>
               </ul>
             </div>
@@ -513,7 +513,7 @@ export default function Home() {
             <div>
               <h4 style={{ marginBottom: '16px', fontSize: '18px' }}>会社情報</h4>
               <ul style={{ listStyle: 'none' }}>
-                <li style={{ marginBottom: '8px' }}><Link href="/about" style={{ opacity: 0.8 }}>会社概要</Link></li>
+                <li style={{ marginBottom: '8px' }}><Link href="/about" style={{ opacity: 0.8 }} prefetch={false}>会社概要</Link></li>
                 <li style={{ marginBottom: '8px' }}><Link href="/privacy" style={{ opacity: 0.8 }}>プライバシー</Link></li>
                 <li style={{ marginBottom: '8px' }}><Link href="/terms" style={{ opacity: 0.8 }}>利用規約</Link></li>
               </ul>

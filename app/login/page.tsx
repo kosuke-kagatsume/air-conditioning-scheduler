@@ -279,7 +279,7 @@ export default function Login() {
             color: '#667eea', 
             textDecoration: 'none',
             fontWeight: '500'
-          }}>
+          }} prefetch={false}>
             {' '}新規登録
           </Link>
         </p>

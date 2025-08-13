@@ -5,13 +5,17 @@ import MobileNav from '@/components/MobileNav'
 export const metadata = {
   title: 'Dandori Scheduler | 工事現場スケジューラー',
   description: 'Construction Site Scheduler - ダンドリスケジューラー',
-  manifest: '/manifest.json',
+  applicationName: 'Dandori Scheduler',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Dandori Scheduler',
   },
-  themeColor: '#ff6b6b',
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'mobile-web-app-status-bar-style': 'default',
+    'mobile-web-app-title': 'Dandori Scheduler'
+  }
 }
 
 export const viewport = {
@@ -20,6 +24,7 @@ export const viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
+  themeColor: '#ff6b6b',
 }
 
 export default function RootLayout({
@@ -30,9 +35,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
       </head>
       <body>
         <AuthProvider>
