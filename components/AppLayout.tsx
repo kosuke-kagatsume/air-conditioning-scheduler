@@ -4,7 +4,9 @@ import { useState, ReactNode, useEffect } from 'react'
 import { Menu, Bell, User, Calendar, Users, MapPin, LayoutDashboard, FileEdit, CalendarClock, Package, FileText, Settings, X, LogOut } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import NotificationPanel from './NotificationPanel'
+import NotificationBell from './NotificationBell'
 import { generateMockNotifications } from '@/lib/mockDataExtended'
+import { generateSampleNotifications } from '@/lib/notifications'
 
 interface AppLayoutProps {
   children: ReactNode
@@ -23,11 +25,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
     if (userData) {
       setUser(JSON.parse(userData))
     }
+    
+    // 初回アクセス時にサンプル通知を生成
+    const isFirstVisit = !localStorage.getItem('notifications_initialized')
+    if (isFirstVisit) {
+      generateSampleNotifications()
+      localStorage.setItem('notifications_initialized', 'true')
+    }
   }, [])
 
   useEffect(() => {
     if (user) {
-      // 未読通知数を計算
+      // 未読通知数を計算（旧システム用）
       const notifications = generateMockNotifications()
       const userNotifications = notifications.filter(n => n.userRole === user.role)
       const unread = userNotifications.filter(n => !n.read).length
@@ -116,41 +125,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
             </div>
           )}
           
-          <button 
-            onClick={() => setShowNotifications(true)}
-            style={{ 
-              position: 'relative', 
-              padding: '8px', 
-              backgroundColor: 'transparent', 
-              border: 'none', 
-              cursor: 'pointer',
-              borderRadius: '8px',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <Bell size={20} color="#4b5563" />
-            {unreadCount > 0 && (
-              <span style={{ 
-                position: 'absolute', 
-                top: '4px', 
-                right: '4px', 
-                backgroundColor: '#ef4444', 
-                color: 'white', 
-                fontSize: '12px', 
-                borderRadius: '50%', 
-                height: '16px', 
-                width: '16px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                minWidth: '16px'
-              }}>
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
+          {/* 新しい通知システム */}
+          <NotificationBell />
           
           <button 
             onClick={() => {
