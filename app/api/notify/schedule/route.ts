@@ -2,7 +2,8 @@ import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
+// ResendのAPIキーが設定されている場合のみインスタンスを作成
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 export async function POST(request: NextRequest) {
   return Sentry.startSpan(
@@ -28,6 +29,16 @@ export async function POST(request: NextRequest) {
             },
             { status: 400 }
           )
+        }
+
+        // ResendのAPIキーが設定されていない場合
+        if (!resend) {
+          console.warn('Resend API key not configured, skipping email notification')
+          return NextResponse.json({
+            success: false,
+            message: 'Email service not configured',
+            error: 'RESEND_API_KEY not set',
+          })
         }
 
         // メール送信（指数バックオフで3回まで再試行）
