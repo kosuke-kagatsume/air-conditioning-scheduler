@@ -1,30 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { createAuditLog, calculateDiff } from '@/lib/audit-log'
-
-// モックデータベース（実際はPrismaを使用）
-const mockEvents: Record<string, any> = {
-  '1': {
-    id: '1',
-    title: 'オフィスビルA 空調設置',
-    date: '2025-08-14',
-    startTime: '09:00',
-    endTime: '12:00',
-    siteId: '1',
-    workerId: 'worker-1',
-    status: 'CONFIRMED',
-  },
-  '2': {
-    id: '2',
-    title: 'マンションB メンテナンス',
-    date: '2025-08-15',
-    startTime: '14:00',
-    endTime: '17:00',
-    siteId: '2',
-    workerId: 'worker-2',
-    status: 'PROPOSED',
-  },
-}
+import { checkScheduleConflict, reportConflictToSentry } from '@/lib/conflict-detection'
+import { mockEvents } from '@/lib/mock-data'
 
 // ユーザー情報を取得する仮の関数（実際は認証から取得）
 function getCurrentUser() {
@@ -62,6 +40,50 @@ export async function PATCH(
             { success: false, message: 'Event not found' },
             { status: 404 }
           )
+        }
+
+        // 衝突検知: 同一職人の時間重複をチェック
+        if (updates.workerId || updates.date || updates.startTime || updates.endTime) {
+          const targetWorkerId = updates.workerId || existingEvent.workerId
+          const targetDate = updates.date || existingEvent.date
+          const targetStartTime = updates.startTime || existingEvent.startTime
+          const targetEndTime = updates.endTime || existingEvent.endTime
+
+          const conflictResult = checkScheduleConflict(
+            mockEvents,
+            eventId,
+            targetWorkerId,
+            targetDate,
+            targetStartTime,
+            targetEndTime
+          )
+
+          if (conflictResult.hasConflict) {
+            const conflict = conflictResult.conflictingEvents[0]
+            
+            // Sentryに衝突情報を送信
+            reportConflictToSentry(eventId, targetWorkerId, conflictResult, {
+              date: targetDate,
+              startTime: targetStartTime,
+              endTime: targetEndTime,
+            })
+
+            return NextResponse.json(
+              { 
+                success: false, 
+                error: 'Schedule conflict detected',
+                message: conflictResult.message,
+                conflictingEvent: {
+                  id: conflict.id,
+                  title: conflict.title,
+                  date: conflict.date,
+                  startTime: conflict.startTime,
+                  endTime: conflict.endTime,
+                }
+              },
+              { status: 409 }
+            )
+          }
         }
 
         // 更新前のデータを保存

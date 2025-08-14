@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { createAuditLog } from '@/lib/audit-log'
+import { checkScheduleConflict, reportConflictToSentry } from '@/lib/conflict-detection'
+import { mockEvents } from '@/lib/mock-data'
 
 // ユーザー情報を取得する仮の関数（実際は認証から取得）
 function getCurrentUser() {
@@ -36,6 +38,59 @@ export async function POST(request: NextRequest) {
               message: 'Event ID and Worker ID are required' 
             },
             { status: 400 }
+          )
+        }
+
+        // 対象イベントを取得
+        const targetEvent = mockEvents[eventId]
+        if (!targetEvent) {
+          return NextResponse.json(
+            { 
+              success: false, 
+              message: 'Event not found' 
+            },
+            { status: 404 }
+          )
+        }
+
+        // 衝突検知: 指定された職人の時間重複をチェック
+        const assignStartTime = startTime || targetEvent.startTime
+        const assignEndTime = endTime || targetEvent.endTime
+        const assignDate = targetEvent.date
+
+        const conflictResult = checkScheduleConflict(
+          mockEvents,
+          eventId,
+          workerId,
+          assignDate,
+          assignStartTime,
+          assignEndTime
+        )
+
+        if (conflictResult.hasConflict) {
+          const conflict = conflictResult.conflictingEvents[0]
+          
+          // Sentryに衝突情報を送信
+          reportConflictToSentry(eventId, workerId, conflictResult, {
+            date: assignDate,
+            startTime: assignStartTime,
+            endTime: assignEndTime,
+          })
+
+          return NextResponse.json(
+            { 
+              success: false, 
+              error: 'Schedule conflict detected',
+              message: conflictResult.message,
+              conflictingEvent: {
+                id: conflict.id,
+                title: conflict.title,
+                date: conflict.date,
+                startTime: conflict.startTime,
+                endTime: conflict.endTime,
+              }
+            },
+            { status: 409 }
           )
         }
 
