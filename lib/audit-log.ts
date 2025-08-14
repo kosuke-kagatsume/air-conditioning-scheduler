@@ -143,10 +143,10 @@ export async function getAuditLogs(filters?: {
     filtered = filtered.filter(log => log.entityId === filters.entityId)
   }
   if (filters?.startDate) {
-    filtered = filtered.filter(log => log.createdAt >= filters.startDate)
+    filtered = filtered.filter(log => log.createdAt >= filters.startDate!)
   }
   if (filters?.endDate) {
-    filtered = filtered.filter(log => log.createdAt <= filters.endDate)
+    filtered = filtered.filter(log => log.createdAt <= filters.endDate!)
   }
 
   // ソート（新しい順）
