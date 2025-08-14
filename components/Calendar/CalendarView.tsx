@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Event } from '@/types'
 import { mockEvents, mockWorkerCapacities, mockUsers } from '@/lib/mockData'
 import { useAuth } from '@/contexts/AuthContext'
@@ -25,6 +25,88 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
   const [showStatusModal, setShowStatusModal] = useState(false)
   const [eventToUpdate, setEventToUpdate] = useState<Event | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [events, setEvents] = useState<Event[]>(mockEvents)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // APIからイベントを読み込み
+  async function loadEvents(viewStart: Date, viewEnd: Date) {
+    setIsLoading(true)
+    try {
+      const qs = new URLSearchParams({
+        from: viewStart.toISOString().split('T')[0],
+        to: viewEnd.toISOString().split('T')[0],
+        limit: "200",
+      })
+      const res = await fetch(`/api/schedule?${qs}`, { cache: "no-store" })
+      
+      if (!res.ok) {
+        console.warn('Failed to load events, using mock data')
+        setEvents(mockEvents)
+        return
+      }
+      
+      const { items } = await res.json()
+
+      // APIのレスポンスをカレンダーのイベント型にマッピング
+      const mappedEvents: Event[] = items.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        date: item.date || new Date(item.start).toISOString().split('T')[0],
+        startTime: item.startTime || new Date(item.start).toTimeString().slice(0, 5),
+        endTime: item.endTime || new Date(item.end).toTimeString().slice(0, 5),
+        status: item.status,
+        address: `現場${item.siteId}`, // 実際はサイト情報から取得
+        city: '未設定',
+        constructionType: '空調工事',
+        clientName: 'クライアント名',
+        constructorName: '工務店名',
+        salesPersons: [],
+        workerId: item.workerId,
+        workerName: item.workerId ? `職人${item.workerId}` : '未割当',
+        createdBy: 'system',
+        tenantId: currentTenant?.id || 'tenant-1',
+        customFieldValues: {},
+      }))
+      
+      setEvents(mappedEvents)
+    } catch (error) {
+      console.error('Failed to load events:', error)
+      // エラー時はモックデータを使用
+      setEvents(mockEvents)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // 表示範囲を計算
+  const getViewRange = (date: Date, view: ViewType) => {
+    const start = new Date(date)
+    const end = new Date(date)
+    
+    switch (view) {
+      case 'month':
+        start.setDate(1)
+        end.setMonth(end.getMonth() + 1)
+        end.setDate(0)
+        break
+      case 'week':
+        const dayOfWeek = start.getDay()
+        start.setDate(start.getDate() - dayOfWeek)
+        end.setDate(start.getDate() + 6)
+        break
+      case 'day':
+        // 同じ日
+        break
+    }
+    
+    return { start, end }
+  }
+
+  // 初期表示 & 日付・ビュー変更時にイベント読み込み
+  useEffect(() => {
+    const { start, end } = getViewRange(currentDate, viewType)
+    loadEvents(start, end)
+  }, [currentDate, viewType])
 
   // モバイル検出
   React.useEffect(() => {
@@ -38,7 +120,7 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
 
   // フィルタリングされたイベント
   const filteredEvents = useMemo(() => {
-    let events = [...mockEvents]
+    let filteredEventList = [...events]
     
     // 権限に基づくフィルタリング
     if (!canViewAllEvents) {
@@ -47,27 +129,27 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
         const childWorkerIds = mockUsers
           .filter(u => u.parentId === user?.id)
           .map(u => u.id)
-        events = events.filter(e => 
+        filteredEventList = filteredEventList.filter(e => 
           e.workerId === user?.id || childWorkerIds.includes(e.workerId)
         )
       } else if (isWorker) {
         // 子方は自分の予定のみ
-        events = events.filter(e => e.workerId === user?.id)
+        filteredEventList = filteredEventList.filter(e => e.workerId === user?.id)
       }
     }
     
     // 選択されたワーカーでフィルタリング
     if (selectedWorkers.length > 0) {
-      events = events.filter(e => selectedWorkers.includes(e.workerId))
+      filteredEventList = filteredEventList.filter(e => selectedWorkers.includes(e.workerId))
     }
     
     // ステータスフィルタリング
     if (statusFilter !== 'all') {
-      events = events.filter(e => e.status === statusFilter)
+      filteredEventList = filteredEventList.filter(e => e.status === statusFilter)
     }
     
-    return events
-  }, [canViewAllEvents, isMaster, isWorker, user, selectedWorkers, statusFilter])
+    return filteredEventList
+  }, [events, canViewAllEvents, isMaster, isWorker, user, selectedWorkers, statusFilter])
 
   // 日付関連のユーティリティ
   const getMonthDays = (date: Date) => {
