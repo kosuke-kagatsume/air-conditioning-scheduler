@@ -1,4 +1,8 @@
 import * as Sentry from '@sentry/nextjs'
+import { Resend } from 'resend'
+
+// Resendクライアントの初期化
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 export interface EmailNotificationData {
   to: string | string[]
@@ -15,23 +19,98 @@ export async function sendScheduleNotification(
   notificationData: EmailNotificationData
 ): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
-    const response = await fetch('/api/notify/schedule', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(notificationData),
-    })
+    const { to, subject, html, eventId, eventType = 'schedule.update' } = notificationData
 
-    const result = await response.json()
-
-    if (!response.ok) {
-      throw new Error(result.message || 'Failed to send notification')
+    // 入力検証
+    if (!to || !subject || !html) {
+      return {
+        success: false,
+        error: 'Missing required fields: to, subject, html',
+      }
     }
 
+    // ResendのAPIキーが設定されていない場合
+    if (!resend) {
+      console.warn('Resend API key not configured, skipping email notification')
+      return {
+        success: false,
+        error: 'Email service not configured - RESEND_API_KEY not set',
+      }
+    }
+
+    // メール送信（指数バックオフで3回まで再試行）
+    let lastError: Error | null = null
+    const maxRetries = 3
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await resend.emails.send({
+          from: process.env.RESEND_FROM_EMAIL || 'noreply@hvac-scheduler.com',
+          to: Array.isArray(to) ? to : [to],
+          subject,
+          html,
+          headers: {
+            'X-Event-Id': eventId || 'unknown',
+            'X-Event-Type': eventType,
+            'X-Attempt': attempt.toString(),
+          },
+        })
+
+        // 成功時の処理
+        Sentry.captureMessage('Email notification sent successfully', {
+          level: 'info',
+          tags: {
+            action: 'email.sent',
+            eventType,
+            attempt: attempt.toString(),
+          },
+          extra: {
+            emailId: result.data?.id,
+            to: Array.isArray(to) ? to : [to],
+            subject,
+            eventId,
+          },
+        })
+
+        return {
+          success: true,
+          data: {
+            id: result.data?.id,
+            attempt,
+            message: 'Email sent successfully',
+          },
+        }
+      } catch (error) {
+        lastError = error as Error
+        
+        // 最終試行でない場合は指数バックオフで待機
+        if (attempt < maxRetries) {
+          const backoffMs = Math.min(1000 * Math.pow(2, attempt - 1), 10000) // 最大10秒
+          await new Promise(resolve => setTimeout(resolve, backoffMs))
+          
+          console.warn(`Email send attempt ${attempt} failed, retrying in ${backoffMs}ms:`, error)
+        }
+      }
+    }
+
+    // 全ての試行が失敗した場合
+    Sentry.captureException(lastError, {
+      tags: {
+        action: 'email.failed',
+        eventType,
+        maxRetries: maxRetries.toString(),
+      },
+      extra: {
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        eventId,
+        finalError: lastError?.message,
+      },
+    })
+
     return {
-      success: true,
-      data: result.data,
+      success: false,
+      error: `Failed to send email after ${maxRetries} attempts: ${lastError?.message}`,
     }
   } catch (error) {
     console.error('Failed to send schedule notification:', error)
