@@ -11,9 +11,14 @@ export default function WorkerProfile({ user }: WorkerProfileProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
+  console.log('WorkerProfile - user prop:', user)
+  console.log('WorkerProfile - user role:', user?.role)
+
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024)
+      const mobile = window.innerWidth < 1024
+      console.log('WorkerProfile - window width:', window.innerWidth, 'isMobile:', mobile)
+      setIsMobile(mobile)
     }
     checkMobile()
     window.addEventListener('resize', checkMobile)
