@@ -32,10 +32,10 @@ Sentry.init({
   ],
   
   // トランザクション名の正規化
-  beforeTransaction(transaction) {
+  beforeSendTransaction(transaction) {
     // 動的ルートパラメータを正規化
-    if (transaction.name) {
-      transaction.name = transaction.name
+    if (transaction.transaction) {
+      transaction.transaction = transaction.transaction
         .replace(/\/[a-f0-9]{24}/g, "/[id]") // MongoDB ObjectID
         .replace(/\/\d+/g, "/[id]") // 数値ID
         .replace(/\/[A-Za-z0-9-_]+/g, "/[slug]"); // スラッグ
