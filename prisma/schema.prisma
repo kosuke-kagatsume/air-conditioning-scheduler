@@ -368,3 +368,23 @@ enum ShiftStatus {
   ABSENT
   CANCELLED
 }
+
+// 監査ログ
+model AuditLog {
+  id        String   @id @default(uuid())
+  tenantId  String   // テナント（会社）ID
+  userId    String?  // 操作を行ったユーザーID
+  userName  String?  // ユーザー名（削除されたユーザーでも名前を残す）
+  action    String   // "event.create" | "event.update" | "event.delete" | "event.assign" | "assignee.change" など
+  entity    String   // "Event" | "User" | "Site" など
+  entityId  String   // 対象エンティティのID
+  before    Json?    // 変更前のデータ
+  after     Json?    // 変更後のデータ
+  metadata  Json?    // その他のメタデータ（IPアドレス、ブラウザ情報など）
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@index([entity, entityId])
+  @@index([action, createdAt])
+}

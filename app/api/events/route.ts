@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import * as Sentry from '@sentry/nextjs'
 
 // Mock database
 const mockEvents = [
@@ -50,61 +51,162 @@ const mockEvents = [
 ]
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const start = searchParams.get('start')
-  const end = searchParams.get('end')
+  return Sentry.startSpan(
+    {
+      op: 'http.server',
+      name: 'GET /api/events',
+      attributes: {
+        'http.method': 'GET',
+        'http.route': '/api/events',
+      },
+    },
+    async () => {
+      const { searchParams } = new URL(request.url)
+      const start = searchParams.get('start')
+      const end = searchParams.get('end')
 
-  // Filter events by date range if provided
-  let filteredEvents = mockEvents
-  if (start && end) {
-    filteredEvents = mockEvents.filter(event => {
-      const eventDate = new Date(event.startAt)
-      return eventDate >= new Date(start) && eventDate <= new Date(end)
-    })
-  }
+      // Filter events by date range if provided
+      let filteredEvents = mockEvents
+      if (start && end) {
+        Sentry.setContext('query', { start, end })
+        
+        filteredEvents = mockEvents.filter(event => {
+          const eventDate = new Date(event.startAt)
+          return eventDate >= new Date(start) && eventDate <= new Date(end)
+        })
+      }
 
-  return NextResponse.json({
-    success: true,
-    data: filteredEvents
-  })
+      Sentry.setMeasurement('events.count', filteredEvents.length, 'none')
+
+      return NextResponse.json({
+        success: true,
+        data: filteredEvents
+      })
+    }
+  )
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json()
+  return Sentry.startSpan(
+    {
+      op: 'http.server',
+      name: 'POST /api/events',
+      attributes: {
+        'http.method': 'POST',
+        'http.route': '/api/events',
+      },
+    },
+    async () => {
+      try {
+        const body = await request.json()
+        
+        Sentry.setContext('event.create', {
+          title: body.title,
+          status: body.status,
+          startAt: body.startAt,
+        })
 
-  const newEvent = {
-    id: Date.now().toString(),
-    ...body,
-    status: 'PROPOSED',
-    createdAt: new Date().toISOString()
-  }
+        const newEvent = {
+          id: Date.now().toString(),
+          ...body,
+          status: 'PROPOSED',
+          createdAt: new Date().toISOString()
+        }
 
-  mockEvents.push(newEvent)
+        mockEvents.push(newEvent)
+        
+        // カスタムイベントをSentryに送信
+        Sentry.captureMessage('Event created', {
+          level: 'info',
+          tags: {
+            action: 'event.create',
+            status: newEvent.status,
+          },
+        })
 
-  return NextResponse.json({
-    success: true,
-    data: newEvent
-  })
+        return NextResponse.json({
+          success: true,
+          data: newEvent
+        })
+      } catch (error) {
+        Sentry.captureException(error)
+        return NextResponse.json({
+          success: false,
+          message: 'Failed to create event'
+        }, { status: 500 })
+      }
+    }
+  )
 }
 
 export async function PATCH(request: NextRequest) {
-  const { id, ...updates } = await request.json()
+  return Sentry.startSpan(
+    {
+      op: 'dispatch.schedule.update',
+      name: 'PATCH /api/events - Schedule Update',
+      attributes: {
+        'http.method': 'PATCH',
+        'http.route': '/api/events',
+        'dispatch.type': 'schedule.update',
+      },
+    },
+    async () => {
+      try {
+        const { id, ...updates } = await request.json()
+        
+        Sentry.setContext('event.update', {
+          eventId: id,
+          updates: Object.keys(updates),
+        })
 
-  const eventIndex = mockEvents.findIndex(e => e.id === id)
-  if (eventIndex === -1) {
-    return NextResponse.json({
-      success: false,
-      message: 'Event not found'
-    }, { status: 404 })
-  }
+        const eventIndex = mockEvents.findIndex(e => e.id === id)
+        if (eventIndex === -1) {
+          return NextResponse.json({
+            success: false,
+            message: 'Event not found'
+          }, { status: 404 })
+        }
 
-  mockEvents[eventIndex] = {
-    ...mockEvents[eventIndex],
-    ...updates
-  }
+        // 職人割当変更の追跡
+        if (updates.assignees) {
+          Sentry.startSpan(
+            {
+              op: 'dispatch.assignee.change',
+              name: 'Update Event Assignees',
+              attributes: {
+                'event.id': id,
+                'assignees.count': updates.assignees.length,
+              },
+            },
+            () => {
+              // 割当変更のロジック
+              Sentry.captureMessage('Event assignee changed', {
+                level: 'info',
+                tags: {
+                  action: 'assignee.change',
+                  eventId: id,
+                },
+              })
+            }
+          )
+        }
 
-  return NextResponse.json({
-    success: true,
-    data: mockEvents[eventIndex]
-  })
+        mockEvents[eventIndex] = {
+          ...mockEvents[eventIndex],
+          ...updates
+        }
+
+        return NextResponse.json({
+          success: true,
+          data: mockEvents[eventIndex]
+        })
+      } catch (error) {
+        Sentry.captureException(error)
+        return NextResponse.json({
+          success: false,
+          message: 'Failed to update event'
+        }, { status: 500 })
+      }
+    }
+  )
 }

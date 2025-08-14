@@ -34,3 +34,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /lib/generated/prisma
+
+# Sentry
+.sentryclirc
+sentry.properties
+.sentry-nextjs/
