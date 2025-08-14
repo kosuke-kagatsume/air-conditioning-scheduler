@@ -102,8 +102,6 @@ export default function NotificationsPage() {
         return '👤'
       case 'alert':
         return '⚠️'
-      case 'check':
-        return '✅'
       case 'info':
       default:
         return 'ℹ️'
