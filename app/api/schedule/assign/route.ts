@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { createAuditLog } from '@/lib/audit-log'
 import { checkScheduleConflict, reportConflictToSentry } from '@/lib/conflict-detection'
-import { mockEvents } from '@/lib/mock-data'
+import { mockEvents, mockUsers } from '@/lib/mock-data'
+import { sendScheduleNotification, generateWorkerAssignEmailHtml } from '@/lib/email-notifications'
 
 // ユーザー情報を取得する仮の関数（実際は認証から取得）
 function getCurrentUser() {
@@ -142,6 +143,35 @@ export async function POST(request: NextRequest) {
           extra: {
             assignment,
           },
+        })
+
+        // メール通知を送信（非同期、失敗してもメインの処理は継続）
+        const workerInfo = mockUsers[workerId] || mockUsers['worker-1']
+        const workerEmail = `${workerInfo.name.replace(/\s+/g, '')}@example.com`
+
+        const emailHtml = generateWorkerAssignEmailHtml({
+          eventTitle: targetEvent.title,
+          eventDate: targetEvent.date,
+          eventTime: `${assignment.startTime} - ${assignment.endTime}`,
+          workerName: assignment.workerName,
+          siteName: `現場${targetEvent.siteId}`, // 実際はサイト情報から取得
+          assignedBy: user.name,
+          notes: assignment.notes,
+        })
+
+        // 非同期でメール送信（エラーは記録するが処理は継続）
+        sendScheduleNotification({
+          to: workerEmail,
+          subject: `【HVAC Scheduler】新しい作業が割り当てられました - ${targetEvent.title}`,
+          html: emailHtml,
+          eventId: eventId,
+          eventType: 'worker.assign',
+        }).catch(error => {
+          console.error('Failed to send assignment email notification:', error)
+          Sentry.captureException(error, {
+            tags: { component: 'email-notification' },
+            extra: { eventId, workerId, workerEmail },
+          })
         })
 
         return NextResponse.json({

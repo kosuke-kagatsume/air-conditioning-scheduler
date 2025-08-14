@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { createAuditLog, calculateDiff } from '@/lib/audit-log'
 import { checkScheduleConflict, reportConflictToSentry } from '@/lib/conflict-detection'
-import { mockEvents } from '@/lib/mock-data'
+import { mockEvents, mockUsers } from '@/lib/mock-data'
+import { sendScheduleNotification, generateEventUpdateEmailHtml } from '@/lib/email-notifications'
 
 // ユーザー情報を取得する仮の関数（実際は認証から取得）
 function getCurrentUser() {
@@ -137,6 +138,39 @@ export async function PATCH(
               action: 'assignee.change',
               eventId: eventId,
             },
+          })
+        }
+
+        // メール通知を送信（非同期、失敗してもメインの処理は継続）
+        const changes = calculateDiff(beforeData, updatedEvent)
+        if (Object.keys(changes).length > 0) {
+          // 担当者のメールアドレスを取得（実際はDBから取得）
+          const workerInfo = mockUsers[updatedEvent.workerId] || mockUsers['worker-1']
+          const workerEmail = `${workerInfo.name.replace(/\s+/g, '')}@example.com`
+
+          const emailHtml = generateEventUpdateEmailHtml({
+            eventTitle: updatedEvent.title,
+            eventDate: updatedEvent.date,
+            eventTime: `${updatedEvent.startTime} - ${updatedEvent.endTime}`,
+            workerName: workerInfo.name,
+            siteName: `現場${updatedEvent.siteId}`, // 実際はサイト情報から取得
+            changes,
+            updatedBy: user.name,
+          })
+
+          // 非同期でメール送信（エラーは記録するが処理は継続）
+          sendScheduleNotification({
+            to: workerEmail,
+            subject: `【HVAC Scheduler】スケジュール変更通知 - ${updatedEvent.title}`,
+            html: emailHtml,
+            eventId: eventId,
+            eventType: 'schedule.update',
+          }).catch(error => {
+            console.error('Failed to send email notification:', error)
+            Sentry.captureException(error, {
+              tags: { component: 'email-notification' },
+              extra: { eventId, workerEmail },
+            })
           })
         }
 
