@@ -127,8 +127,6 @@ export default function NotificationPopover({ isOpen, onClose, anchorEl }: Notif
         return '👤'
       case 'alert':
         return '⚠️'
-      case 'check':
-        return '✅'
       case 'info':
       default:
         return 'ℹ️'
