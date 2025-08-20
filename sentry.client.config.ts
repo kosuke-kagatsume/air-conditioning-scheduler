@@ -1,7 +1,12 @@
 import * as Sentry from "@sentry/nextjs";
 
-Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+// Sentryを有効にするには有効なDSNが必要
+const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
+
+// DSNが設定されていない場合はSentryを初期化しない
+if (SENTRY_DSN && SENTRY_DSN !== 'your-dsn' && !SENTRY_DSN.includes('your-dsn')) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
   
   // パフォーマンス監視のサンプリングレート（1.0 = 100%）
   tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
@@ -47,4 +52,10 @@ Sentry.init({
     /^Loading chunk \d+ failed/,
     /^Cannot read properties of undefined \(reading 'call'\)/,
   ],
-});
+  });
+} else {
+  // Sentryが無効の場合はコンソールにメッセージを表示（開発環境のみ）
+  if (process.env.NODE_ENV === "development") {
+    console.log("Sentry is disabled: No valid DSN provided");
+  }
+}
