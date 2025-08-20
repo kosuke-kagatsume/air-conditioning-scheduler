@@ -58,9 +58,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
     { href: '/settings', icon: Settings, label: '設定', roles: ['admin'] }
   ]
 
-  const menuItems = allMenuItems.filter(item => 
-    !user || item.roles.includes(user.role)
-  )
+  const menuItems = allMenuItems.filter(item => {
+    if (!user) return true;
+    const userRole = user.role?.toLowerCase();
+    return item.roles.includes(userRole) || 
+           (userRole === 'superadmin' && item.roles.includes('admin'));
+  })
 
   return (
     <div className="min-h-screen bg-gray-50">
