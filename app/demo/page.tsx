@@ -32,7 +32,7 @@ export default function DemoPage() {
     <AppLayout>
       <div style={{ 
         padding: '16px',
-        paddingRight: user?.role === 'worker' ? '360px' : '16px',
+        paddingRight: (user?.role === 'worker' || user?.role === 'WORKER') ? '360px' : '16px',
         transition: 'padding-right 0.3s ease'
       }}>
         <CalendarView 
@@ -40,7 +40,7 @@ export default function DemoPage() {
         />
       </div>
       {/* 職人用プロフィールカード */}
-      {user && user.role === 'worker' && (
+      {user && (user.role === 'worker' || user.role === 'WORKER') && (
         <WorkerProfile user={user} />
       )}
     </AppLayout>
