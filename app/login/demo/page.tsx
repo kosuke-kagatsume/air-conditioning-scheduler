@@ -94,6 +94,9 @@ export default function DemoLoginPage() {
         localStorage.setItem('user', JSON.stringify(data.user))
         localStorage.setItem('token', data.token)
         
+        // Cookieを設定（ミドルウェアの認証用）
+        document.cookie = 'demo=1; path=/; max-age=86400'; // 24時間有効
+        
         // ダッシュボードへリダイレクト
         router.push('/demo')
       } else {
