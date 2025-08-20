@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, UserRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -25,7 +25,7 @@ async function main() {
       email: 'superadmin@dandori.com',
       password: superadminPassword,
       name: 'DW 管理者',
-      role: 'SUPERADMIN',
+      role: UserRole.SUPERADMIN,
       phone: '03-0000-0000',
       // スーパー管理者は会社に所属しない
     },
@@ -40,7 +40,7 @@ async function main() {
       email: 'admin@demo.com',
       password: adminPassword,
       name: '山田 太郎',
-      role: 'ADMIN',
+      role: UserRole.ADMIN,
       phone: '090-1111-1111',
       companyId: company.id,
     },
@@ -55,7 +55,7 @@ async function main() {
       email: 'worker1@demo.com',
       password: workerPassword,
       name: '鈴木 一郎',
-      role: 'WORKER',
+      role: UserRole.WORKER,
       phone: '090-2222-2222',
       companyId: company.id,
       workerProfile: {
@@ -85,7 +85,7 @@ async function main() {
         email: 'takahashi@dandori.jp',
         password: workerPassword,
         name: '高橋次郎',
-        role: 'WORKER',
+        role: UserRole.WORKER,
         phone: '090-3333-3333',
         companyId: company.id,
         workerProfile: {
@@ -110,7 +110,7 @@ async function main() {
         email: 'sato@dandori.jp',
         password: workerPassword,
         name: '佐藤健一',
-        role: 'WORKER',
+        role: UserRole.WORKER,
         phone: '090-4444-4444',
         companyId: company.id,
         workerProfile: {
