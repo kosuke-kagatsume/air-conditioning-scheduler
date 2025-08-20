@@ -97,8 +97,12 @@ export default function DemoLoginPage() {
         // Cookieを設定（ミドルウェアの認証用）
         document.cookie = 'demo=1; path=/; max-age=86400'; // 24時間有効
         
-        // ダッシュボードへリダイレクト
-        router.push('/demo')
+        // ロールに応じてリダイレクト
+        if (data.user.role === 'SUPERADMIN') {
+          router.push('/admin/dashboard')
+        } else {
+          router.push('/demo')
+        }
       } else {
         console.error('Demo login failed:', data.message)
         alert('ログインに失敗しました: ' + data.message)
