@@ -11,13 +11,10 @@ export default function WorkerProfile({ user }: WorkerProfileProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
-  console.log('WorkerProfile - user prop:', user)
-  console.log('WorkerProfile - user role:', user?.role)
 
   useEffect(() => {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024
-      console.log('WorkerProfile - window width:', window.innerWidth, 'isMobile:', mobile)
       setIsMobile(mobile)
     }
     checkMobile()
@@ -41,7 +38,7 @@ export default function WorkerProfile({ user }: WorkerProfileProps) {
     quickActions: [
       { icon: Package, label: '作業報告書を作成', action: '/reports' },
       { icon: Calendar, label: '予定変更を申請', action: '/schedule-change' },
-      { icon: MessageCircle, label: '管理者に連絡', action: '/chat' }
+      { icon: MessageCircle, label: '管理者に連絡', action: '/contact-admin' }
     ],
     monthlyStats: {
       completedJobs: 18,

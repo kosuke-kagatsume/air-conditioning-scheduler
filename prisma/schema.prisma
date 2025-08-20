@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -40,8 +40,9 @@ model User {
 }
 
 enum UserRole {
-  ADMIN
-  MANAGER
+  SUPERADMIN     // スーパー管理者（システム全体管理）
+  ADMIN          // 管理者（会社レベル）
+  MANAGER        // マネージャー
   MASTER_WORKER  // 親方
   WORKER         // 子方
 }
@@ -71,14 +72,14 @@ model WorkerProfile {
   
   // スキル・資格
   skills          Skill[]
-  certifications  String[]
+  certifications  Json // JSON形式で資格リストを保存
   
   // 稼働情報
   maxDailySlots   Int      @default(3)
   currentSlots    Int      @default(0)
   
   // 対応可能エリア
-  workAreas       String[]
+  workAreas       Json // JSON形式で対応エリアを保存
   
   // 対応可能時間
   availableMorning  Boolean @default(true)
@@ -208,13 +209,13 @@ model WorkReport {
   breakTime       Int?     // 休憩時間（分）
   
   // 作業詳細
-  tasksCompleted  String[]
+  tasksCompleted  Json // JSON形式で完了タスクを保存
   issues          String?
   nextSteps       String?
   
   // 添付ファイル
-  photos          String[] // URLの配列
-  documents       String[] // URLの配列
+  photos          Json // JSON形式でURL配列を保存
+  documents       Json // JSON形式でURL配列を保存
   
   // 材料・部品
   materialsUsed   Json?    // JSON形式で材料リストを保存

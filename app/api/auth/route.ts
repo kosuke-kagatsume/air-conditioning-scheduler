@@ -1,65 +1,96 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock database
-const mockUsers = [
-  { id: '1', email: 'demo@example.com', name: '山田太郎', role: 'admin' },
-  { id: '2', email: 'worker@example.com', name: '佐藤職人', role: 'worker' }
-]
+import { prisma } from '@/lib/prisma'
+import bcrypt from 'bcryptjs'
 
 const otpStore = new Map<string, { otp: string; expires: number }>()
 
 export async function POST(request: NextRequest) {
-  const { action, email, otp } = await request.json()
+  try {
+    const body = await request.json()
+    const { action, email, password } = body
 
-  if (action === 'request-otp') {
-    // Generate 6-digit OTP
-    const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString()
-    
-    // Store OTP with 10-minute expiration
-    otpStore.set(email, {
-      otp: generatedOtp,
-      expires: Date.now() + 10 * 60 * 1000
-    })
+    if (action === 'login') {
+      // データベースからユーザーを検索
+      const user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          company: true,
+          workerProfile: {
+            include: {
+              skills: true
+            }
+          }
+        }
+      })
 
-    // In real app, send email here
-    console.log(`OTP for ${email}: ${generatedOtp}`)
-
-    return NextResponse.json({
-      success: true,
-      message: 'OTP sent to email'
-    })
-  }
-
-  if (action === 'verify-otp') {
-    const storedOtp = otpStore.get(email)
-    
-    // For demo, accept "123456" as valid OTP
-    if (otp === '123456' || (storedOtp && storedOtp.otp === otp && storedOtp.expires > Date.now())) {
-      const user = mockUsers.find(u => u.email === email)
-      
-      if (user) {
-        // Clear OTP after successful verification
-        otpStore.delete(email)
-        
-        // In real app, generate JWT here
-        const token = Buffer.from(JSON.stringify(user)).toString('base64')
-        
+      if (!user) {
         return NextResponse.json({
-          success: true,
-          user,
-          token
-        })
+          success: false,
+          message: 'ユーザーが見つかりません'
+        }, { status: 401 })
       }
+
+      // パスワードを検証
+      const isValidPassword = await bcrypt.compare(password, user.password)
+      
+      if (!isValidPassword) {
+        return NextResponse.json({
+          success: false,
+          message: 'パスワードが正しくありません'
+        }, { status: 401 })
+      }
+
+      // パスワードを除外してユーザー情報を返す
+      const { password: _, ...userWithoutPassword } = user
+
+      return NextResponse.json({
+        success: true,
+        user: userWithoutPassword,
+        token: 'demo-token-' + user.id // デモ用トークン
+      })
     }
-    
+
+    if (action === 'demo-login') {
+      // デモログイン用（パスワードチェックなし）
+      const user = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          company: true,
+          workerProfile: {
+            include: {
+              skills: true
+            }
+          }
+        }
+      })
+
+      if (!user) {
+        return NextResponse.json({
+          success: false,
+          message: 'デモユーザーが見つかりません'
+        }, { status: 401 })
+      }
+
+      // パスワードを除外してユーザー情報を返す
+      const { password: _, ...userWithoutPassword } = user
+
+      return NextResponse.json({
+        success: true,
+        user: userWithoutPassword,
+        token: 'demo-token-' + user.id
+      })
+    }
+
     return NextResponse.json({
       success: false,
-      message: 'Invalid OTP or user not found'
-    }, { status: 401 })
-  }
+      message: 'Invalid action'
+    }, { status: 400 })
 
-  return NextResponse.json({
-    success: false,
-    message: 'Invalid action'
-  }, { status: 400 })
+  } catch (error) {
+    console.error('Auth API Error:', error)
+    return NextResponse.json({
+      success: false,
+      message: 'サーバーエラーが発生しました'
+    }, { status: 500 })
+  }
 }

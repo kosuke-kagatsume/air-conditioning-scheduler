@@ -18,13 +18,28 @@ async function main() {
 
   console.log('✅ Company created')
 
-  // 管理者ユーザー作成
+  // スーパー管理者ユーザー作成
+  const superadminPassword = await bcrypt.hash('dw_admin2025', 10)
+  const superadmin = await prisma.user.create({
+    data: {
+      email: 'superadmin@dandori.com',
+      password: superadminPassword,
+      name: 'DW 管理者',
+      role: 'SUPERADMIN',
+      phone: '03-0000-0000',
+      // スーパー管理者は会社に所属しない
+    },
+  })
+
+  console.log('✅ Superadmin user created')
+
+  // 管理者ユーザー作成（デモアカウント）
   const adminPassword = await bcrypt.hash('admin123', 10)
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@dandori.jp',
+      email: 'admin@demo.com',
       password: adminPassword,
-      name: '管理者',
+      name: '山田 太郎',
       role: 'ADMIN',
       phone: '090-1111-1111',
       companyId: company.id,
@@ -33,20 +48,20 @@ async function main() {
 
   console.log('✅ Admin user created')
 
-  // 親方作成
-  const masterPassword = await bcrypt.hash('master123', 10)
-  const master = await prisma.user.create({
+  // 職人作成（デモアカウント - 鈴木一郎）
+  const workerPassword = await bcrypt.hash('worker123', 10)
+  const worker1 = await prisma.user.create({
     data: {
-      email: 'master@dandori.jp',
-      password: masterPassword,
-      name: '山田太郎',
-      role: 'MASTER_WORKER',
+      email: 'worker1@demo.com',
+      password: workerPassword,
+      name: '鈴木 一郎',
+      role: 'WORKER',
       phone: '090-2222-2222',
       companyId: company.id,
       workerProfile: {
         create: {
           maxDailySlots: 5,
-          workAreas: ['東京都', '神奈川県', '埼玉県'],
+          workAreas: JSON.stringify(['東京都', '神奈川県', '埼玉県']),
           availableMorning: true,
           availableNight: true,
           availableWeekend: true,
@@ -55,16 +70,15 @@ async function main() {
           completedJobs: 156,
           hasLiabilityInsurance: true,
           hasAccidentInsurance: true,
-          certifications: ['第二種電気工事士', '冷媒取扱技術者', 'フルハーネス特別教育'],
+          certifications: JSON.stringify(['第二種電気工事士', '冷媒取扱技術者', 'フルハーネス特別教育']),
         },
       },
     },
   })
 
-  console.log('✅ Master worker created')
+  console.log('✅ Demo worker (Suzuki) created')
 
-  // 職人作成
-  const workerPassword = await bcrypt.hash('worker123', 10)
+  // 追加の職人作成
   const workers = await Promise.all([
     prisma.user.create({
       data: {
@@ -77,7 +91,7 @@ async function main() {
         workerProfile: {
           create: {
             maxDailySlots: 3,
-            workAreas: ['東京都', '神奈川県'],
+            workAreas: JSON.stringify(['東京都', '神奈川県']),
             availableMorning: true,
             availableNight: false,
             availableWeekend: true,
@@ -86,7 +100,7 @@ async function main() {
             completedJobs: 89,
             hasLiabilityInsurance: true,
             hasAccidentInsurance: true,
-            certifications: ['第二種電気工事士', '高所作業車運転'],
+            certifications: JSON.stringify(['第二種電気工事士', '高所作業車運転']),
           },
         },
       },
@@ -102,7 +116,7 @@ async function main() {
         workerProfile: {
           create: {
             maxDailySlots: 4,
-            workAreas: ['東京都', '埼玉県', '千葉県'],
+            workAreas: JSON.stringify(['東京都', '埼玉県', '千葉県']),
             availableMorning: false,
             availableNight: true,
             availableWeekend: false,
@@ -111,7 +125,7 @@ async function main() {
             completedJobs: 67,
             hasLiabilityInsurance: true,
             hasAccidentInsurance: true,
-            certifications: ['第一種電気工事士', 'ガス溶接技能'],
+            certifications: JSON.stringify(['第一種電気工事士', 'ガス溶接技能']),
           },
         },
       },
@@ -204,7 +218,7 @@ async function main() {
         siteId: sites[0].id,
         companyId: company.id,
         managerId: admin.id,
-        workerId: workers[0].id,
+        workerId: worker1.id,
         estimatedHours: 2,
       },
     }),
@@ -236,7 +250,7 @@ async function main() {
         siteId: sites[2].id,
         companyId: company.id,
         managerId: admin.id,
-        workerId: master.id,
+        workerId: workers[0].id,
         estimatedHours: 3,
       },
     }),
@@ -294,9 +308,10 @@ async function main() {
 
   console.log('✅ Database seeding completed!')
   console.log('\n📝 Login credentials:')
-  console.log('Admin: admin@dandori.jp / admin123')
-  console.log('Master: master@dandori.jp / master123')
-  console.log('Worker: takahashi@dandori.jp / worker123')
+  console.log('Superadmin: superadmin@dandori.com / dw_admin2025')
+  console.log('Admin (Demo): admin@demo.com / admin123')
+  console.log('Worker1 (Demo): worker1@demo.com / worker123')
+  console.log('Additional workers: takahashi@dandori.jp, sato@dandori.jp / worker123')
 }
 
 main()

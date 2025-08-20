@@ -7,7 +7,7 @@ import { Calendar, Users, Shield, CheckCircle } from 'lucide-react'
 interface DemoAccount {
   id: string
   name: string
-  role: 'admin' | 'worker'
+  role: 'superadmin' | 'admin' | 'worker'
   email: string
   password: string
   description: string
@@ -16,6 +16,22 @@ interface DemoAccount {
 }
 
 const demoAccounts: DemoAccount[] = [
+  {
+    id: '0',
+    name: 'DW 管理者',
+    role: 'superadmin',
+    email: 'superadmin@dandori.com',
+    password: 'dw_admin2025',
+    description: 'DW社システム管理者',
+    features: [
+      'テナント管理',
+      'プラン管理',
+      'システム監視',
+      '利用統計',
+      '全権限'
+    ],
+    avatar: '🛡️'
+  },
   {
     id: '1',
     name: '山田 太郎',
@@ -38,7 +54,7 @@ const demoAccounts: DemoAccount[] = [
     role: 'worker',
     email: 'worker1@demo.com',
     password: 'worker123',
-    description: 'エアコン設置専門の職人',
+    description: '職人',
     features: [
       '自分のスケジュール確認',
       '作業報告書作成',
@@ -46,21 +62,6 @@ const demoAccounts: DemoAccount[] = [
       'チャット機能'
     ],
     avatar: '👷'
-  },
-  {
-    id: '3',
-    name: '佐藤 次郎',
-    role: 'worker',
-    email: 'worker2@demo.com',
-    password: 'worker123',
-    description: 'メンテナンス専門の職人',
-    features: [
-      '自分のスケジュール確認',
-      '作業報告書作成',
-      '在庫確認',
-      'チャット機能'
-    ],
-    avatar: '🔧'
   }
 ]
 
@@ -73,19 +74,39 @@ export default function DemoLoginPage() {
     setSelectedAccount(account)
     setIsLoading(true)
     
-    // ローカルストレージに保存
-    localStorage.setItem('user', JSON.stringify({
-      id: account.id,
-      name: account.name,
-      email: account.email,
-      role: account.role
-    }))
-    
-    // デモ用の遅延
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // ダッシュボードまたはカレンダーへリダイレクト
-    router.push('/demo')
+    try {
+      // デモログインAPIを呼び出し
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'demo-login',
+          email: account.email
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        // 実際のユーザー情報をローカルストレージに保存
+        localStorage.setItem('user', JSON.stringify(data.user))
+        localStorage.setItem('token', data.token)
+        
+        // ダッシュボードへリダイレクト
+        router.push('/demo')
+      } else {
+        console.error('Demo login failed:', data.message)
+        alert('ログインに失敗しました: ' + data.message)
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      alert('ログインエラーが発生しました')
+    } finally {
+      setIsLoading(false)
+      setSelectedAccount(null)
+    }
   }
 
   return (
@@ -188,10 +209,10 @@ export default function DemoLoginPage() {
                     borderRadius: '20px',
                     fontSize: '12px',
                     fontWeight: '600',
-                    background: account.role === 'admin' ? '#f56565' : '#48bb78',
+                    background: account.role === 'superadmin' ? '#9333ea' : account.role === 'admin' ? '#f56565' : '#48bb78',
                     color: 'white'
                   }}>
-                    {account.role === 'admin' ? '管理者' : '職人'}
+                    {account.role === 'superadmin' ? 'スーパー管理者' : account.role === 'admin' ? '管理者' : '職人'}
                   </div>
                 </div>
               </div>
@@ -275,7 +296,9 @@ export default function DemoLoginPage() {
                 ) : (
                   <button style={{
                     padding: '8px 20px',
-                    background: account.role === 'admin' 
+                    background: account.role === 'superadmin'
+                      ? 'linear-gradient(135deg, #9333ea 0%, #7c3aed 100%)'
+                      : account.role === 'admin' 
                       ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                       : 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)',
                     color: 'white',
