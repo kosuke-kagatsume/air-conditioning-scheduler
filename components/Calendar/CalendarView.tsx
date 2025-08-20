@@ -41,14 +41,26 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
       
       if (!res.ok) {
         console.warn('Failed to load events, using mock data')
-        setEvents(mockEvents)
+        // モックデータをそのまま使用
+        if (!events.length) {
+          setEvents(mockEvents)
+        }
         return
       }
       
-      const { items } = await res.json()
+      const data = await res.json()
+      
+      // レスポンスが正しい形式かチェック
+      if (!data.items || !Array.isArray(data.items)) {
+        console.warn('Invalid API response, using mock data')
+        if (!events.length) {
+          setEvents(mockEvents)
+        }
+        return
+      }
 
       // APIのレスポンスをカレンダーのイベント型にマッピング
-      const mappedEvents: Event[] = items.map((item: any) => ({
+      const mappedEvents: Event[] = data.items.map((item: any) => ({
         id: item.id,
         title: item.title,
         date: item.date || new Date(item.start).toISOString().split('T')[0],
@@ -68,11 +80,18 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
         customFieldValues: {},
       }))
       
-      setEvents(mappedEvents)
+      // 空のレスポンスの場合はモックデータを使用
+      if (mappedEvents.length === 0 && !events.length) {
+        setEvents(mockEvents)
+      } else if (mappedEvents.length > 0) {
+        setEvents(mappedEvents)
+      }
     } catch (error) {
       console.error('Failed to load events:', error)
-      // エラー時はモックデータを使用
-      setEvents(mockEvents)
+      // エラー時はモックデータを使用（既存のイベントがない場合のみ）
+      if (!events.length) {
+        setEvents(mockEvents)
+      }
     } finally {
       setIsLoading(false)
     }

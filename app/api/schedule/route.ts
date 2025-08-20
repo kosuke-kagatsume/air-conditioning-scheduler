@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
-import { mockEvents } from '@/lib/mock-data'
+import { mockEvents } from '@/lib/mockData'
 
 // TODO: Prismaクライアントが利用可能になったら以下のコードを有効化
 // import { prisma } from "@/lib/prisma";
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         const limit = Math.min(Math.max(Number(searchParams.get('limit') ?? '200'), 1), 200)
 
         // 現在はモックデータを使用
-        let events = Object.values(mockEvents)
+        let events = Array.isArray(mockEvents) ? mockEvents : Object.values(mockEvents)
 
         // 日付フィルタリング
         if (from || to) {
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
           end: new Date(event.date + 'T' + (event.endTime || event.startTime)).toISOString(),
           workerId: event.workerId,
           status: event.status,
-          siteId: event.siteId,
+          siteId: event.id.split('-')[0], // イベントIDから仮のサイトIDを生成
           date: event.date,
           startTime: event.startTime,
           endTime: event.endTime,
