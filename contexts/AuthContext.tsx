@@ -95,12 +95,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // 権限チェック
-  const isAdmin = user?.role === 'admin'
-  const isManager = user?.role === 'manager1' || user?.role === 'manager2'
-  const isStaff = user?.role === 'staff'
-  const isMaster = user?.role === 'master'
-  const isWorker = user?.role === 'worker'
+  // 権限チェック（大文字小文字両対応）
+  const userRole = user?.role?.toLowerCase()
+  const isAdmin = userRole === 'admin' || userRole === 'superadmin'
+  const isManager = userRole === 'manager' || userRole === 'manager1' || userRole === 'manager2'
+  const isStaff = userRole === 'staff'
+  const isMaster = userRole === 'master' || userRole === 'master_worker'
+  const isWorker = userRole === 'worker'
 
   // 機能権限
   const canCreateEvent = isAdmin || isManager || isStaff

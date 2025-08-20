@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import CalendarView from '@/components/Calendar/CalendarView'
 import AppLayout from '@/components/AppLayout'
 import WorkerProfile from '@/components/WorkerProfile'
-import { AuthProvider } from '@/contexts/AuthContext'
 
 export default function DemoPage() {
   const [mounted, setMounted] = useState(false)
@@ -43,24 +42,22 @@ export default function DemoPage() {
   }
 
   return (
-    <AuthProvider>
-      <AppLayout>
-        <div style={{ 
-          padding: '16px',
-          paddingRight: (user?.role === 'worker' || user?.role === 'WORKER') ? '360px' : '16px',
-          transition: 'padding-right 0.3s ease',
-          minHeight: 'calc(100vh - 56px)',
-          background: '#ffffff'
-        }}>
-          <CalendarView 
-            selectedWorkers={selectedWorkers}
-          />
-        </div>
-        {/* 職人用プロフィールカード */}
-        {user && (user.role === 'worker' || user.role === 'WORKER') && (
-          <WorkerProfile user={user} />
-        )}
-      </AppLayout>
-    </AuthProvider>
+    <AppLayout>
+      <div style={{ 
+        padding: '16px',
+        paddingRight: (user?.role === 'worker' || user?.role === 'WORKER') ? '360px' : '16px',
+        transition: 'padding-right 0.3s ease',
+        minHeight: 'calc(100vh - 56px)',
+        background: '#ffffff'
+      }}>
+        <CalendarView 
+          selectedWorkers={selectedWorkers}
+        />
+      </div>
+      {/* 職人用プロフィールカード */}
+      {user && (user.role === 'worker' || user.role === 'WORKER') && (
+        <WorkerProfile user={user} />
+      )}
+    </AppLayout>
   )
 }
