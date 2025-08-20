@@ -45,25 +45,25 @@ export default function AdminDashboard() {
     return matchesSearch && matchesPlan && matchesStatus
   })
 
-  // ステータスバッジの色
-  const getStatusColor = (status: string) => {
+  // ステータスバッジのスタイル
+  const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800'
-      case 'trial': return 'bg-blue-100 text-blue-800'
-      case 'suspended': return 'bg-red-100 text-red-800'
-      case 'cancelled': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'active': return { backgroundColor: '#dcfce7', color: '#166534' }
+      case 'trial': return { backgroundColor: '#dbeafe', color: '#1e40af' }
+      case 'suspended': return { backgroundColor: '#fee2e2', color: '#dc2626' }
+      case 'cancelled': return { backgroundColor: '#f3f4f6', color: '#374151' }
+      default: return { backgroundColor: '#f3f4f6', color: '#374151' }
     }
   }
 
-  // プランバッジの色
-  const getPlanColor = (plan: string) => {
+  // プランバッジのスタイル
+  const getPlanStyle = (plan: string) => {
     switch (plan) {
-      case 'enterprise': return 'bg-purple-100 text-purple-800'
-      case 'pro': return 'bg-indigo-100 text-indigo-800'
-      case 'basic': return 'bg-blue-100 text-blue-800'
-      case 'free': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'enterprise': return { backgroundColor: '#f3e8ff', color: '#7c3aed' }
+      case 'pro': return { backgroundColor: '#e0e7ff', color: '#4338ca' }
+      case 'basic': return { backgroundColor: '#dbeafe', color: '#1e40af' }
+      case 'free': return { backgroundColor: '#f3f4f6', color: '#374151' }
+      default: return { backgroundColor: '#f3f4f6', color: '#374151' }
     }
   }
 
@@ -81,90 +81,165 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: '#f9fafb',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    }}>
       {/* ヘッダー */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">DW管理コンソール</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">
-                ログイン中: {user.name}
-              </span>
-              <button
-                onClick={() => {
-                  localStorage.clear()
-                  router.push('/login/demo')
-                }}
-                className="text-sm text-red-600 hover:text-red-800"
-              >
-                ログアウト
-              </button>
-            </div>
-          </div>
+      <header style={{
+        backgroundColor: 'white',
+        borderBottom: '1px solid #e5e7eb',
+        padding: '0 24px',
+        height: '64px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }}>
+        <h1 style={{
+          fontSize: '24px',
+          fontWeight: 'bold',
+          color: '#111827',
+          margin: 0
+        }}>
+          DW管理コンソール
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <span style={{ fontSize: '14px', color: '#6b7280' }}>
+            ログイン中: {user.name}
+          </span>
+          <button
+            onClick={() => {
+              localStorage.clear()
+              router.push('/login/demo')
+            }}
+            style={{
+              fontSize: '14px',
+              color: '#dc2626',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            ログアウト
+          </button>
         </div>
       </header>
 
       {/* 統計サマリー */}
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
+      <div style={{ padding: '32px 24px' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '24px',
+          marginBottom: '32px'
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            padding: '24px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <p className="text-sm text-gray-600">総テナント数</p>
-                <p className="text-2xl font-bold text-gray-900">{mockTenantStats.totalTenants}</p>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 8px 0' }}>総テナント数</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#111827', margin: 0 }}>{mockTenantStats.totalTenants}</p>
               </div>
-              <Building2 className="w-10 h-10 text-blue-500" />
+              <Building2 size={40} color="#3b82f6" />
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            padding: '24px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <p className="text-sm text-gray-600">アクティブ</p>
-                <p className="text-2xl font-bold text-gray-900">{mockTenantStats.activeTenants}</p>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 8px 0' }}>アクティブ</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#111827', margin: 0 }}>{mockTenantStats.activeTenants}</p>
               </div>
-              <CheckCircle className="w-10 h-10 text-green-500" />
+              <CheckCircle size={40} color="#10b981" />
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            padding: '24px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <p className="text-sm text-gray-600">月間収益</p>
-                <p className="text-2xl font-bold text-gray-900">¥{mockTenantStats.totalRevenue.toLocaleString()}</p>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 8px 0' }}>月間収益</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#111827', margin: 0 }}>¥{mockTenantStats.totalRevenue.toLocaleString()}</p>
               </div>
-              <DollarSign className="w-10 h-10 text-yellow-500" />
+              <DollarSign size={40} color="#f59e0b" />
             </div>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            padding: '24px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <p className="text-sm text-gray-600">成長率</p>
-                <p className="text-2xl font-bold text-gray-900">+{mockTenantStats.growthRate}%</p>
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: '0 0 8px 0' }}>成長率</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#111827', margin: 0 }}>+{mockTenantStats.growthRate}%</p>
               </div>
-              <TrendingUp className="w-10 h-10 text-purple-500" />
+              <TrendingUp size={40} color="#8b5cf6" />
             </div>
           </div>
         </div>
 
         {/* フィルターとアクション */}
-        <div className="bg-white rounded-lg shadow mb-6">
-          <div className="p-4 border-b border-gray-200">
-            <div className="flex flex-col sm:flex-row justify-between gap-4">
-              <div className="flex flex-1 gap-4">
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '8px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          marginBottom: '24px'
+        }}>
+          <div style={{
+            padding: '16px',
+            borderBottom: '1px solid #e5e7eb'
+          }}>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              gap: '16px'
+            }}>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', flex: 1 }}>
                 {/* 検索 */}
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
+                  <Search style={{
+                    position: 'absolute',
+                    left: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '20px',
+                    height: '20px',
+                    color: '#9ca3af'
+                  }} />
                   <input
                     type="text"
                     placeholder="会社名・メールで検索..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{
+                      width: '100%',
+                      paddingLeft: '40px',
+                      paddingRight: '16px',
+                      paddingTop: '8px',
+                      paddingBottom: '8px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
                   />
                 </div>
                 
@@ -172,7 +247,14 @@ export default function AdminDashboard() {
                 <select
                   value={filterPlan}
                   onChange={(e) => setFilterPlan(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    backgroundColor: 'white'
+                  }}
                 >
                   <option value="all">全プラン</option>
                   <option value="free">無料</option>
@@ -185,7 +267,14 @@ export default function AdminDashboard() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{
+                    padding: '8px 16px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    outline: 'none',
+                    backgroundColor: 'white'
+                  }}
                 >
                   <option value="all">全ステータス</option>
                   <option value="active">アクティブ</option>
@@ -198,90 +287,215 @@ export default function AdminDashboard() {
               {/* 新規作成ボタン */}
               <button
                 onClick={() => router.push('/admin/tenants/new')}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '8px 16px',
+                  backgroundColor: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
               >
-                <Plus className="w-5 h-5" />
+                <Plus size={20} />
                 新規テナント
               </button>
             </div>
           </div>
 
           {/* テナント一覧テーブル */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ backgroundColor: '#f9fafb' }}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th style={{ 
+                    padding: '12px 24px', 
+                    textAlign: 'left', 
+                    fontSize: '12px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     会社名
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th style={{ 
+                    padding: '12px 24px', 
+                    textAlign: 'left', 
+                    fontSize: '12px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     プラン
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th style={{ 
+                    padding: '12px 24px', 
+                    textAlign: 'left', 
+                    fontSize: '12px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     ユーザー数
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th style={{ 
+                    padding: '12px 24px', 
+                    textAlign: 'left', 
+                    fontSize: '12px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     ステータス
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th style={{ 
+                    padding: '12px 24px', 
+                    textAlign: 'left', 
+                    fontSize: '12px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     最終ログイン
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th style={{ 
+                    padding: '12px 24px', 
+                    textAlign: 'left', 
+                    fontSize: '12px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     月額料金
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th style={{ 
+                    padding: '12px 24px', 
+                    textAlign: 'left', 
+                    fontSize: '12px', 
+                    fontWeight: '500', 
+                    color: '#6b7280', 
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
                     アクション
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody style={{ backgroundColor: 'white' }}>
                 {filteredTenants.map((tenant) => (
-                  <tr key={tenant.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                  <tr 
+                    key={tenant.id} 
+                    style={{ 
+                      borderBottom: '1px solid #e5e7eb',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  >
+                    <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{tenant.companyName}</div>
-                        <div className="text-sm text-gray-500">{tenant.email}</div>
+                        <div style={{ fontSize: '14px', fontWeight: '500', color: '#111827' }}>{tenant.companyName}</div>
+                        <div style={{ fontSize: '14px', color: '#6b7280' }}>{tenant.email}</div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getPlanColor(tenant.plan)}`}>
+                    <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
+                      <span style={{
+                        padding: '4px 12px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        borderRadius: '9999px',
+                        ...getPlanStyle(tenant.plan)
+                      }}>
                         {tenantPlans[tenant.plan as keyof typeof tenantPlans].name}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td style={{ padding: '16px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#111827' }}>
                       {tenant.userCount} / {tenant.userLimit === -1 ? '無制限' : tenant.userLimit}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(tenant.status)}`}>
+                    <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
+                      <span style={{
+                        padding: '4px 12px',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        borderRadius: '9999px',
+                        ...getStatusStyle(tenant.status)
+                      }}>
                         {tenant.status === 'active' ? 'アクティブ' : 
                          tenant.status === 'trial' ? '試用期間' :
                          tenant.status === 'suspended' ? '停止中' : '解約済み'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td style={{ padding: '16px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#6b7280' }}>
                       {tenant.lastLoginAt ? new Date(tenant.lastLoginAt).toLocaleDateString('ja-JP') : '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td style={{ padding: '16px 24px', whiteSpace: 'nowrap', fontSize: '14px', color: '#111827' }}>
                       ¥{tenant.monthlyFee.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="relative">
+                    <td style={{ padding: '16px 24px', whiteSpace: 'nowrap' }}>
+                      <div style={{ position: 'relative' }}>
                         <button
                           onClick={() => setShowDropdown(showDropdown === tenant.id ? null : tenant.id)}
-                          className="text-gray-400 hover:text-gray-600"
+                          style={{
+                            color: '#9ca3af',
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            borderRadius: '4px',
+                            transition: 'color 0.2s'
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.color = '#6b7280'}
+                          onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
                         >
-                          <MoreVertical className="w-5 h-5" />
+                          <MoreVertical size={20} />
                         </button>
                         {showDropdown === tenant.id && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-200">
+                          <div style={{
+                            position: 'absolute',
+                            right: 0,
+                            marginTop: '8px',
+                            width: '192px',
+                            backgroundColor: 'white',
+                            borderRadius: '6px',
+                            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                            zIndex: 10,
+                            border: '1px solid #e5e7eb'
+                          }}>
                             <button
                               onClick={() => {
                                 setShowDropdown(null)
                                 router.push(`/admin/tenants/${tenant.id}`)
                               }}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                width: '100%',
+                                padding: '8px 16px',
+                                fontSize: '14px',
+                                color: '#374151',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'background-color 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye size={16} />
                               詳細表示
                             </button>
                             <button
@@ -289,9 +503,24 @@ export default function AdminDashboard() {
                                 setShowDropdown(null)
                                 router.push(`/admin/tenants/${tenant.id}/edit`)
                               }}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                width: '100%',
+                                padding: '8px 16px',
+                                fontSize: '14px',
+                                color: '#374151',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'background-color 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit size={16} />
                               編集
                             </button>
                             <button
@@ -299,9 +528,25 @@ export default function AdminDashboard() {
                                 setShowDropdown(null)
                                 loginAsTenant(tenant)
                               }}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-blue-700 hover:bg-blue-50 border-t border-gray-200"
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                width: '100%',
+                                padding: '8px 16px',
+                                fontSize: '14px',
+                                color: '#1d4ed8',
+                                background: 'none',
+                                border: 'none',
+                                borderTop: '1px solid #e5e7eb',
+                                cursor: 'pointer',
+                                textAlign: 'left',
+                                transition: 'background-color 0.2s'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dbeafe'}
+                              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
-                              <LogIn className="w-4 h-4" />
+                              <LogIn size={16} />
                               このテナントとしてログイン
                             </button>
                           </div>
