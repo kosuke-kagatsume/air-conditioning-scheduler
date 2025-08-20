@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
         // 日付フィルタリング
         if (from || to) {
-          events = events.filter(event => {
+          events = events.filter((event: any) => {
             const eventDate = event.date
             
             let include = true
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         }
 
         // 日付順でソート
-        events.sort((a, b) => {
+        events.sort((a: any, b: any) => {
           const dateA = new Date(a.date + 'T' + a.startTime)
           const dateB = new Date(b.date + 'T' + b.startTime)
           return dateA.getTime() - dateB.getTime()
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
         events = events.slice(0, limit)
 
         // レスポンス形式を統一
-        const items = events.map(event => ({
+        const items = events.map((event: any) => ({
           id: event.id,
           title: event.title,
           start: new Date(event.date + 'T' + event.startTime).toISOString(),
