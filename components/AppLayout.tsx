@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, ReactNode, useEffect } from 'react'
+import Link from 'next/link'
 import { Menu, Bell, User, Calendar, Users, MapPin, LayoutDashboard, FileEdit, CalendarClock, Package, FileText, Settings, X, LogOut, Mail, CheckCircle, AlertTriangle } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import NotificationPanel from './NotificationPanel'
@@ -218,7 +219,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   const isActive = pathname === item.href
                   
                   return (
-                    <a
+                    <Link
                       key={item.href}
                       href={item.href}
                       style={{
@@ -245,15 +246,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
                           e.currentTarget.style.backgroundColor = 'transparent'
                         }
                       }}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        router.push(item.href)
+                      onClick={() => {
                         setShowMenu(false)
                       }}
                     >
                       <Icon size={20} color={isActive ? '#ea580c' : '#9ca3af'} />
                       <span>{item.label}</span>
-                    </a>
+                    </Link>
                   )
                 })}
               </nav>

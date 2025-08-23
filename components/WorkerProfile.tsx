@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { Calendar, MapPin, Star, Clock, Package, MessageCircle, Award, TrendingUp, CheckCircle, AlertCircle, FileText } from 'lucide-react'
 
 interface WorkerProfileProps {
@@ -357,7 +358,7 @@ export default function WorkerProfile({ user }: WorkerProfileProps) {
           {workerData.quickActions.map((action, idx) => {
             const Icon = action.icon
             return (
-              <a
+              <Link
                 key={idx}
                 href={action.action}
                 style={{
@@ -384,7 +385,7 @@ export default function WorkerProfile({ user }: WorkerProfileProps) {
               >
                 <Icon size={16} />
                 <span>{action.label}</span>
-              </a>
+              </Link>
             )
           })}
         </div>

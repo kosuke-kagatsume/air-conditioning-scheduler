@@ -51,6 +51,11 @@ export default function ContactAdminPage() {
 
       setSubmitStatus('success')
       
+      // 3秒後にカレンダーページにリダイレクト
+      setTimeout(() => {
+        router.push('/demo')
+      }, 3000)
+      
       // 成功後、フォームをリセット
       setTimeout(() => {
         setFormData({

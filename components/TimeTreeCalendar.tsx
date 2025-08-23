@@ -980,14 +980,61 @@ export default function TimeTreeCalendar({
       </div>
     </div>
 
-    {/* Event Detail Modal - コメントアウト（型の不整合のため） */}
-    {/* selectedEvent && (
+    {/* Event Detail Modal */}
+    {selectedEvent && (
       <EventDetailModal
-        event={selectedEvent}
+        event={{
+          id: selectedEvent.id,
+          title: selectedEvent.title,
+          date: selectedEvent.date.toISOString(),
+          startTime: selectedEvent.startTime,
+          endTime: selectedEvent.endTime,
+          status: selectedEvent.status as any,
+          address: selectedEvent.location,
+          city: selectedEvent.site,
+          constructionType: selectedEvent.workType,
+          description: `${selectedEvent.workType} - ${selectedEvent.contractor || ''}`,
+          clientName: 'お客様',
+          constructorName: selectedEvent.contractor || '工務店',
+          salesPersons: [{ id: '1', name: selectedEvent.salesRep || '営業担当', role: 'main' as any }],
+          workerId: 'worker-1',
+          workerName: selectedEvent.workers?.[0] || '担当職人',
+          createdBy: 'system',
+          tenantId: 'tenant-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }}
         onClose={() => setSelectedEvent(null)}
-        isMobile={isMobile}
+        onStatusChange={(eventId: string, status: string, message?: string) => {
+          // イベントのステータスを更新
+          console.log(`Event ${eventId} status changed to ${status}`, message)
+          
+          // ローカルストレージに保存
+          const statusChange = {
+            eventId,
+            status,
+            message,
+            timestamp: new Date().toISOString(),
+            userId: 'current-user'
+          }
+          
+          const existingChanges = JSON.parse(localStorage.getItem('eventStatusChanges') || '[]')
+          existingChanges.push(statusChange)
+          localStorage.setItem('eventStatusChanges', JSON.stringify(existingChanges))
+          
+          // 通知を表示
+          const statusNames: {[key: string]: string} = {
+            'accepted': '承諾',
+            'pending': '保留', 
+            'rejected': '拒否',
+            'completed': '完了',
+            'cancel_requested': 'キャンセル申請'
+          }
+          
+          alert(`予定を「${statusNames[status] || status}」に変更しました`)
+        }}
       />
-    ) */}
+    )}
     </>
   )
 }

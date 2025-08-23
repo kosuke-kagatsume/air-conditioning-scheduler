@@ -41,6 +41,13 @@ export default function WorkStatusPage() {
     // ローカルストレージに保存
     localStorage.setItem(`workStatus_${workId}`, newStatus)
     localStorage.setItem(`workStatusTime_${workId}_${newStatus}`, new Date().toISOString())
+    
+    // 問題報告の場合は問題報告ページにリダイレクト
+    if (newStatus === 'issue') {
+      setTimeout(() => {
+        window.location.href = '/problem-report'
+      }, 500)
+    }
   }
 
   const getStatusColor = (status: string) => {

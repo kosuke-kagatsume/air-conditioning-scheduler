@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import AppLayout from '@/components/AppLayout'
 import { AlertTriangle, Camera, Send, MapPin, Clock, User } from 'lucide-react'
 
 export default function ProblemReportPage() {
+  const router = useRouter()
   const [reportType, setReportType] = useState('')
   const [urgency, setUrgency] = useState('')
   const [description, setDescription] = useState('')
@@ -36,13 +38,9 @@ export default function ProblemReportPage() {
       existingReports.push(report)
       localStorage.setItem('problemReports', JSON.stringify(existingReports))
       
-      // 3秒後にリセット
+      // 3秒後にカレンダーページにリダイレクト
       setTimeout(() => {
-        setSubmitted(false)
-        setReportType('')
-        setUrgency('')
-        setDescription('')
-        setPhotos([])
+        router.push('/demo')
       }, 3000)
     }, 1000)
   }
