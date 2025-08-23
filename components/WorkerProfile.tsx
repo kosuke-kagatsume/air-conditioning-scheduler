@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, MapPin, Star, Clock, Package, MessageCircle, Award, TrendingUp } from 'lucide-react'
+import { Calendar, MapPin, Star, Clock, Package, MessageCircle, Award, TrendingUp, CheckCircle, AlertCircle, FileText } from 'lucide-react'
 
 interface WorkerProfileProps {
   user: any
@@ -10,6 +10,12 @@ interface WorkerProfileProps {
 export default function WorkerProfile({ user }: WorkerProfileProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [morningChecklist, setMorningChecklist] = useState({
+    tools: false,
+    safety: false,
+    schedule: false,
+    contact: false
+  })
 
 
   useEffect(() => {
@@ -186,6 +192,148 @@ export default function WorkerProfile({ user }: WorkerProfileProps) {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* 朝の作業確認 */}
+      <div style={{
+        padding: '16px 20px',
+        borderBottom: '1px solid #e5e7eb',
+        background: '#fef5e7'
+      }}>
+        <h4 style={{
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#2d3748',
+          marginBottom: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}>
+          <AlertCircle size={16} color="#f59e0b" />
+          朝の作業確認
+        </h4>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px'
+        }}>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            color: '#4a5568'
+          }}>
+            <input
+              type="checkbox"
+              checked={morningChecklist.tools}
+              onChange={(e) => setMorningChecklist({...morningChecklist, tools: e.target.checked})}
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{
+              textDecoration: morningChecklist.tools ? 'line-through' : 'none',
+              opacity: morningChecklist.tools ? 0.6 : 1
+            }}>
+              工具・資材の確認
+            </span>
+          </label>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            color: '#4a5568'
+          }}>
+            <input
+              type="checkbox"
+              checked={morningChecklist.safety}
+              onChange={(e) => setMorningChecklist({...morningChecklist, safety: e.target.checked})}
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{
+              textDecoration: morningChecklist.safety ? 'line-through' : 'none',
+              opacity: morningChecklist.safety ? 0.6 : 1
+            }}>
+              安全装備の着用
+            </span>
+          </label>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            color: '#4a5568'
+          }}>
+            <input
+              type="checkbox"
+              checked={morningChecklist.schedule}
+              onChange={(e) => setMorningChecklist({...morningChecklist, schedule: e.target.checked})}
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{
+              textDecoration: morningChecklist.schedule ? 'line-through' : 'none',
+              opacity: morningChecklist.schedule ? 0.6 : 1
+            }}>
+              本日の作業内容確認
+            </span>
+          </label>
+          <label style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            fontSize: '13px',
+            color: '#4a5568'
+          }}>
+            <input
+              type="checkbox"
+              checked={morningChecklist.contact}
+              onChange={(e) => setMorningChecklist({...morningChecklist, contact: e.target.checked})}
+              style={{
+                width: '16px',
+                height: '16px',
+                cursor: 'pointer'
+              }}
+            />
+            <span style={{
+              textDecoration: morningChecklist.contact ? 'line-through' : 'none',
+              opacity: morningChecklist.contact ? 0.6 : 1
+            }}>
+              現場への連絡確認
+            </span>
+          </label>
+        </div>
+        {Object.values(morningChecklist).every(v => v) && (
+          <div style={{
+            marginTop: '12px',
+            padding: '8px',
+            background: '#d4edda',
+            borderRadius: '6px',
+            fontSize: '12px',
+            color: '#155724',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}>
+            <CheckCircle size={14} />
+            準備完了！安全作業を心がけましょう
+          </div>
+        )}
       </div>
 
       {/* クイックアクション */}

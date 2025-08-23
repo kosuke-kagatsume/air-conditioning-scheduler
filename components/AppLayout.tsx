@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, ReactNode, useEffect } from 'react'
-import { Menu, Bell, User, Calendar, Users, MapPin, LayoutDashboard, FileEdit, CalendarClock, Package, FileText, Settings, X, LogOut, Mail } from 'lucide-react'
+import { Menu, Bell, User, Calendar, Users, MapPin, LayoutDashboard, FileEdit, CalendarClock, Package, FileText, Settings, X, LogOut, Mail, CheckCircle, AlertTriangle } from 'lucide-react'
 import { usePathname, useRouter } from 'next/navigation'
 import NotificationPanel from './NotificationPanel'
 import NotificationBell from './NotificationBell'
@@ -51,7 +51,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
     { href: '/sites', icon: MapPin, label: '現場管理', roles: ['admin'] },
     { href: '/dashboard', icon: LayoutDashboard, label: 'ダッシュボード', roles: ['admin'] },
     { href: '/contact-admin', icon: Mail, label: '管理者への連絡', roles: ['worker'] },
+    { href: '/work-status', icon: CheckCircle, label: '作業ステータス', roles: ['worker'] },
     { href: '/schedule-change', icon: FileEdit, label: '予定変更申請', roles: ['admin', 'worker'] },
+    { href: '/problem-report', icon: AlertTriangle, label: '問題報告', roles: ['worker'] },
     { href: '/shifts', icon: CalendarClock, label: 'シフト管理', roles: ['admin'] },
     { href: '/inventory', icon: Package, label: '在庫管理', roles: ['admin', 'worker'] },
     { href: '/reports', icon: FileText, label: '作業報告書', roles: ['admin', 'worker'] },
