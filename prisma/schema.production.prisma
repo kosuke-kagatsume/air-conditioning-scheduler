@@ -1,0 +1,317 @@
+// 本番環境用Prismaスキーマ（PostgreSQL対応）
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザーモデル（管理者・職人共通）
+model User {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  password          String
+  name              String
+  role              UserRole  @default(WORKER)
+  phone             String?
+  emergencyPhone    String?
+  avatar            String?
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  company           Company?  @relation(fields: [companyId], references: [id])
+  companyId         String?
+  
+  managedEvents     Event[]   @relation("EventManager")
+  assignedEvents    Event[]   @relation("EventWorker")
+  workReports       WorkReport[]
+  scheduleChanges   ScheduleChangeRequest[]
+  notifications     Notification[]
+  workerProfile     WorkerProfile?
+  
+  @@index([email])
+  @@index([companyId])
+}
+
+enum UserRole {
+  SUPERADMIN     // スーパー管理者（システム全体管理）
+  ADMIN          // 管理者（会社レベル）
+  MANAGER        // マネージャー
+  MASTER_WORKER  // 親方
+  WORKER         // 子方
+}
+
+// 会社・組織
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  address     String?
+  phone       String?
+  email       String?
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users       User[]
+  sites       Site[]
+  events      Event[]
+}
+
+// 職人プロフィール（追加情報）
+model WorkerProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // スキル・資格
+  skills          Skill[]
+  certifications  Json // JSON形式で資格リストを保存
+  
+  // 稼働情報
+  maxDailySlots   Int      @default(3)
+  currentSlots    Int      @default(0)
+  
+  // 対応可能エリア
+  workAreas       Json // JSON形式で対応エリアを保存
+  
+  // 対応可能時間
+  availableMorning  Boolean @default(true)
+  availableNight    Boolean @default(false)
+  availableWeekend  Boolean @default(true)
+  availableHoliday  Boolean @default(false)
+  
+  // 評価
+  rating          Float?   @default(0)
+  completedJobs   Int      @default(0)
+  
+  // 保険
+  hasLiabilityInsurance  Boolean @default(false)
+  hasAccidentInsurance   Boolean @default(false)
+  insuranceExpiryDate    DateTime?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([userId])
+}
+
+// スキル
+model Skill {
+  id          String   @id @default(cuid())
+  name        String
+  category    String
+  level       SkillLevel @default(BASIC)
+  
+  // Relations
+  workers     WorkerProfile[]
+  
+  @@index([category])
+}
+
+enum SkillLevel {
+  BASIC
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+// サイト（作業場所）
+model Site {
+  id          String   @id @default(cuid())
+  name        String
+  address     String
+  clientName  String?
+  clientPhone String?
+  clientEmail String?
+  accessInfo  String?   // アクセス情報
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  company     Company  @relation(fields: [companyId], references: [id])
+  companyId   String
+  events      Event[]
+  
+  @@index([companyId])
+  @@index([address])
+}
+
+// イベント（スケジュール）
+model Event {
+  id              String     @id @default(cuid())
+  title           String
+  description     String?
+  date            DateTime
+  startTime       String
+  endTime         String
+  status          EventStatus @default(SCHEDULED)
+  constructionType String?   // 工事種別
+  
+  // Relations
+  site            Site       @relation(fields: [siteId], references: [id])
+  siteId          String
+  company         Company    @relation(fields: [companyId], references: [id])
+  companyId       String
+  manager         User?      @relation("EventManager", fields: [managerId], references: [id])
+  managerId       String?
+  worker          User?      @relation("EventWorker", fields: [workerId], references: [id])
+  workerId        String?
+  
+  // 作業詳細
+  estimatedHours  Float?
+  actualHours     Float?
+  notes          String?
+  
+  // 子レコード
+  workReports    WorkReport[]
+  scheduleChanges ScheduleChangeRequest[]
+  
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  
+  @@index([date])
+  @@index([workerId])
+  @@index([managerId])
+  @@index([siteId])
+  @@index([companyId])
+}
+
+enum EventStatus {
+  SCHEDULED    // 予定
+  IN_PROGRESS  // 作業中
+  COMPLETED    // 完了
+  CANCELLED    // キャンセル
+  POSTPONED    // 延期
+}
+
+// 作業報告書
+model WorkReport {
+  id              String   @id @default(cuid())
+  
+  // Relations
+  event           Event    @relation(fields: [eventId], references: [id])
+  eventId         String
+  worker          User     @relation(fields: [workerId], references: [id])
+  workerId        String
+  
+  // 報告内容
+  actualStartTime DateTime
+  actualEndTime   DateTime
+  workContent     String
+  usedMaterials   Json     // 使用部材
+  problemsFound   String?  // 発見した問題
+  recommendations String?  // 推奨事項
+  customerSignature Boolean @default(false)
+  photos          Json     // 作業写真のURL配列
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([eventId])
+  @@index([workerId])
+}
+
+// スケジュール変更申請
+model ScheduleChangeRequest {
+  id          String   @id @default(cuid())
+  
+  // Relations
+  event       Event    @relation(fields: [eventId], references: [id])
+  eventId     String
+  requestedBy User     @relation(fields: [userId], references: [id])
+  userId      String
+  
+  // 変更内容
+  changeType  ScheduleChangeType
+  currentDate DateTime
+  requestedDate DateTime?
+  currentTime String
+  requestedTime String?
+  reason      String
+  status      RequestStatus @default(PENDING)
+  
+  // 承認情報
+  approvedBy  String?
+  approvedAt  DateTime?
+  rejectedReason String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([eventId])
+  @@index([userId])
+  @@index([status])
+}
+
+enum ScheduleChangeType {
+  RESCHEDULE  // 日程変更
+  TIME_CHANGE // 時間変更
+  CANCEL      // キャンセル
+  POSTPONE    // 延期
+}
+
+enum RequestStatus {
+  PENDING    // 承認待ち
+  APPROVED   // 承認済み
+  REJECTED   // 却下
+}
+
+// 通知
+model Notification {
+  id          String   @id @default(cuid())
+  
+  // Relations
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  
+  // 通知内容
+  type        String
+  title       String
+  message     String
+  severity    NotificationSeverity @default(INFO)
+  data        Json     @default("{}")
+  actionUrl   String?
+  isRead      Boolean  @default(false)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+enum NotificationSeverity {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+}
+
+// 在庫管理
+model InventoryItem {
+  id              String   @id @default(cuid())
+  name            String
+  category        String
+  sku             String   @unique
+  description     String?
+  unitPrice       Decimal?
+  currentStock    Int      @default(0)
+  minimumStock    Int      @default(0)
+  supplier        String?
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([category])
+  @@index([currentStock])
+}
+
+// PostgreSQL用インデックス最適化
+// ここにカスタムインデックスを追加可能
