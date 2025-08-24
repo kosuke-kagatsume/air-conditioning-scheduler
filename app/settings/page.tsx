@@ -134,7 +134,7 @@ export default function SettingsPage() {
     }
   }
 
-  const removeSkill = (skillToRemove) => {
+  const removeSkill = (skillToRemove: string) => {
     setSkills(skills.filter(skill => skill !== skillToRemove))
     showToast(`スキル「${skillToRemove}」を削除しました`, 'success')
   }
@@ -147,12 +147,12 @@ export default function SettingsPage() {
     }
   }
 
-  const removeCertification = (certToRemove) => {
+  const removeCertification = (certToRemove: string) => {
     setCertifications(certifications.filter(cert => cert !== certToRemove))
     showToast(`資格「${certToRemove}」を削除しました`, 'success')
   }
 
-  const toggleWorkerStatus = (workerId) => {
+  const toggleWorkerStatus = (workerId: number) => {
     setWorkers(workers.map(worker => 
       worker.id === workerId 
         ? { ...worker, status: worker.status === 'active' ? 'inactive' : 'active' }
@@ -161,7 +161,7 @@ export default function SettingsPage() {
     showToast('職人のステータスを変更しました', 'success')
   }
 
-  const toggleTemplateStatus = (templateId, templateType) => {
+  const toggleTemplateStatus = (templateId: number, templateType: string) => {
     if (templateType === 'shift') {
       setShiftTemplates(shiftTemplates.map(template =>
         template.id === templateId
@@ -184,7 +184,7 @@ export default function SettingsPage() {
     showToast(`テンプレートの状態を変更しました`, 'success')
   }
 
-  const handleApprovalAction = (action, item) => {
+  const handleApprovalAction = (action: string, item: string) => {
     showToast(`${action}を実行しました: ${item}`, 'success')
   }
 
@@ -193,12 +193,12 @@ export default function SettingsPage() {
     setTimeout(() => showToast('レポート生成完了！', 'success'), 1500)
   }
 
-  const handleExportData = (format) => {
+  const handleExportData = (format: string) => {
     showToast(`${format}形式でデータをエクスポートしています...`, 'info')
     setTimeout(() => showToast(`${format}ファイルのダウンロードを開始しました`, 'success'), 1000)
   }
 
-  const toggleUserRole = (roleId) => {
+  const toggleUserRole = (roleId: number) => {
     setUserRoles(userRoles.map(role =>
       role.id === roleId
         ? { ...role, active: !role.active }
@@ -207,7 +207,7 @@ export default function SettingsPage() {
     showToast('役割の状態を変更しました', 'success')
   }
 
-  const toggleUserStatus = (userId) => {
+  const toggleUserStatus = (userId: number) => {
     setUsers(users.map(user =>
       user.id === userId
         ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }
@@ -216,7 +216,7 @@ export default function SettingsPage() {
     showToast('ユーザーのステータスを変更しました', 'success')
   }
 
-  const syncMobileApp = (feature) => {
+  const syncMobileApp = (feature: string) => {
     showToast(`${feature}をモバイルアプリに同期しています...`, 'info')
     setTimeout(() => showToast('モバイルアプリとの同期が完了しました！', 'success'), 1500)
   }
@@ -269,7 +269,7 @@ export default function SettingsPage() {
             <input
               type="text"
               value={editingItem?.name || editingItem?.title || ''}
-              onChange={(e) => setEditingItem(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => setEditingItem((prev: any) => ({ ...prev, name: e.target.value }))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -310,38 +310,6 @@ export default function SettingsPage() {
         background: '#f5f6f8',
         minHeight: 'calc(100vh - 56px)'
       }}>
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '24px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <h1 style={{
-            fontSize: '24px',
-            fontWeight: '600',
-            marginBottom: '20px',
-            color: '#1f2937'
-          }}>
-            管理者設定
-          </h1>
-
-          {/* Tabs Navigation */}
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            marginBottom: '24px',
-            flexWrap: 'wrap'
-          }}>
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  padding: '8px 16px',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  background: activeTab === tab.id ? '#3B82F6' : 'white',
-                  color: activeTab === tab.id ? 'white' : '#374151',>
         <div style={{
           background: 'white',
           borderRadius: '12px',
