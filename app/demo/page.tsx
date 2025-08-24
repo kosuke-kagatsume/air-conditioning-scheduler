@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import CalendarView from '@/components/Calendar/CalendarView'
 import AppLayout from '@/components/AppLayout'
 import WorkerProfile from '@/components/WorkerProfile'
+import AdminProfile from '@/components/AdminProfile'
 import { X } from 'lucide-react'
 
 export default function DemoPage() {
@@ -130,7 +131,7 @@ export default function DemoPage() {
         <AppLayout>
           <div style={{ 
             padding: '16px',
-            paddingRight: (user?.role === 'worker' || user?.role === 'WORKER') ? '360px' : '16px',
+            paddingRight: user ? '360px' : '16px',
             transition: 'padding-right 0.3s ease',
             minHeight: 'calc(100vh - 56px)',
             background: '#ffffff'
@@ -142,6 +143,11 @@ export default function DemoPage() {
           {/* 職人用プロフィールカード */}
           {user && (user.role === 'worker' || user.role === 'WORKER') && !isDWAdmin && (
             <WorkerProfile user={user} />
+          )}
+          
+          {/* 管理者用プロフィールカード */}
+          {user && (user.role === 'admin' || user.role === 'ADMIN') && (
+            <AdminProfile user={user} />
           )}
         </AppLayout>
       </div>

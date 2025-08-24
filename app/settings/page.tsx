@@ -135,8 +135,8 @@ export default function SettingsPage() {
   }
 
   const removeSkill = (skillToRemove: string) => {
-    setSkills(skills.filter(skill => skill !== skillToRemove))
-    showToast(`スキル「${skillToRemove}」を削除しました`, 'success')
+    setDeletingItem({ name: skillToRemove, type: 'skill' })
+    setDeleteModalOpen(true)
   }
 
   const addCertification = () => {
@@ -148,8 +148,8 @@ export default function SettingsPage() {
   }
 
   const removeCertification = (certToRemove: string) => {
-    setCertifications(certifications.filter(cert => cert !== certToRemove))
-    showToast(`資格「${certToRemove}」を削除しました`, 'success')
+    setDeletingItem({ name: certToRemove, type: 'certification' })
+    setDeleteModalOpen(true)
   }
 
   const toggleWorkerStatus = (workerId: number) => {
@@ -238,6 +238,34 @@ export default function SettingsPage() {
 
   const handleDelete = () => {
     if (deletingItem) {
+      // 実際の削除処理
+      switch(deletingItem.type) {
+        case 'skill':
+          setSkills(skills.filter(s => s !== deletingItem.name))
+          break
+        case 'certification':
+          setCertifications(certifications.filter(c => c !== deletingItem.name))
+          break
+        case 'worker':
+          setWorkers(workers.filter(w => w.id !== deletingItem.id))
+          break
+        case 'shift':
+          setShiftTemplates(shiftTemplates.filter(t => t.id !== deletingItem.id))
+          break
+        case 'approval':
+          setApprovalTemplates(approvalTemplates.filter(t => t.id !== deletingItem.id))
+          break
+        case 'report':
+          setReportTemplates(reportTemplates.filter(r => r.id !== deletingItem.id))
+          break
+        case 'role':
+          setUserRoles(userRoles.filter(r => r.id !== deletingItem.id))
+          break
+        case 'user':
+          setUsers(users.filter(u => u.id !== deletingItem.id))
+          break
+      }
+      
       showToast(`${deletingItem.name || deletingItem.title}を削除しました`, 'success')
       setDeleteModalOpen(false)
       setDeletingItem(null)
@@ -246,6 +274,40 @@ export default function SettingsPage() {
 
   const handleEdit = () => {
     if (editingItem) {
+      // 実際の更新処理
+      switch(editingItem.type) {
+        case 'worker':
+          setWorkers(workers.map(w => 
+            w.id === editingItem.id ? { ...w, name: editingItem.name } : w
+          ))
+          break
+        case 'shift':
+          setShiftTemplates(shiftTemplates.map(t => 
+            t.id === editingItem.id ? { ...t, name: editingItem.name } : t
+          ))
+          break
+        case 'approval':
+          setApprovalTemplates(approvalTemplates.map(t => 
+            t.id === editingItem.id ? { ...t, name: editingItem.name } : t
+          ))
+          break
+        case 'report':
+          setReportTemplates(reportTemplates.map(r => 
+            r.id === editingItem.id ? { ...r, name: editingItem.name } : r
+          ))
+          break
+        case 'role':
+          setUserRoles(userRoles.map(r => 
+            r.id === editingItem.id ? { ...r, name: editingItem.name } : r
+          ))
+          break
+        case 'user':
+          setUsers(users.map(u => 
+            u.id === editingItem.id ? { ...u, name: editingItem.name } : u
+          ))
+          break
+      }
+      
       showToast(`${editingItem.name || editingItem.title}を更新しました`, 'success')
       setEditModalOpen(false)
       setEditingItem(null)
@@ -713,7 +775,7 @@ export default function SettingsPage() {
                       </div>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <button 
-                          onClick={() => alert(`職人「${worker.name}」の編集画面を開きます`)}
+                          onClick={() => openEditModal(worker, 'worker')}
                           style={{
                             padding: '4px 8px',
                             background: '#f3f4f6',
@@ -725,12 +787,7 @@ export default function SettingsPage() {
                           編集
                         </button>
                         <button 
-                          onClick={() => {
-                            if (confirm(`職人「${worker.name}」を削除しますか？`)) {
-                              setWorkers(workers.filter(w => w.id !== worker.id))
-                              alert(`職人「${worker.name}」を削除しました`)
-                            }
-                          }}
+                          onClick={() => openDeleteModal(worker, 'worker')}
                           style={{
                             padding: '4px 8px',
                             background: '#fef2f2',
@@ -859,7 +916,7 @@ export default function SettingsPage() {
                       </div>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <button 
-                          onClick={() => alert(`シフトテンプレート「${template.name}」の編集画面を開きます`)}
+                          onClick={() => openEditModal(template, 'shift')}
                           style={{
                             padding: '4px 8px',
                             background: '#f3f4f6',
@@ -1583,7 +1640,7 @@ export default function SettingsPage() {
                       </div>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <button 
-                          onClick={() => alert(`承認テンプレート「${template.name}」の編集画面を開きます`)}
+                          onClick={() => openEditModal(template, 'approval')}
                           style={{
                             padding: '4px 8px',
                             background: '#f3f4f6',
@@ -1764,7 +1821,7 @@ export default function SettingsPage() {
                       </div>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <button 
-                          onClick={() => alert(`レポート「${report.name}」の編集画面を開きます`)}
+                          onClick={() => openEditModal(report, 'report')}
                           style={{
                             padding: '4px 8px',
                             background: '#f3f4f6',
@@ -2244,7 +2301,7 @@ export default function SettingsPage() {
                       
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <button 
-                          onClick={() => alert(`役割「${role.name}」の編集画面を開きます\n権限設定を変更できます。`)}
+                          onClick={() => openEditModal(role, 'role')}
                           style={{
                             padding: '4px 8px',
                             background: '#f3f4f6',
@@ -2359,7 +2416,7 @@ export default function SettingsPage() {
                       </div>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <button 
-                          onClick={() => alert(`ユーザー「${user.name}」の編集画面を開きます\nメール、役割、権限を変更できます。`)}
+                          onClick={() => openEditModal(user, 'user')}
                           style={{
                             padding: '4px 8px',
                             background: '#f3f4f6',
