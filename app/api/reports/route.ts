@@ -59,7 +59,12 @@ export async function GET(request: NextRequest) {
 async function generateWorkerPerformanceReport(fromDate: Date, toDate: Date) {
   try {
     // 職人別の作業実績を集計
-    const workers = await prisma.worker.findMany({
+    const workers = await prisma.user.findMany({
+      where: {
+        role: {
+          in: ['WORKER', 'MASTER_WORKER']
+        }
+      },
       include: {
         assignedEvents: {
           where: {
@@ -73,13 +78,17 @@ async function generateWorkerPerformanceReport(fromDate: Date, toDate: Date) {
             site: true
           }
         },
-        skills: true
+        workerProfile: {
+          include: {
+            skills: true
+          }
+        }
       }
     })
 
     const workerStats = workers.map(worker => {
       const completedJobs = worker.assignedEvents.length
-      const totalRevenue = worker.assignedEvents.reduce((sum, event) => sum + (event.estimatedRevenue || 50000), 0)
+      const totalRevenue = worker.assignedEvents.reduce((sum, event) => sum + (event.estimatedHours || 0) * 5000, 0)
       const avgJobsPerMonth = completedJobs / Math.max(1, Math.ceil((toDate.getTime() - fromDate.getTime()) / (30 * 24 * 60 * 60 * 1000)))
       
       return {
@@ -88,7 +97,7 @@ async function generateWorkerPerformanceReport(fromDate: Date, toDate: Date) {
         completedJobs,
         totalRevenue,
         avgJobsPerMonth: Math.round(avgJobsPerMonth * 10) / 10,
-        skills: worker.skills.map(s => s.name),
+        skills: worker.workerProfile?.skills?.map(s => s.name) || [],
         efficiency: Math.min(100, Math.round((completedJobs / Math.max(1, avgJobsPerMonth * 3)) * 100))
       }
     })

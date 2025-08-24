@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import * as Sentry from '@sentry/nextjs'
 import { prisma } from "@/lib/prisma"
+import { handleApiError, successResponse, validateRequestBody, getPaginationParams } from '@/lib/api-helpers'
 
 export async function GET(request: NextRequest) {
   return Sentry.startSpan(
@@ -14,11 +15,20 @@ export async function GET(request: NextRequest) {
     },
     async () => {
       try {
-        const workers = await prisma.worker.findMany({
+        // 職人（WORKER, MASTER_WORKER）のユーザーを取得
+        const workers = await prisma.user.findMany({
+          where: {
+            role: {
+              in: ['WORKER', 'MASTER_WORKER']
+            }
+          },
           include: {
-            skills: true,
-            certifications: true,
-            company: true
+            company: true,
+            workerProfile: {
+              include: {
+                skills: true
+              }
+            }
           },
           orderBy: {
             name: 'asc'
@@ -67,51 +77,71 @@ export async function POST(request: NextRequest) {
         }
 
         // メールアドレスの重複チェック
-        const existingWorker = await prisma.worker.findUnique({
+        const existingUser = await prisma.user.findUnique({
           where: { email: body.email }
         })
 
-        if (existingWorker) {
+        if (existingUser) {
           return NextResponse.json(
             { success: false, message: 'このメールアドレスは既に使用されています' },
             { status: 400 }
           )
         }
 
-        // 職人を作成
-        const worker = await prisma.worker.create({
-          data: {
-            name: body.name,
-            email: body.email,
-            phone: body.phone,
-            emergencyContact: body.emergencyContact,
-            emergencyPhone: body.emergencyPhone,
-            address: body.address,
-            birthDate: body.birthDate ? new Date(body.birthDate) : null,
-            hireDate: body.hireDate ? new Date(body.hireDate) : null,
-            employmentType: body.employmentType || 'FULL_TIME',
-            hourlyRate: body.hourlyRate ? parseFloat(body.hourlyRate) : null,
-            notes: body.notes,
-            companyId: 'company-1', // デフォルト会社ID
-            skills: {
-              create: (body.skills || []).map((skill: string) => ({
-                name: skill,
-                level: 'INTERMEDIATE'
-              }))
-            },
-            certifications: {
-              create: (body.certifications || []).map((cert: string) => ({
-                name: cert,
-                issuedDate: new Date(),
-                isValid: true
-              }))
+        // bcryptをインポート
+        const bcrypt = require('bcryptjs')
+        const hashedPassword = await bcrypt.hash(body.password || 'default123', 10)
+
+        // 職人ユーザーを作成（トランザクション使用）
+        const worker = await prisma.$transaction(async (tx) => {
+          // ユーザーを作成
+          const user = await tx.user.create({
+            data: {
+              name: body.name,
+              email: body.email,
+              password: hashedPassword,
+              phone: body.phone,
+              emergencyPhone: body.emergencyPhone,
+              role: body.role || 'WORKER',
+              companyId: body.companyId || 'company-1', // デフォルト会社ID
             }
-          },
-          include: {
-            skills: true,
-            certifications: true,
-            company: true
-          }
+          })
+
+          // WorkerProfileを作成
+          const workerProfile = await tx.workerProfile.create({
+            data: {
+              userId: user.id,
+              certifications: body.certifications || [],
+              workAreas: body.workAreas || [],
+              maxDailySlots: body.maxDailySlots || 3,
+              availableMorning: body.availableMorning ?? true,
+              availableNight: body.availableNight ?? false,
+              availableWeekend: body.availableWeekend ?? true,
+              availableHoliday: body.availableHoliday ?? false,
+              skills: {
+                create: (body.skills || []).map((skill: string) => ({
+                  name: skill,
+                  category: 'GENERAL'
+                }))
+              }
+            },
+            include: {
+              skills: true
+            }
+          })
+
+          // 完全なユーザー情報を返す
+          return await tx.user.findUnique({
+            where: { id: user.id },
+            include: {
+              company: true,
+              workerProfile: {
+                include: {
+                  skills: true
+                }
+              }
+            }
+          })
         })
 
         return NextResponse.json({
@@ -155,35 +185,68 @@ export async function PUT(request: NextRequest) {
           )
         }
 
-        // 既存の職人を更新
-        const worker = await prisma.worker.update({
-          where: { id },
-          data: {
-            ...workerData,
-            birthDate: workerData.birthDate ? new Date(workerData.birthDate) : null,
-            hireDate: workerData.hireDate ? new Date(workerData.hireDate) : null,
-            hourlyRate: workerData.hourlyRate ? parseFloat(workerData.hourlyRate) : null,
-            skills: {
-              deleteMany: {},
-              create: (skills || []).map((skill: string) => ({
-                name: skill,
-                level: 'INTERMEDIATE'
-              }))
-            },
-            certifications: {
-              deleteMany: {},
-              create: (certifications || []).map((cert: string) => ({
-                name: cert,
-                issuedDate: new Date(),
-                isValid: true
-              }))
+        // 既存の職人を更新（トランザクション使用）
+        const worker = await prisma.$transaction(async (tx) => {
+          // ユーザー情報を更新
+          const user = await tx.user.update({
+            where: { id },
+            data: {
+              name: workerData.name,
+              phone: workerData.phone,
+              emergencyPhone: workerData.emergencyPhone,
+              isActive: workerData.isActive ?? true
             }
-          },
-          include: {
-            skills: true,
-            certifications: true,
-            company: true
-          }
+          })
+
+          // WorkerProfileが存在する場合は更新
+          const workerProfile = await tx.workerProfile.upsert({
+            where: { userId: id },
+            create: {
+              userId: id,
+              certifications: certifications || [],
+              workAreas: workerData.workAreas || [],
+              maxDailySlots: workerData.maxDailySlots || 3,
+              availableMorning: workerData.availableMorning ?? true,
+              availableNight: workerData.availableNight ?? false,
+              availableWeekend: workerData.availableWeekend ?? true,
+              availableHoliday: workerData.availableHoliday ?? false,
+              skills: {
+                create: (skills || []).map((skill: string) => ({
+                  name: skill,
+                  category: 'GENERAL'
+                }))
+              }
+            },
+            update: {
+              certifications: certifications || [],
+              workAreas: workerData.workAreas || [],
+              maxDailySlots: workerData.maxDailySlots,
+              availableMorning: workerData.availableMorning,
+              availableNight: workerData.availableNight,
+              availableWeekend: workerData.availableWeekend,
+              availableHoliday: workerData.availableHoliday,
+              skills: {
+                deleteMany: {},
+                create: (skills || []).map((skill: string) => ({
+                  name: skill,
+                  category: 'GENERAL'
+                }))
+              }
+            }
+          })
+
+          // 完全なユーザー情報を返す
+          return await tx.user.findUnique({
+            where: { id },
+            include: {
+              company: true,
+              workerProfile: {
+                include: {
+                  skills: true
+                }
+              }
+            }
+          })
         })
 
         return NextResponse.json({
@@ -242,8 +305,8 @@ export async function DELETE(request: NextRequest) {
           )
         }
 
-        // 職人を削除
-        await prisma.worker.delete({
+        // 職人ユーザーを削除（WorkerProfileは自動的にカスケード削除される）
+        await prisma.user.delete({
           where: { id }
         })
 
