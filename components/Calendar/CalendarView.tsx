@@ -27,6 +27,10 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
   const [isMobile, setIsMobile] = useState(false)
   const [events, setEvents] = useState<Event[]>(mockEvents)
   const [isLoading, setIsLoading] = useState(false)
+  
+  // デバッグ用
+  console.log('mockEvents loaded:', mockEvents.length, 'events')
+  console.log('First few events:', mockEvents.slice(0, 5))
 
   // APIからイベントを読み込み
   async function loadEvents(viewStart: Date, viewEnd: Date) {

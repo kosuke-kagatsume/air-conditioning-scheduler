@@ -108,30 +108,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* ユーザー情報表示 */}
-          {user && (
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '8px',
-              padding: '4px 12px',
-              background: user.role === 'admin' ? '#fef2f2' : '#f0fdf4',
-              borderRadius: '20px',
-              fontSize: '14px'
-            }}>
-              <span style={{ fontWeight: '600' }}>{user.name}</span>
-              <span style={{ 
-                fontSize: '12px',
-                padding: '2px 8px',
-                background: user.role === 'admin' ? '#ef4444' : '#22c55e',
-                color: 'white',
-                borderRadius: '10px'
-              }}>
-                {user.role === 'admin' ? '管理者' : '職人'}
-              </span>
-            </div>
-          )}
-          
           {/* 新しい通知システム */}
           <NotificationBell />
           

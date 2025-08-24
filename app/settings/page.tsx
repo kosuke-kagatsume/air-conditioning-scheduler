@@ -1,10 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import AppLayout from '@/components/AppLayout'
 import { ToastContainer } from '@/components/Toast'
 import Modal, { ConfirmDialog } from '@/components/Modal'
+import QRCodeModal from '@/components/QRCodeModal'
+import ColorPicker from '@/components/ColorPicker'
+import AppSyncModal from '@/components/AppSyncModal'
+import ReportModal from '@/components/ReportModal'
+import WorkerModal from '@/components/WorkerModal'
+import AutoAssignmentModal from '@/components/AutoAssignmentModal'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -18,6 +24,13 @@ export default function SettingsPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState<any>(null)
   const [deletingItem, setDeletingItem] = useState<any>(null)
+  const [qrModalOpen, setQrModalOpen] = useState(false)
+  const [qrData, setQrData] = useState({ title: '', data: '', description: '' })
+  const [appSyncModalOpen, setAppSyncModalOpen] = useState(false)
+  const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [workerModalOpen, setWorkerModalOpen] = useState(false)
+  const [autoAssignmentModalOpen, setAutoAssignmentModalOpen] = useState(false)
+  const [editingWorker, setEditingWorker] = useState<any>(null)
   
   // Calendar display settings
   const [calendarSettings, setCalendarSettings] = useState({
@@ -115,6 +128,31 @@ export default function SettingsPage() {
     { id: 'permissions', label: '権限管理', icon: '🔒' },
     { id: 'calendar-config', label: '営業日設定', icon: '📆' }
   ]
+  // データベースから職人データを取得
+  useEffect(() => {
+    const loadWorkers = async () => {
+      try {
+        const response = await fetch('/api/workers')
+        const result = await response.json()
+        
+        if (result.success) {
+          setWorkers(result.workers.map((worker: any) => ({
+            ...worker,
+            statusColor: worker.employmentType === 'FULL_TIME' ? '#10b981' : '#f59e0b',
+            status: worker.employmentType === 'FULL_TIME' ? '稼働中' : 'パート',
+            cert: worker.certifications?.[0]?.issuedDate ? 
+              new Date(worker.certifications[0].issuedDate).toISOString().split('T')[0] : 
+              '2025/12/31',
+            skills: worker.skills?.map((s: any) => s.name) || []
+          })))
+        }
+      } catch (error) {
+        console.error('Error loading workers:', error)
+      }
+    }
+    
+    loadWorkers()
+  }, [])
 
   // Toast helper
   const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
@@ -221,6 +259,11 @@ export default function SettingsPage() {
     setTimeout(() => showToast('モバイルアプリとの同期が完了しました！', 'success'), 1500)
   }
 
+  const openQRModal = (title: string, data: string, description: string) => {
+    setQrData({ title, data, description })
+    setQrModalOpen(true)
+  }
+
   const handleSave = () => {
     // Save settings logic here
     showToast('設定を保存しました', 'success')
@@ -231,6 +274,38 @@ export default function SettingsPage() {
     setEditModalOpen(true)
   }
 
+  const handleWorkerDelete = async (workerId: string) => {
+    try {
+      const response = await fetch(`/api/workers?id=${workerId}`, {
+        method: 'DELETE'
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        // データベースから職人リストを再取得
+        const workersResponse = await fetch('/api/workers')
+        const workersResult = await workersResponse.json()
+        
+        if (workersResult.success) {
+          setWorkers(workersResult.workers.map((worker: any) => ({
+            ...worker,
+            statusColor: worker.employmentType === 'FULL_TIME' ? '#10b981' : '#f59e0b',
+            status: worker.employmentType === 'FULL_TIME' ? '稼働中' : 'パート',
+            cert: worker.certifications?.[0]?.issuedDate ? 
+              new Date(worker.certifications[0].issuedDate).toISOString().split('T')[0] : 
+              '2025/12/31',
+            skills: worker.skills?.map((s: any) => s.name) || []
+          })))
+        }
+      } else {
+        alert(result.message || '削除に失敗しました')
+      }
+    } catch (error) {
+      console.error('Error deleting worker:', error)
+      alert('削除中にエラーが発生しました')
+    }
+  }
   const openDeleteModal = (item: any, type: string) => {
     setDeletingItem({ ...item, type })
     setDeleteModalOpen(true)
@@ -247,7 +322,7 @@ export default function SettingsPage() {
           setCertifications(certifications.filter(c => c !== deletingItem.name))
           break
         case 'worker':
-          setWorkers(workers.filter(w => w.id !== deletingItem.id))
+          handleWorkerDelete(deletingItem.id)
           break
         case 'shift':
           setShiftTemplates(shiftTemplates.filter(t => t.id !== deletingItem.id))
@@ -364,6 +439,71 @@ export default function SettingsPage() {
         type="danger"
       />
 
+      {/* QR Code Modal */}
+      <QRCodeModal
+        isOpen={qrModalOpen}
+        onClose={() => setQrModalOpen(false)}
+        title={qrData.title}
+        data={qrData.data}
+        description={qrData.description}
+      />
+
+      {/* App Sync Modal */}
+      <AppSyncModal
+        isOpen={appSyncModalOpen}
+        onClose={() => setAppSyncModalOpen(false)}
+      />
+
+      {/* Report Modal */}
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+      />
+
+      {/* Worker Modal */}
+      <WorkerModal
+        isOpen={workerModalOpen}
+        onClose={() => {
+          setWorkerModalOpen(false)
+          setEditingWorker(null)
+        }}
+        onSave={async (workerData) => {
+          // データベースから職人リストを再取得
+          try {
+            const response = await fetch('/api/workers')
+            const result = await response.json()
+            
+            if (result.success) {
+              setWorkers(result.workers.map((worker: any) => ({
+                ...worker,
+                statusColor: worker.employmentType === 'FULL_TIME' ? '#10b981' : '#f59e0b',
+                status: worker.employmentType === 'FULL_TIME' ? '稼働中' : 'パート',
+                cert: worker.certifications?.[0]?.issuedDate ? 
+                  new Date(worker.certifications[0].issuedDate).toISOString().split('T')[0] : 
+                  '2025/12/31',
+                skills: worker.skills?.map((s: any) => s.name) || []
+              })))
+              showToast(`${workerData.name}を${editingWorker ? '更新' : '登録'}しました`, 'success')
+            }
+          } catch (error) {
+            console.error('Error refreshing workers:', error)
+          }
+          
+          setWorkerModalOpen(false)
+          setEditingWorker(null)
+        }}
+        skills={skills}
+        certifications={certifications}
+        editingWorker={editingWorker}
+      />
+
+      {/* Auto Assignment Modal */}
+      <AutoAssignmentModal
+        isOpen={autoAssignmentModalOpen}
+        onClose={() => setAutoAssignmentModalOpen(false)}
+        showToast={showToast}
+      />
+
       <div style={{
         padding: '20px',
         maxWidth: '1200px',
@@ -474,31 +614,21 @@ export default function SettingsPage() {
                 <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>
                   色分けルール
                 </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {Object.entries(calendarSettings.colorRules).map(([type, color]) => (
-                    <div key={type} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontSize: '14px', minWidth: '80px' }}>
-                        {type === 'installation' ? '設置工事' : 
-                         type === 'maintenance' ? 'メンテナンス' : 
-                         type === 'repair' ? '修理' : '緊急対応'}:
-                      </span>
-                      <input 
-                        type="color" 
-                        value={color}
-                        onChange={(e) => setCalendarSettings({
-                          ...calendarSettings, 
-                          colorRules: {...calendarSettings.colorRules, [type]: e.target.value}
-                        })}
-                        style={{ width: '40px', height: '30px', border: 'none', borderRadius: '4px' }}
-                      />
-                      <div style={{ 
-                        width: '20px', 
-                        height: '20px', 
-                        backgroundColor: color, 
-                        borderRadius: '4px',
-                        border: '1px solid #e5e7eb'
-                      }}></div>
-                    </div>
+                    <ColorPicker
+                      key={type}
+                      color={color}
+                      onChange={(newColor) => setCalendarSettings({
+                        ...calendarSettings, 
+                        colorRules: {...calendarSettings.colorRules, [type]: newColor}
+                      })}
+                      label={
+                        type === 'installation' ? '設置工事' : 
+                        type === 'maintenance' ? 'メンテナンス' : 
+                        type === 'repair' ? '修理' : '緊急対応'
+                      }
+                    />
                   ))}
                 </div>
               </div>
@@ -699,15 +829,20 @@ export default function SettingsPage() {
                   marginBottom: '12px' 
                 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>職人一覧</h3>
-                  <button style={{
-                    padding: '6px 12px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}>
+                  <button 
+                    onClick={() => {
+                      setEditingWorker(null)
+                      setWorkerModalOpen(true)
+                    }}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}>
                     + 新規登録
                   </button>
                 </div>
@@ -775,7 +910,10 @@ export default function SettingsPage() {
                       </div>
                       <div style={{ display: 'flex', gap: '4px' }}>
                         <button 
-                          onClick={() => openEditModal(worker, 'worker')}
+                          onClick={() => {
+                            setEditingWorker(worker)
+                            setWorkerModalOpen(true)
+                          }}
                           style={{
                             padding: '4px 8px',
                             background: '#f3f4f6',
@@ -833,7 +971,11 @@ export default function SettingsPage() {
                     アプリデータを同期
                   </button>
                   <button 
-                    onClick={() => alert('職人登録用QRコードを生成しました！\n職人にこのQRコードをスキャンしてもらってください。')}
+                    onClick={() => openQRModal(
+                      '職人登録用QRコード',
+                      `https://dandori-scheduler.vercel.app/register/worker?token=${Date.now()}`,
+                      '職人にこのQRコードをスキャンしてもらって、アプリに登録してください。'
+                    )}
                     style={{
                       padding: '8px 16px',
                       background: 'white',
@@ -867,15 +1009,17 @@ export default function SettingsPage() {
                   marginBottom: '12px' 
                 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>シフトテンプレート</h3>
-                  <button style={{
-                    padding: '6px 12px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}>
+                  <button 
+                    onClick={() => showToast('シフトテンプレートの新規作成機能を実装中です', 'info')}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}>
                     + 新規テンプレート
                   </button>
                 </div>
@@ -1054,94 +1198,33 @@ export default function SettingsPage() {
                 <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px' }}>
                   自動割当プレビュー
                 </h3>
-                <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>
-                  現在の設定で明日のスケジュールを自動割当した場合の結果
+                <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
+                  現在の設定で明日のスケジュールを自動割当した場合の結果を確認できます
                 </div>
 
-                <div style={{ 
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '6px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{ 
-                    display: 'grid', 
-                    gridTemplateColumns: '1fr 1fr 1fr 1fr',
-                    background: '#f9fafb',
-                    padding: '8px',
-                    fontSize: '13px',
-                    fontWeight: '600',
-                    borderBottom: '1px solid #e5e7eb'
-                  }}>
-                    <div>時間</div>
-                    <div>現場</div>
-                    <div>割当職人</div>
-                    <div>スキル適合度</div>
-                  </div>
-                  
-                  {[
-                    { time: '09:00', site: '渋谷オフィス', worker: '山田太郎', match: '100%', color: '#10b981' },
-                    { time: '10:00', site: '新宿マンション', worker: '佐藤次郎', match: '85%', color: '#22c55e' },
-                    { time: '14:00', site: '品川ビル', worker: '鈴木三郎', match: '92%', color: '#16a34a' },
-                    { time: '16:00', site: '池袋店舗', worker: '田中四郎', match: '78%', color: '#f59e0b' }
-                  ].map((assignment, idx) => (
-                    <div key={idx} style={{ 
-                      display: 'grid', 
-                      gridTemplateColumns: '1fr 1fr 1fr 1fr',
-                      padding: '8px',
-                      fontSize: '13px',
-                      borderBottom: idx < 3 ? '1px solid #f3f4f6' : 'none',
-                      alignItems: 'center'
-                    }}>
-                      <div>{assignment.time}</div>
-                      <div>{assignment.site}</div>
-                      <div style={{ fontWeight: '500' }}>{assignment.worker}</div>
-                      <div>
-                        <span style={{ 
-                          color: assignment.color,
-                          fontSize: '12px',
-                          fontWeight: '600'
-                        }}>
-                          {assignment.match}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
-                  <button 
-                    onClick={() => {
-                      alert('自動割当を適用しています...')
-                      setTimeout(() => alert('スケジュールに反映しました！'), 1500)
-                    }}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '13px'
-                    }}>
-                    この割当を適用
-                  </button>
-                  <button 
-                    onClick={() => {
-                      alert('割当を再計算しています...')
-                      setTimeout(() => alert('新しい割当結果が生成されました'), 1200)
-                    }}
-                    style={{
-                      padding: '8px 16px',
-                      background: 'white',
-                      color: '#6b7280',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '13px'
-                    }}>
-                    再計算
-                  </button>
-                </div>
+                <button 
+                  onClick={() => setAutoAssignmentModalOpen(true)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    background: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'background-color 0.2s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+                >
+                  📊 自動割当結果を詳しく見る
+                </button>
               </div>
 
               {/* Mobile App Integration */}
@@ -1159,7 +1242,7 @@ export default function SettingsPage() {
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button 
-                    onClick={() => alert('アプリ自動通知を有効にしました！\n新しいスケジュールが職人アプリに自動で送信されます。')}
+                    onClick={() => setAppSyncModalOpen(true)}
                     style={{
                       padding: '8px 16px',
                       background: '#10b981',
@@ -1172,7 +1255,7 @@ export default function SettingsPage() {
                     アプリに自動通知ON
                   </button>
                   <button 
-                    onClick={() => alert('手動確認モードに設定しました。\nスケジュール変更は管理者確認後にアプリに送信されます。')}
+                    onClick={() => setAppSyncModalOpen(true)}
                     style={{
                       padding: '8px 16px',
                       background: 'white',
@@ -1536,7 +1619,7 @@ export default function SettingsPage() {
                         )}
                         {approval.status === '差し戻し' && (
                           <button 
-                            onClick={() => alert(`差し戻し詳細:\n案件: ${approval.work}\n申請者: ${approval.requester}\n理由: 必要書類が不足しています`)}
+                            onClick={() => showToast(`${approval.work}を差し戻しました`, 'warning')}
                             style={{
                               padding: '4px 8px',
                               background: '#f3f4f6',
@@ -1582,15 +1665,17 @@ export default function SettingsPage() {
                   marginBottom: '12px' 
                 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>承認テンプレート</h3>
-                  <button style={{
-                    padding: '6px 12px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}>
+                  <button 
+                    onClick={() => showToast('承認テンプレートの新規作成機能を実装中です', 'info')}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}>
                     + 新規テンプレート
                   </button>
                 </div>
@@ -1685,7 +1770,9 @@ export default function SettingsPage() {
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <button 
-                    onClick={() => alert('モバイルアプリ承認機能を有効にしました！\n職人・現場責任者がスマホで承認作業を行えるようになります。')}
+                    onClick={() => {
+                      showToast('モバイルアプリ承認機能を有効にしました', 'success')
+                    }}
                     style={{
                       padding: '8px 16px',
                       background: '#8b5cf6',
@@ -1698,7 +1785,14 @@ export default function SettingsPage() {
                     アプリ承認機能を有効化
                   </button>
                   <button 
-                    onClick={() => alert('承認権限付与用QRコードを生成しました！\nこのQRコードで責任者に承認権限を設定できます。')}
+                    onClick={() => {
+                      setQrData({
+                        title: '承認権限付与QRコード',
+                        data: `https://dandori-scheduler.app/grant-approval/${Date.now()}`,
+                        description: 'このQRコードをスキャンして承認権限を取得してください'
+                      })
+                      setQrModalOpen(true)
+                    }}
                     style={{
                       padding: '8px 16px',
                       background: 'white',
@@ -1772,15 +1866,17 @@ export default function SettingsPage() {
                   marginBottom: '12px' 
                 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>定期レポート設定</h3>
-                  <button style={{
-                    padding: '6px 12px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}>
+                  <button 
+                    onClick={() => showToast('レポートテンプレートの新規作成機能を実装中です', 'info')}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}>
                     + 新規レポート
                   </button>
                 </div>
@@ -1834,8 +1930,8 @@ export default function SettingsPage() {
                         </button>
                         <button 
                           onClick={() => {
-                            alert(`レポート「${report.name}」を送信しています...`)
-                            setTimeout(() => alert(`${report.format}形式のレポートを${report.recipients.join('、')}に送信しました！`), 1500)
+                            showToast(`レポート「${report.name}」を送信しています...`, 'info')
+                            setTimeout(() => showToast(`${report.format}形式のレポートを${report.recipients.join('、')}に送信しました`, 'success'), 1500)
                           }}
                           style={{
                             padding: '4px 8px',
@@ -1976,7 +2072,7 @@ export default function SettingsPage() {
                     レポート生成
                   </button>
                   <button 
-                    onClick={() => alert('レポートプレビューを表示しています...\n\n選択した項目:\n- 作業日時\n- 現場名\n- 作業内容\n- 担当職人\n- 作業時間')}
+                    onClick={() => setReportModalOpen(true)}
                     style={{
                       padding: '8px 16px',
                       background: 'white',
@@ -1992,7 +2088,7 @@ export default function SettingsPage() {
                     onClick={() => {
                       const templateName = prompt('テンプレート名を入力してください:')
                       if (templateName) {
-                        alert(`カスタムレポートテンプレート「${templateName}」を保存しました！`)
+                        showToast(`カスタムレポートテンプレート「${templateName}」を保存しました`, 'success')
                       }
                     }}
                     style={{
@@ -2131,10 +2227,7 @@ export default function SettingsPage() {
                     アプリデータ同期
                   </button>
                   <button 
-                    onClick={() => {
-                      alert('職人アプリで撮影された写真を含むレポートを生成しています...')
-                      setTimeout(() => alert('写真付きレポートが完成しました！\n現場写真と作業完了写真が含まれています。'), 2000)
-                    }}
+                    onClick={() => setReportModalOpen(true)}
                     style={{
                       padding: '8px 16px',
                       background: 'white',
@@ -2148,8 +2241,8 @@ export default function SettingsPage() {
                   </button>
                   <button 
                     onClick={() => {
-                      alert('GPS位置情報を含むレポートを生成しています...')
-                      setTimeout(() => alert('GPS位置データ込みレポートが完成しました！\n作業場所の正確な位置情報が含まれています。'), 2000)
+                      showToast('GPS位置情報を含むレポートを生成しています...', 'info')
+                      setTimeout(() => showToast('GPS位置データ込みレポートが完成しました', 'success'), 2000)
                     }}
                     style={{
                       padding: '8px 16px',
@@ -2224,15 +2317,17 @@ export default function SettingsPage() {
                   marginBottom: '12px' 
                 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>役割・権限設定</h3>
-                  <button style={{
-                    padding: '6px 12px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}>
+                  <button 
+                    onClick={() => showToast('ユーザー役割の新規作成機能を実装中です', 'info')}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}>
                     + 新規役割
                   </button>
                 </div>
@@ -2313,7 +2408,7 @@ export default function SettingsPage() {
                           編集
                         </button>
                         <button 
-                          onClick={() => alert(`役割「${role.name}」のユーザー管理画面を開きます\n現在${role.users}名が登録されています。`)}
+                          onClick={() => showToast(`役割「${role.name}」の管理画面を開きます (現在${role.users}名)`, 'info')}
                           style={{
                             padding: '4px 8px',
                             background: '#3b82f6',
@@ -2344,15 +2439,17 @@ export default function SettingsPage() {
                   marginBottom: '12px' 
                 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>ユーザー管理</h3>
-                  <button style={{
-                    padding: '6px 12px',
-                    background: '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}>
+                  <button 
+                    onClick={() => showToast('ユーザーの新規登録機能を実装中です', 'info')}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}>
                     + 新規ユーザー
                   </button>
                 </div>
@@ -2646,7 +2743,14 @@ export default function SettingsPage() {
                     アプリ権限を同期
                   </button>
                   <button 
-                    onClick={() => alert('アプリ登録用QRコードを発行しました！\n新規ユーザーがこのQRコードでアプリに登録できます。')}
+                    onClick={() => {
+                      setQrData({
+                        title: 'アプリ登録用QRコード',
+                        data: `https://dandori-scheduler.app/register/${Date.now()}`,
+                        description: 'このQRコードをスキャンしてアプリに登録してください'
+                      })
+                      setQrModalOpen(true)
+                    }}
                     style={{
                       padding: '8px 16px',
                       background: 'white',
@@ -2659,7 +2763,7 @@ export default function SettingsPage() {
                     QRコード発行（アプリ登録用）
                   </button>
                   <button 
-                    onClick={() => alert('アプリ利用状況:\n\n- アクティブユーザー: 12名\n- 今日のログイン: 8名\n- 最新バージョン: v2.1.3\n- 平均利用時間: 4.2時間/日')}
+                    onClick={() => setAppSyncModalOpen(true)}
                     style={{
                       padding: '8px 16px',
                       background: 'white',
@@ -2800,7 +2904,7 @@ export default function SettingsPage() {
                           checked={businessHours.saturdayEnabled}
                           onChange={(e) => {
                             setBusinessHours({...businessHours, saturdayEnabled: e.target.checked})
-                            alert(e.target.checked ? '土曜日営業を有効にしました' : '土曜日営業を無効にしました')
+                            showToast(e.target.checked ? '土曜日営業を有効にしました' : '土曜日営業を無効にしました', 'success')
                           }}
                         />
                         <span style={{ fontSize: '13px' }}>土曜日営業（9:00-15:00）</span>
@@ -2811,7 +2915,7 @@ export default function SettingsPage() {
                           checked={businessHours.sundayEnabled}
                           onChange={(e) => {
                             setBusinessHours({...businessHours, sundayEnabled: e.target.checked})
-                            alert(e.target.checked ? '日曜日営業を有効にしました' : '日曜日営業を無効にしました')
+                            showToast(e.target.checked ? '日曜日営業を有効にしました' : '日曜日営業を無効にしました', 'success')
                           }}
                         />
                         <span style={{ fontSize: '13px' }}>日曜日営業（緊急対応のみ）</span>
@@ -2822,7 +2926,7 @@ export default function SettingsPage() {
                           checked={businessHours.holidayEnabled}
                           onChange={(e) => {
                             setBusinessHours({...businessHours, holidayEnabled: e.target.checked})
-                            alert(e.target.checked ? '祝日営業を有効にしました' : '祝日営業を無効にしました')
+                            showToast(e.target.checked ? '祝日営業を有効にしました' : '祝日営業を無効にしました', 'success')
                           }}
                         />
                         <span style={{ fontSize: '13px' }}>祝日営業（要相談）</span>
@@ -2845,15 +2949,17 @@ export default function SettingsPage() {
                   marginBottom: '12px' 
                 }}>
                   <h3 style={{ fontSize: '16px', fontWeight: '600' }}>休日・特別営業日管理</h3>
-                  <button style={{
-                    padding: '6px 12px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '13px'
-                  }}>
+                  <button 
+                    onClick={() => showToast('休日・特別営業日の新規追加機能を実装中です', 'info')}
+                    style={{
+                      padding: '6px 12px',
+                      background: '#3b82f6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '13px'
+                    }}>
                     + 新規追加
                   </button>
                 </div>

@@ -32,7 +32,7 @@ export default function DemoPage() {
         id: 'dw-admin',
         name: 'DW管理者',
         email: 'admin@dandori.com',
-        role: 'admin',
+        role: 'ADMIN',
         tenantId: JSON.parse(tenantData).id
       })
     } else {
@@ -131,24 +131,27 @@ export default function DemoPage() {
         <AppLayout>
           <div style={{ 
             padding: '16px',
-            paddingRight: user ? '360px' : '16px',
-            transition: 'padding-right 0.3s ease',
             minHeight: 'calc(100vh - 56px)',
-            background: '#ffffff'
+            background: '#ffffff',
+            position: 'relative'
           }}>
-            <CalendarView 
-              selectedWorkers={selectedWorkers}
-            />
+            {/* カレンダー - 右側のプロファイル分の余白を確保 */}
+            <div style={{ 
+              marginRight: '360px',
+              overflow: 'auto'
+            }}>
+              <CalendarView 
+                selectedWorkers={selectedWorkers}
+              />
+            </div>
+            
+            {/* 右側のプロファイル表示 - コンポーネント内部で固定配置されている */}
+            {user?.role === 'WORKER' ? (
+              <WorkerProfile user={user} />
+            ) : (
+              <AdminProfile user={user} />
+            )}
           </div>
-          {/* 職人用プロフィールカード */}
-          {user && (user.role === 'worker' || user.role === 'WORKER') && !isDWAdmin && (
-            <WorkerProfile user={user} />
-          )}
-          
-          {/* 管理者用プロフィールカード */}
-          {user && (user.role === 'admin' || user.role === 'ADMIN') && (
-            <AdminProfile user={user} />
-          )}
         </AppLayout>
       </div>
     </>

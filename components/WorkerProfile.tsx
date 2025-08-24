@@ -65,14 +65,14 @@ export default function WorkerProfile({ user }: WorkerProfileProps) {
       <div className="worker-profile-desktop" style={{
         position: 'fixed',
         right: '20px',
-        top: '76px',
+        top: '80px',
         width: '320px',
-        maxHeight: 'calc(100vh - 96px)',
+        maxHeight: 'calc(100vh - 100px)',
         overflowY: 'auto',
         background: 'white',
         borderRadius: '12px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        zIndex: 30,
+        zIndex: 10,
         display: !isMobile ? 'block' : 'none'
       }}>
       {/* プロフィールヘッダー */}

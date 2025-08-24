@@ -109,7 +109,7 @@ export default function EventCreateModal({ initialDate = '', onClose, onSave }: 
     setFormData({ ...formData, timeSlots: newSlots })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     // バリデーション
@@ -118,20 +118,52 @@ export default function EventCreateModal({ initialDate = '', onClose, onSave }: 
       return
     }
     
-    // 保存処理
-    const eventData = {
-      ...formData,
-      status: showConflictWarning ? 'negotiation' : 'proposed',
-      negotiationMessage: showConflictWarning ? negotiationMessage : undefined,
-      createdBy: user?.id,
-      tenantId: currentTenant?.id
+    try {
+      // APIを呼び出してデータベースに保存
+      const response = await fetch('/api/schedule', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: `${formData.constructionType} - ${formData.clientName}`,
+          date: formData.date,
+          startTime: formData.startTime,
+          endTime: formData.endTime,
+          constructionType: formData.constructionType,
+          address: formData.address,
+          city: formData.city,
+          clientName: formData.clientName,
+          workerId: formData.workerId,
+          description: formData.description,
+          notes: formData.notes,
+          estimatedHours: calculateHours(formData.startTime, formData.endTime),
+        })
+      })
+
+      const result = await response.json()
+      
+      if (result.success) {
+        // 保存成功時の処理
+        if (onSave) {
+          onSave(result.event)
+        }
+        onClose()
+      } else {
+        alert(`保存に失敗しました: ${result.message}`)
+      }
+    } catch (error) {
+      console.error('Error saving event:', error)
+      alert('保存中にエラーが発生しました')
     }
-    
-    if (onSave) {
-      onSave(eventData)
-    }
-    
-    onClose()
+  }
+
+  // 作業時間計算ヘルパー関数
+  const calculateHours = (startTime: string, endTime: string): number => {
+    if (!startTime || !endTime) return 0
+    const start = new Date(`2000-01-01T${startTime}:00`)
+    const end = new Date(`2000-01-01T${endTime}:00`)
+    return (end.getTime() - start.getTime()) / (1000 * 60 * 60)
   }
 
   const workers = mockUsers.filter(u => ['master', 'worker'].includes(u.role))

@@ -26,32 +26,78 @@ export function Toast({ message, type = 'info', duration = 3000, onClose }: Toas
 
   if (!isVisible) return null
 
-  const icons = {
-    success: <CheckCircle className="w-5 h-5 text-green-500" />,
-    error: <XCircle className="w-5 h-5 text-red-500" />,
-    warning: <AlertCircle className="w-5 h-5 text-yellow-500" />,
-    info: <Info className="w-5 h-5 text-blue-500" />
+  const getStyles = () => {
+    const baseStyle = {
+      position: 'fixed' as const,
+      bottom: '16px',
+      right: '16px',
+      zIndex: 1001,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      padding: '12px 16px',
+      borderRadius: '8px',
+      border: '1px solid',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+      animation: 'slideUp 0.3s ease-out',
+      minWidth: '300px',
+      maxWidth: '500px'
+    }
+
+    switch (type) {
+      case 'success':
+        return { ...baseStyle, backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', color: '#166534' }
+      case 'error':
+        return { ...baseStyle, backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#991b1b' }
+      case 'warning':
+        return { ...baseStyle, backgroundColor: '#fffbeb', borderColor: '#fed7aa', color: '#92400e' }
+      default:
+        return { ...baseStyle, backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af' }
+    }
   }
 
-  const bgColors = {
-    success: 'bg-green-50 border-green-200',
-    error: 'bg-red-50 border-red-200',
-    warning: 'bg-yellow-50 border-yellow-200',
-    info: 'bg-blue-50 border-blue-200'
+  const getIconColor = () => {
+    switch (type) {
+      case 'success': return '#10b981'
+      case 'error': return '#ef4444'
+      case 'warning': return '#f59e0b'
+      default: return '#3b82f6'
+    }
+  }
+
+  const icons = {
+    success: <CheckCircle size={20} style={{ color: getIconColor() }} />,
+    error: <XCircle size={20} style={{ color: getIconColor() }} />,
+    warning: <AlertCircle size={20} style={{ color: getIconColor() }} />,
+    info: <Info size={20} style={{ color: getIconColor() }} />
   }
 
   return (
-    <div className={`fixed bottom-4 right-4 z-50 flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg ${bgColors[type]} animate-slide-up`}>
+    <div style={getStyles()}>
       {icons[type]}
-      <p className="text-gray-800">{message}</p>
+      <p style={{ fontSize: '14px', fontWeight: '500', flex: 1 }}>{message}</p>
       <button
         onClick={() => {
           setIsVisible(false)
           onClose?.()
         }}
-        className="ml-4 text-gray-500 hover:text-gray-700"
+        style={{
+          marginLeft: '16px',
+          padding: '4px',
+          background: 'none',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'background-color 0.2s',
+          color: '#6b7280'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
       >
-        <X className="w-4 h-4" />
+        <X size={16} />
       </button>
     </div>
   )
@@ -65,28 +111,77 @@ interface ToastMessage {
 }
 
 export function ToastContainer({ toasts, onRemove }: { toasts: ToastMessage[], onRemove: (id: string) => void }) {
+  const getToastStyles = (type: ToastType) => {
+    const baseStyle = {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px',
+      padding: '12px 16px',
+      borderRadius: '8px',
+      border: '1px solid',
+      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+      animation: 'slideUp 0.3s ease-out',
+      minWidth: '300px',
+      maxWidth: '500px',
+      marginBottom: '8px'
+    }
+
+    switch (type) {
+      case 'success':
+        return { ...baseStyle, backgroundColor: '#f0fdf4', borderColor: '#bbf7d0', color: '#166534' }
+      case 'error':
+        return { ...baseStyle, backgroundColor: '#fef2f2', borderColor: '#fecaca', color: '#991b1b' }
+      case 'warning':
+        return { ...baseStyle, backgroundColor: '#fffbeb', borderColor: '#fed7aa', color: '#92400e' }
+      default:
+        return { ...baseStyle, backgroundColor: '#eff6ff', borderColor: '#bfdbfe', color: '#1e40af' }
+    }
+  }
+
+  const getIconColor = (type: ToastType) => {
+    switch (type) {
+      case 'success': return '#10b981'
+      case 'error': return '#ef4444'
+      case 'warning': return '#f59e0b'
+      default: return '#3b82f6'
+    }
+  }
+
   return (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2">
+    <div style={{
+      position: 'fixed',
+      bottom: '16px',
+      right: '16px',
+      zIndex: 1001,
+      display: 'flex',
+      flexDirection: 'column-reverse'
+    }}>
       {toasts.map((toast) => (
-        <div
-          key={toast.id}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg animate-slide-up ${
-            toast.type === 'success' ? 'bg-green-50 border-green-200' :
-            toast.type === 'error' ? 'bg-red-50 border-red-200' :
-            toast.type === 'warning' ? 'bg-yellow-50 border-yellow-200' :
-            'bg-blue-50 border-blue-200'
-          }`}
-        >
-          {toast.type === 'success' && <CheckCircle className="w-5 h-5 text-green-500" />}
-          {toast.type === 'error' && <XCircle className="w-5 h-5 text-red-500" />}
-          {toast.type === 'warning' && <AlertCircle className="w-5 h-5 text-yellow-500" />}
-          {toast.type === 'info' && <Info className="w-5 h-5 text-blue-500" />}
-          <p className="text-gray-800">{toast.message}</p>
+        <div key={toast.id} style={getToastStyles(toast.type)}>
+          {toast.type === 'success' && <CheckCircle size={20} style={{ color: getIconColor(toast.type) }} />}
+          {toast.type === 'error' && <XCircle size={20} style={{ color: getIconColor(toast.type) }} />}
+          {toast.type === 'warning' && <AlertCircle size={20} style={{ color: getIconColor(toast.type) }} />}
+          {toast.type === 'info' && <Info size={20} style={{ color: getIconColor(toast.type) }} />}
+          <p style={{ fontSize: '14px', fontWeight: '500', flex: 1 }}>{toast.message}</p>
           <button
             onClick={() => onRemove(toast.id)}
-            className="ml-4 text-gray-500 hover:text-gray-700"
+            style={{
+              marginLeft: '16px',
+              padding: '4px',
+              background: 'none',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'background-color 0.2s',
+              color: '#6b7280'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.05)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
-            <X className="w-4 h-4" />
+            <X size={16} />
           </button>
         </div>
       ))}

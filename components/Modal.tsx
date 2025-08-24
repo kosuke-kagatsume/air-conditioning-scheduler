@@ -38,43 +38,102 @@ export default function Modal({
 
   if (!isOpen) return null
 
-  const sizeClasses = {
-    sm: 'max-w-md',
-    md: 'max-w-lg',
-    lg: 'max-w-2xl',
-    xl: 'max-w-4xl'
+  const getMaxWidth = () => {
+    switch (size) {
+      case 'sm': return 'min(400px, 95vw)'
+      case 'md': return 'min(500px, 95vw)'
+      case 'lg': return 'min(700px, 95vw)'
+      case 'xl': return 'min(900px, 95vw)'
+      default: return 'min(500px, 95vw)'
+    }
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex min-h-full items-center justify-center p-4">
-        {/* Backdrop */}
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
-          onClick={onClose}
-        />
-        
-        {/* Modal */}
-        <div className={`relative bg-white rounded-lg shadow-xl ${sizeClasses[size]} w-full transform transition-all`}>
-          {/* Header */}
-          {(title || showCloseButton) && (
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              {title && <h3 className="text-lg font-semibold text-gray-900">{title}</h3>}
-              {showCloseButton && (
-                <button
-                  onClick={onClose}
-                  className="ml-auto rounded-lg p-1 hover:bg-gray-100 transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              )}
-            </div>
-          )}
-          
-          {/* Content */}
-          <div className="p-4">
-            {children}
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 1000,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '8px'
+    }}>
+      {/* Backdrop */}
+      <div 
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          transition: 'opacity 0.3s'
+        }}
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div style={{
+        position: 'relative',
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
+        width: '100%',
+        maxWidth: getMaxWidth(),
+        maxHeight: '90vh',
+        overflow: 'auto',
+        transform: 'scale(1)',
+        transition: 'all 0.3s ease'
+      }}>
+        {/* Header */}
+        {(title || showCloseButton) && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px',
+            borderBottom: '1px solid #e5e7eb'
+          }}>
+            {title && (
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                color: '#111827',
+                margin: 0
+              }}>
+                {title}
+              </h3>
+            )}
+            {showCloseButton && (
+              <button
+                onClick={onClose}
+                style={{
+                  marginLeft: 'auto',
+                  padding: '4px',
+                  background: 'none',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+              >
+                <X size={20} style={{ color: '#6b7280' }} />
+              </button>
+            )}
           </div>
+        )}
+        
+        {/* Content */}
+        <div style={{ padding: '12px 16px 16px' }}>
+          {children}
         </div>
       </div>
     </div>
@@ -103,20 +162,47 @@ export function ConfirmDialog({
   cancelText = 'キャンセル',
   type = 'info'
 }: ConfirmDialogProps) {
-  const confirmButtonClass = type === 'danger' 
-    ? 'bg-red-600 hover:bg-red-700 text-white'
-    : type === 'warning'
-    ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-    : 'bg-blue-600 hover:bg-blue-700 text-white'
+  const getConfirmButtonStyle = () => {
+    const baseStyle = {
+      padding: '8px 16px',
+      border: 'none',
+      borderRadius: '6px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      fontWeight: '500',
+      transition: 'background-color 0.2s'
+    }
+    
+    switch (type) {
+      case 'danger':
+        return { ...baseStyle, backgroundColor: '#dc2626', color: 'white' }
+      case 'warning':
+        return { ...baseStyle, backgroundColor: '#f59e0b', color: 'white' }
+      default:
+        return { ...baseStyle, backgroundColor: '#3b82f6', color: 'white' }
+    }
+  }
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm">
-      <div className="space-y-4">
-        <p className="text-gray-600">{message}</p>
-        <div className="flex justify-end gap-3">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <p style={{ color: '#6b7280', lineHeight: '1.5' }}>{message}</p>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            style={{
+              padding: '8px 16px',
+              border: '1px solid #d1d5db',
+              borderRadius: '6px',
+              backgroundColor: 'white',
+              color: '#374151',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
           >
             {cancelText}
           </button>
@@ -125,7 +211,18 @@ export function ConfirmDialog({
               onConfirm()
               onClose()
             }}
-            className={`px-4 py-2 rounded-lg transition-colors ${confirmButtonClass}`}
+            style={getConfirmButtonStyle()}
+            onMouseEnter={(e) => {
+              const currentBg = e.currentTarget.style.backgroundColor
+              if (currentBg === 'rgb(220, 38, 38)') e.currentTarget.style.backgroundColor = '#b91c1c'
+              else if (currentBg === 'rgb(245, 158, 11)') e.currentTarget.style.backgroundColor = '#d97706'
+              else e.currentTarget.style.backgroundColor = '#2563eb'
+            }}
+            onMouseLeave={(e) => {
+              if (type === 'danger') e.currentTarget.style.backgroundColor = '#dc2626'
+              else if (type === 'warning') e.currentTarget.style.backgroundColor = '#f59e0b'
+              else e.currentTarget.style.backgroundColor = '#3b82f6'
+            }}
           >
             {confirmText}
           </button>
