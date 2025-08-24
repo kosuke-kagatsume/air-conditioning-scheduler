@@ -59,10 +59,9 @@ export async function POST(request: NextRequest) {
       await prisma.notification.create({
         data: {
           userId: body.targetId,
-          type: body.type,
+          type: body.type as any,
           title: body.title,
           message: body.message,
-          severity: body.severity,
           data: body.data || {},
           isRead: false,
         }

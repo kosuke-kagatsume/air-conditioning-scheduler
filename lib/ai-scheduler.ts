@@ -140,7 +140,7 @@ async function getWorkerWorkload(workerId: string, date: Date): Promise<number> 
         lte: endOfDay
       },
       status: {
-        in: ['SCHEDULED', 'IN_PROGRESS']
+        in: ['SCHEDULED' as any, 'IN_PROGRESS' as any]
       }
     }
   })
@@ -348,7 +348,7 @@ export async function executeAutoAssignment(
       where: { id: eventId },
       data: { 
         workerId,
-        status: 'SCHEDULED',
+        status: 'SCHEDULED' as any,
         updatedAt: new Date()
       }
     })

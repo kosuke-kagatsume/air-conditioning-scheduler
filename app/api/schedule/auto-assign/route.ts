@@ -52,10 +52,18 @@ export async function POST(request: NextRequest) {
         }
 
         // 稼働可能な職人を取得
-        const workers = await prisma.worker.findMany({
+        const workers = await prisma.user.findMany({
+          where: {
+            role: {
+              in: ['WORKER', 'MASTER_WORKER']
+            }
+          },
           include: {
-            skills: true,
-            certifications: true,
+            workerProfile: {
+              include: {
+                skills: true
+              }
+            },
             assignedEvents: {
               where: {
                 date: event.date,

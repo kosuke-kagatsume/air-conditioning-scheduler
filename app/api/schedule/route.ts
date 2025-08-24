@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
           events = events.slice(0, limit)
 
           // レスポンス形式を統一
-          const items = events.map((event: any) => ({
+          const mockItems = events.map((event: any) => ({
             id: event.id,
             title: event.title,
             start: new Date(event.date + 'T' + event.startTime).toISOString(),
@@ -128,21 +128,18 @@ export async function GET(request: NextRequest) {
             startTime: event.startTime,
             endTime: event.endTime,
           }))
+
+          return NextResponse.json({
+            success: true,
+            items: mockItems,
+            pagination: {
+              total: mockItems.length,
+              limit,
+              from,
+              to,
+            },
+          })
         }
-
-        // パフォーマンス測定
-        Sentry.setMeasurement('schedule.events.count', items.length, 'none')
-
-        return NextResponse.json({
-          success: true,
-          items,
-          pagination: {
-            total: items.length,
-            limit,
-            from,
-            to,
-          },
-        })
 
         /* TODO: Prismaを使用する場合の実装
         const where: any = {

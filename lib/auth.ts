@@ -51,8 +51,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
-          companyId: user.companyId,
-          image: user.avatar
+          companyId: user.companyId || undefined,
+          image: user.avatar || null
         }
       }
     })

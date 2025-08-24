@@ -158,13 +158,13 @@ async function generateSalesSummaryReport(fromDate: Date, toDate: Date) {
 
     const monthlySales = events.reduce((acc, event) => {
       const month = event.date.toISOString().slice(0, 7)
-      acc[month] = (acc[month] || 0) + (event.estimatedRevenue || 50000)
+      acc[month] = (acc[month] || 0) + ((event.estimatedHours || 1) * 50000)
       return acc
     }, {} as Record<string, number>)
 
     const constructionTypeRevenue = events.reduce((acc, event) => {
       const type = event.constructionType
-      acc[type] = (acc[type] || 0) + (event.estimatedRevenue || 50000)
+      acc[type] = (acc[type] || 0) + ((event.estimatedHours || 1) * 50000)
       return acc
     }, {} as Record<string, number>)
 

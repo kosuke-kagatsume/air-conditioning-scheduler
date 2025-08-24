@@ -299,9 +299,6 @@ export default function ReportModal({ isOpen, onClose, reportType = 'daily' }: R
           gap: '4px', 
           marginBottom: '16px',
           flexWrap: 'wrap',
-          '@media (max-width: 640px)': {
-            flexDirection: 'column'
-          }
         }}>
           {reportTypes.map((type) => (
             <button
