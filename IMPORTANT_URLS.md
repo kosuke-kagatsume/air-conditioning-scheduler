@@ -1,13 +1,19 @@
 # 🚨 重要なURL - 絶対に忘れないこと！！！
 
-## 📌 正しいURL構造
+## 📌 最新URL (2025-08-27更新)
 
-### ✅ デモログインページ（これが正解！）
-**https://air-conditioning-scheduler-fcoji9ij5-kosukes-projects-c6ad92ba.vercel.app/login/demo**
+### ✅ 本番環境 - デモログインページ
+**https://air-conditioning-scheduler-iyg7lrxyp-kosukes-projects-c6ad92ba.vercel.app/login/demo**
 - これが3つのデモアカウントが表示される正しいページ
+- 管理者設定: `/admin/settings`
+
+### ✅ ローカル開発環境
+**http://localhost:3003**
+- `npm run dev` で起動
+- デモログイン: http://localhost:3003/login/demo
 
 ### ❌ 通常のトップページ（これは使わない）
-~~https://air-conditioning-scheduler-fcoji9ij5-kosukes-projects-c6ad92ba.vercel.app~~
+~~https://air-conditioning-scheduler-iyg7lrxyp-kosukes-projects-c6ad92ba.vercel.app~~
 - これはランディングページ（営業ページ）
 - 「工事現場の予定をもっとシンプルに」と表示される
 - 通常のログイン画面（/login）に遷移してしまう
@@ -39,4 +45,4 @@
 - 左メニューに「管理者への連絡」がある
 
 ## 📅 最終更新
-2025-01-20
+2025-08-27 - 自動割当プレビューモーダル修正完了

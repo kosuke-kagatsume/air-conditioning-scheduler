@@ -1,7 +1,14 @@
 # 🚀 本番環境デプロイ完了状況
-最終更新: 2025-08-24
+最終更新: 2025-08-27
 
 ## ✅ 完了済み作業
+
+### 最新修正 (2025-08-27)
+- **自動割当プレビューモーダル修正**
+  - モーダルが閉じない問題を解決
+  - ESCキーでの閉じる機能を追加
+  - 明示的な「閉じる」ボタンを追加
+  - APIエラー時のフォールバック処理を改善
 
 ### 1. **右パネル表示修正** ⭐️ 超重要
 - **問題**: 右パネルが表示されない
@@ -38,9 +45,10 @@
 - **状態**: ✅ 作成完了・環境変数自動設定済み
 
 ### 6. **本番デプロイ成功**
-- **最新URL**: https://air-conditioning-scheduler-iyg7lrxyp-kosukes-projects-c6ad92ba.vercel.app
+- **最新URL**: https://air-conditioning-scheduler.vercel.app （カスタムドメイン設定済み）
+- **バックアップURL**: https://air-conditioning-scheduler-iyg7lrxyp-kosukes-projects-c6ad92ba.vercel.app
 - **状態**: ● Ready（正常稼働中）
-- **HTTP 200**: 確認済み
+- **最終デプロイ**: 2025-08-27 (自動割当モーダル修正)
 
 ### 7. **ドメイン設定状況**
 - **dandori-scheduler.com**: 追加済み（DNS設定待ち）
