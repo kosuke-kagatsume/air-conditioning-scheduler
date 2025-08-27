@@ -77,9 +77,9 @@ export default function DemoPage() {
     const multiDayEvents = [
       {
         id: 'multi-1',
-        title: '品川ビル大規模改修',
-        startDate: new Date(today.getFullYear(), today.getMonth(), 25).toISOString().split('T')[0],
-        endDate: new Date(today.getFullYear(), today.getMonth(), 28).toISOString().split('T')[0],
+        title: '◆品川ビル大規模改修',
+        startDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2).toISOString().split('T')[0],
+        endDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 5).toISOString().split('T')[0],
         startTime: '08:00',
         endTime: '17:00',
         isMultiDay: true,
@@ -91,9 +91,9 @@ export default function DemoPage() {
       },
       {
         id: 'multi-2',
-        title: '渋谷タワー空調システム',
-        startDate: new Date(today.getFullYear(), today.getMonth() + 1, 2).toISOString().split('T')[0],
-        endDate: new Date(today.getFullYear(), today.getMonth() + 1, 5).toISOString().split('T')[0],
+        title: '◆渋谷タワー空調システム',
+        startDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7).toISOString().split('T')[0],
+        endDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 10).toISOString().split('T')[0],
         startTime: '09:00',
         endTime: '18:00',
         isMultiDay: true,
@@ -105,9 +105,9 @@ export default function DemoPage() {
       },
       {
         id: 'multi-3',
-        title: '新宿プラザ定期点検',
-        startDate: new Date(today.getFullYear(), today.getMonth(), 15).toISOString().split('T')[0],
-        endDate: new Date(today.getFullYear(), today.getMonth(), 16).toISOString().split('T')[0],
+        title: '◆新宿プラザ定期点検',
+        startDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 12).toISOString().split('T')[0],
+        endDate: new Date(today.getFullYear(), today.getMonth(), today.getDate() + 14).toISOString().split('T')[0],
         startTime: '10:00',
         endTime: '16:00',
         isMultiDay: true,
