@@ -13,6 +13,23 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
   const [assignments, setAssignments] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState(false)
   const [selectedEvent, setSelectedEvent] = React.useState<any>(null)
+  
+  // Escape key handling
+  React.useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey)
+    }
+    
+    return () => {
+      document.removeEventListener('keydown', handleEscKey)
+    }
+  }, [isOpen, onClose])
 
   // デモ用のイベントを取得
   React.useEffect(() => {
@@ -26,9 +43,23 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
     try {
       // まず最新のイベントを取得して自動割り当てのデモを行う
       const eventsResponse = await fetch('/api/schedule')
+      
+      // APIが失敗してもデモデータで動作を続ける
+      if (!eventsResponse.ok) {
+        console.warn('Schedule API returned error, using demo data')
+        // デモデータを即座に使用
+        setAssignments([
+          { workerId: '1', workerName: '山田太郎', score: 95, reasons: ['エアコン設置スキル保有', '当日予定なし', '近距離'], availability: true, skillMatch: 38, distanceScore: 22, workloadScore: 25 },
+          { workerId: '2', workerName: '佐藤次郎', score: 82, reasons: ['配管工事スキル保有', '距離やや遠い'], availability: true, skillMatch: 32, distanceScore: 18, workloadScore: 22 },
+          { workerId: '3', workerName: '鈴木三郎', score: 78, reasons: ['基本スキル保有', '当日1件予定'], availability: true, skillMatch: 25, distanceScore: 20, workloadScore: 18 }
+        ])
+        setLoading(false)
+        return
+      }
+      
       const eventsResult = await eventsResponse.json()
       
-      if (eventsResult.success && eventsResult.items.length > 0) {
+      if (eventsResult.success && eventsResult.items && eventsResult.items.length > 0) {
         const unassignedEvents = eventsResult.items.filter((event: any) => !event.workerId)
         const eventToAssign = unassignedEvents[0] || eventsResult.items[0]
         
@@ -47,6 +78,10 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
           })
         })
         
+        if (!response.ok) {
+          throw new Error('Auto-assign API failed')
+        }
+        
         const result = await response.json()
         
         if (result.success) {
@@ -55,7 +90,12 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
           if (result.autoAssigned) {
             showToast(`${result.recommendedWorker.workerName}に自動割り当てしました`, 'success')
           }
+        } else {
+          throw new Error('Auto-assign returned unsuccessful')
         }
+      } else {
+        // イベントがない場合もデモデータを表示
+        throw new Error('No events found')
       }
     } catch (error) {
       console.error('Auto-assignment error:', error)
@@ -80,6 +120,9 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
     return skillMap[type] || []
   }
 
+  // Don't render if not open
+  if (!isOpen) return null
+  
   return (
     <div style={{
       position: 'fixed',
@@ -189,8 +232,8 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
               borderRadius: '8px',
               overflow: 'hidden'
             }}>
-              {/* Mobile View */}
-              <div className="block md:hidden">
+              {/* Assignment View */}
+              <div>
                 {loading ? (
                   <div style={{ 
                     padding: '40px',
@@ -241,121 +284,6 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
                     </div>
                   </div>
                 ))}
-              </div>
-
-              {/* Desktop View */}
-              <div className="hidden md:block">
-                {/* Header */}
-                <div style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '100px 1fr 120px 100px 80px',
-                  background: '#f9fafb',
-                  padding: '12px',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  borderBottom: '1px solid #e5e7eb',
-                  color: '#374151'
-                }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Clock size={14} />
-                  時間
-                </div>
-                <div>現場・作業内容</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Users size={14} />
-                  割当職人
-                </div>
-                <div>必要スキル</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <Target size={14} />
-                  適合度
-                </div>
-              </div>
-              
-                
-                {/* Assignment Rows */}
-                {loading ? (
-                <div style={{ 
-                  padding: '40px',
-                  textAlign: 'center',
-                  color: '#6b7280'
-                }}>
-                  <div>自動割り当てを計算中...</div>
-                </div>
-              ) : assignments.length === 0 ? (
-                <div style={{ 
-                  padding: '40px',
-                  textAlign: 'center',
-                  color: '#6b7280'
-                }}>
-                  <div>割り当て可能な職人が見つかりません</div>
-                </div>
-              ) : assignments.map((assignment, idx) => (
-                <div key={idx} style={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '100px 1fr 120px 100px 80px',
-                  padding: '12px',
-                  fontSize: '13px',
-                  borderBottom: idx < assignments.length - 1 ? '1px solid #f3f4f6' : 'none',
-                  alignItems: 'center',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                >
-                  <div style={{ fontWeight: '600', color: '#1e293b' }}>
-                    {selectedEvent?.startTime || '09:00'}
-                  </div>
-                  <div>
-                    <div style={{ fontWeight: '500', color: '#1e293b', marginBottom: '2px' }}>
-                      {selectedEvent?.siteName || '現場名'}
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#64748b' }}>
-                      {selectedEvent?.constructionType || 'エアコン工事'}
-                    </div>
-                  </div>
-                  <div style={{ 
-                    fontWeight: '500',
-                    color: '#1e293b',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      borderRadius: '50%',
-                      backgroundColor: assignment.score >= 80 ? '#10b981' : assignment.score >= 60 ? '#f59e0b' : '#ef4444'
-                    }} />
-                    {assignment.workerName}
-                  </div>
-                  <div style={{ 
-                    fontSize: '11px', 
-                    color: '#64748b',
-                    lineHeight: '1.3'
-                  }}>
-                    {assignment.reasons.slice(0, 2).join('、')}
-                  </div>
-                  <div>
-                    <div style={{ 
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      padding: '2px 8px',
-                      borderRadius: '12px',
-                      backgroundColor: assignment.score >= 80 ? '#10b98115' : assignment.score >= 60 ? '#f59e0b15' : '#ef444415',
-                      border: assignment.score >= 80 ? '1px solid #10b98130' : assignment.score >= 60 ? '1px solid #f59e0b30' : '1px solid #ef444430'
-                    }}>
-                      <span style={{ 
-                        color: assignment.score >= 80 ? '#10b981' : assignment.score >= 60 ? '#f59e0b' : '#ef4444',
-                        fontSize: '12px',
-                        fontWeight: '600'
-                      }}>
-                        {assignment.score}%
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
               </div>
             </div>
 
@@ -421,12 +349,9 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
                   💡 最適な職人を{assignments.filter(a => a.score >= 80).length}名選出、平均適合度{Math.round(assignments.reduce((sum, a) => sum + a.score, 0) / assignments.length)}%
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'space-between' }}>
                 <button 
-                  onClick={() => {
-                    performAutoAssignment()
-                    showToast('割当を再計算しています...', 'info')
-                  }}
+                  onClick={onClose}
                   style={{
                     padding: '8px 16px',
                     background: 'white',
@@ -441,8 +366,30 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
                   onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
                   onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
                 >
-                  再計算
+                  閉じる
                 </button>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button 
+                    onClick={() => {
+                      performAutoAssignment()
+                      showToast('割当を再計算しています...', 'info')
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      background: 'white',
+                      color: '#6b7280',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      transition: 'all 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'white'}
+                  >
+                    再計算
+                  </button>
                 <button 
                   onClick={async () => {
                     if (assignments.length > 0 && selectedEvent) {
@@ -487,6 +434,7 @@ export default function AutoAssignmentModal({ isOpen, onClose, showToast }: Auto
                 >
                   この割当を適用
                 </button>
+                </div>
               </div>
             </div>
           </div>
