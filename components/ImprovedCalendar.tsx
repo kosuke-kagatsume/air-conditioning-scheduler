@@ -16,6 +16,7 @@ interface Event {
   workerName?: string
   siteName?: string
   constructionType?: string
+  date?: string
 }
 
 interface CalendarProps {
@@ -63,7 +64,7 @@ export default function ImprovedCalendar({ events, onDateClick, onEventClick, on
         return checkDate >= start && checkDate <= end
       }
       
-      // 通常のイベント - dateフィールドも確認
+      // 通常のイベント - startDateまたはdateフィールドを確認（後方互換性）
       return event.startDate === dateStr || event.date === dateStr
     })
     
