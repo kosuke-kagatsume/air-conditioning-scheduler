@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
               site: {
                 select: { id: true, name: true, address: true, clientName: true }
               },
-              assignedWorker: {
+              worker: {
                 select: { id: true, name: true }
               }
             },
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
             start: new Date(event.date.toISOString().split('T')[0] + 'T' + event.startTime).toISOString(),
             end: new Date(event.date.toISOString().split('T')[0] + 'T' + (event.endTime || event.startTime)).toISOString(),
             workerId: event.workerId,
-            workerName: event.assignedWorker?.name,
+            workerName: event.worker?.name,
             status: event.status.toLowerCase(),
             siteId: event.siteId,
             siteName: event.site?.name,
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
           start: new Date(event.date.toISOString().split('T')[0] + 'T' + event.startTime).toISOString(),
           end: new Date(event.date.toISOString().split('T')[0] + 'T' + (event.endTime || event.startTime)).toISOString(),
           workerId: event.workerId,
-          workerName: event.assignedWorker?.name,
+          workerName: event.worker?.name,
           status: event.status,
           siteId: event.siteId,
           siteName: event.site?.name,
@@ -261,8 +261,6 @@ export async function POST(request: NextRequest) {
               data: {
                 name: body.clientName || '新規現場',
                 address: body.address || '住所未設定',
-                city: body.city || '未設定',
-                prefecture: '東京都', // デフォルト
                 clientName: body.clientName || '顧客名未設定',
                 clientPhone: body.clientPhone,
                 companyId: 'company-1' // デフォルト会社ID（シードデータから）
@@ -278,7 +276,7 @@ export async function POST(request: NextRequest) {
               date: new Date(body.date),
               startTime: body.startTime,
               endTime: body.endTime,
-              status: 'PROPOSED',
+              status: 'SCHEDULED',
               constructionType: body.constructionType || '空調工事',
               siteId: site.id,
               companyId: 'company-1',
@@ -288,7 +286,7 @@ export async function POST(request: NextRequest) {
             },
             include: {
               site: true,
-              assignedWorker: true
+              worker: true
             }
           })
 
@@ -302,11 +300,10 @@ export async function POST(request: NextRequest) {
               endTime: event.endTime,
               status: event.status,
               address: event.site.address,
-              city: event.site.city,
               constructionType: event.constructionType,
               clientName: event.site.clientName,
               workerId: event.workerId,
-              workerName: event.assignedWorker?.name
+              workerName: event.worker?.name
             }
           })
         } catch (dbError) {

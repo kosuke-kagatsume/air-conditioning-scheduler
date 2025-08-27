@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
           where: { id: eventId },
           include: {
             site: true,
-            assignedWorker: true
+            worker: true
           }
         })
 

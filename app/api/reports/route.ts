@@ -152,7 +152,7 @@ async function generateSalesSummaryReport(fromDate: Date, toDate: Date) {
       },
       include: {
         site: true,
-        assignedWorker: true
+        worker: true
       }
     })
 
@@ -163,7 +163,7 @@ async function generateSalesSummaryReport(fromDate: Date, toDate: Date) {
     }, {} as Record<string, number>)
 
     const constructionTypeRevenue = events.reduce((acc, event) => {
-      const type = event.constructionType
+      const type = event.constructionType || '未分類'
       acc[type] = (acc[type] || 0) + ((event.estimatedHours || 1) * 50000)
       return acc
     }, {} as Record<string, number>)
