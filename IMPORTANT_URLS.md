@@ -2,10 +2,11 @@
 
 ## 📌 最新URL (2025-08-27更新)
 
-### ✅ 本番環境 - デモログインページ
-**https://air-conditioning-scheduler-iyg7lrxyp-kosukes-projects-c6ad92ba.vercel.app/login/demo**
+### ✅ 本番環境 - デモログインページ（最新）
+**https://air-conditioning-scheduler-9ip3ocf40-kosukes-projects-c6ad92ba.vercel.app/login/demo**
 - これが3つのデモアカウントが表示される正しいページ
 - 管理者設定: `/admin/settings`
+- 最終デプロイ: 2025-08-27（ビルドエラー修正済み）
 
 ### ✅ ローカル開発環境
 **http://localhost:3003**

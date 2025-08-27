@@ -45,10 +45,10 @@
 - **状態**: ✅ 作成完了・環境変数自動設定済み
 
 ### 6. **本番デプロイ成功**
-- **最新URL**: https://air-conditioning-scheduler.vercel.app （カスタムドメイン設定済み）
-- **バックアップURL**: https://air-conditioning-scheduler-iyg7lrxyp-kosukes-projects-c6ad92ba.vercel.app
+- **最新URL**: https://air-conditioning-scheduler-9ip3ocf40-kosukes-projects-c6ad92ba.vercel.app
+- **カスタムドメイン**: https://air-conditioning-scheduler.vercel.app （DNS設定待ち）
 - **状態**: ● Ready（正常稼働中）
-- **最終デプロイ**: 2025-08-27 (自動割当モーダル修正)
+- **最終デプロイ**: 2025-08-27 (ビルドエラー修正・自動割当モーダル修正)
 
 ### 7. **ドメイン設定状況**
 - **dandori-scheduler.com**: 追加済み（DNS設定待ち）
