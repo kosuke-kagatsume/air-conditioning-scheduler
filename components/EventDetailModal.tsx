@@ -325,7 +325,7 @@ export default function EventDetailModal({ event, onClose, onStatusChange }: Eve
               <div>
                 <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '8px' }}>営業担当者</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {event.salesPersons.map((sp, index) => (
+                  {event.salesPersons.map((sp: any, index: number) => (
                   <div key={index} style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -372,7 +372,7 @@ export default function EventDetailModal({ event, onClose, onStatusChange }: Eve
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', color: '#2c3e50' }}>追加情報</h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {currentTenant?.settings.customFields.map(field => {
+                  {currentTenant?.settings?.customFields?.map((field: any) => {
                     const value = event.customFieldValues?.[field.id]
                     if (!value) return null
                     
