@@ -3,10 +3,10 @@
 ## 📌 最新URL (2025-08-27更新)
 
 ### ✅ 本番環境 - デモログインページ（最新）
-**https://air-conditioning-scheduler-9ip3ocf40-kosukes-projects-c6ad92ba.vercel.app/login/demo**
+**https://air-conditioning-scheduler-git-main-kosukes-projects-c6ad92ba.vercel.app/login/demo**
 - これが3つのデモアカウントが表示される正しいページ
 - 管理者設定: `/admin/settings`
-- 最終デプロイ: 2025-08-27（ビルドエラー修正済み）
+- 最終デプロイ: 2025-08-27（複数日イベント対応カレンダー実装完了・全TypeScriptエラー修正）
 
 ### ✅ ローカル開発環境
 **http://localhost:3003**
