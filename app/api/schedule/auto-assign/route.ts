@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
             },
             assignedEvents: {
               where: {
-                date: event.date,
+                startDate: event.startDate,
                 OR: [
                   {
                     startTime: { lte: event.startTime },
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
           event: {
             id: event.id,
             title: event.title,
-            date: event.date.toISOString().split('T')[0],
+            date: event.startDate.toISOString().split('T')[0],
             startTime: event.startTime,
             endTime: event.endTime,
             constructionType: event.constructionType,
@@ -191,7 +191,7 @@ function calculateWorkerScore(worker: any, event: any, skillsRequired: string[])
   
   // ワークロードスコア (最大25点)
   const todayEvents = worker.assignedEvents.filter((e: any) => 
-    e.date.toISOString().split('T')[0] === event.date.toISOString().split('T')[0]
+    e.startDate.toISOString().split('T')[0] === event.startDate.toISOString().split('T')[0]
   )
   const workloadScore = Math.max(0, 25 - (todayEvents.length * 8))
   score += workloadScore
