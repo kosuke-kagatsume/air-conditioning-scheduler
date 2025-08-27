@@ -135,7 +135,7 @@ async function getWorkerWorkload(workerId: string, date: Date): Promise<number> 
   const jobCount = await prisma.event.count({
     where: {
       workerId,
-      date: {
+      startDate: {
         gte: startOfDay,
         lte: endOfDay
       },
@@ -175,7 +175,7 @@ async function scoreWorker(
   const distanceScore = Math.max(0, 1 - (distance / 50))
 
   // 負荷分散スコア
-  const currentJobs = await getWorkerWorkload(worker.id, event.date)
+  const currentJobs = await getWorkerWorkload(worker.id, event.startDate)
   const maxDailyJobs = worker.workerProfile?.maxDailySlots || 3
   const workloadScore = Math.max(0, 1 - (currentJobs / maxDailyJobs))
 
@@ -233,7 +233,7 @@ export async function generateScheduleSuggestions(
   }
 
   if (dateRange) {
-    whereClause.date = {
+    whereClause.startDate = {
       gte: dateRange.from,
       lte: dateRange.to
     }
@@ -242,7 +242,7 @@ export async function generateScheduleSuggestions(
     const today = new Date()
     const nextWeek = new Date()
     nextWeek.setDate(today.getDate() + 7)
-    whereClause.date = {
+    whereClause.startDate = {
       gte: today,
       lte: nextWeek
     }
@@ -302,7 +302,7 @@ export async function generateScheduleSuggestions(
     suggestions.push({
       eventId: event.id,
       eventTitle: event.title,
-      eventDate: event.date.toISOString(),
+      eventDate: event.startDate.toISOString(),
       eventLocation: event.site?.address || '',
       requiredSkills,
       recommendations: workerScores.slice(0, 5), // 上位5名

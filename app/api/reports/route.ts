@@ -68,7 +68,7 @@ async function generateWorkerPerformanceReport(fromDate: Date, toDate: Date) {
       include: {
         assignedEvents: {
           where: {
-            date: {
+            startDate: {
               gte: fromDate,
               lte: toDate
             },
@@ -147,7 +147,7 @@ async function generateSalesSummaryReport(fromDate: Date, toDate: Date) {
   try {
     const events = await prisma.event.findMany({
       where: {
-        date: { gte: fromDate, lte: toDate },
+        startDate: { gte: fromDate, lte: toDate },
         status: 'COMPLETED'
       },
       include: {
@@ -157,7 +157,7 @@ async function generateSalesSummaryReport(fromDate: Date, toDate: Date) {
     })
 
     const monthlySales = events.reduce((acc, event) => {
-      const month = event.date.toISOString().slice(0, 7)
+      const month = event.startDate.toISOString().slice(0, 7)
       acc[month] = (acc[month] || 0) + ((event.estimatedHours || 1) * 50000)
       return acc
     }, {} as Record<string, number>)

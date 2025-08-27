@@ -27,9 +27,9 @@ export async function GET(request: NextRequest) {
           
           // 日付範囲フィルタリング
           if (from || to) {
-            whereClause.date = {}
-            if (from) whereClause.date.gte = new Date(from)
-            if (to) whereClause.date.lte = new Date(to)
+            whereClause.startDate = {}
+            if (from) whereClause.startDate.gte = new Date(from)
+            if (to) whereClause.startDate.lte = new Date(to)
           }
 
           const events = await prisma.event.findMany({
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
               }
             },
             orderBy: [
-              { date: 'asc' },
+              { startDate: 'asc' },
               { startTime: 'asc' }
             ],
             take: limit
@@ -52,8 +52,8 @@ export async function GET(request: NextRequest) {
           const items = events.map(event => ({
             id: event.id,
             title: event.title,
-            start: new Date(event.date.toISOString().split('T')[0] + 'T' + event.startTime).toISOString(),
-            end: new Date(event.date.toISOString().split('T')[0] + 'T' + (event.endTime || event.startTime)).toISOString(),
+            start: new Date(event.startDate.toISOString().split('T')[0] + 'T' + event.startTime).toISOString(),
+            end: new Date((event.endDate || event.startDate).toISOString().split('T')[0] + 'T' + (event.endTime || event.startTime)).toISOString(),
             workerId: event.workerId,
             workerName: event.worker?.name,
             status: event.status.toLowerCase(),
@@ -62,9 +62,11 @@ export async function GET(request: NextRequest) {
             address: event.site?.address,
             clientName: event.site?.clientName,
             constructionType: event.constructionType,
-            date: event.date.toISOString().split('T')[0],
+            date: event.startDate.toISOString().split('T')[0],
             startTime: event.startTime,
             endTime: event.endTime,
+            isMultiDay: event.isMultiDay,
+            endDate: event.endDate?.toISOString().split('T')[0],
           }))
 
           // パフォーマンス測定
@@ -151,18 +153,18 @@ export async function GET(request: NextRequest) {
           where.AND = [
             from ? { 
               OR: [
-                { date: { gte: new Date(from) } },
+                { startDate: { gte: new Date(from).toISOString().split('T')[0] } },
                 { 
-                  date: { equals: new Date(from).toISOString().split('T')[0] },
+                  startDate: { equals: new Date(from).toISOString().split('T')[0] },
                   endTime: { gte: new Date(from).toTimeString().slice(0, 5) }
                 }
               ]
             } : {},
             to ? { 
               OR: [
-                { date: { lte: new Date(to) } },
+                { startDate: { lte: new Date(to).toISOString().split('T')[0] } },
                 {
-                  date: { equals: new Date(to).toISOString().split('T')[0] },
+                  startDate: { equals: new Date(to).toISOString().split('T')[0] },
                   startTime: { lte: new Date(to).toTimeString().slice(0, 5) }
                 }
               ]
@@ -273,7 +275,9 @@ export async function POST(request: NextRequest) {
             data: {
               title: body.title,
               description: body.description,
-              date: new Date(body.date),
+              startDate: new Date(body.startDate || body.date),
+              endDate: body.endDate ? new Date(body.endDate) : null,
+              isMultiDay: body.isMultiDay || false,
               startTime: body.startTime,
               endTime: body.endTime,
               status: 'SCHEDULED',
@@ -295,7 +299,10 @@ export async function POST(request: NextRequest) {
             event: {
               id: event.id,
               title: event.title,
-              date: event.date.toISOString().split('T')[0],
+              date: event.startDate.toISOString().split('T')[0],
+              startDate: event.startDate.toISOString().split('T')[0],
+              endDate: event.endDate?.toISOString().split('T')[0],
+              isMultiDay: event.isMultiDay,
               startTime: event.startTime,
               endTime: event.endTime,
               status: event.status,
