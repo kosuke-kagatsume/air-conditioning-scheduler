@@ -54,18 +54,14 @@ export default function AdminProfile({ user }: AdminProfileProps) {
 
   return (
     <>
-      {/* デスクトップ版 - 右側固定 */}
+      {/* デスクトップ版 */}
       <div className="admin-profile-desktop" style={{
-        position: 'fixed',
-        right: '20px',
-        top: '80px',
-        width: '320px',
-        maxHeight: 'calc(100vh - 100px)',
+        width: '100%',
+        height: '100%',
         overflowY: 'auto',
         background: 'white',
         borderRadius: '12px',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        zIndex: 10,
         display: !isMobile ? 'block' : 'none'
       }}>
       {/* プロフィールヘッダー */}

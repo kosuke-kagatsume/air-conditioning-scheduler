@@ -147,7 +147,12 @@ model Event {
   id              String     @id @default(cuid())
   title           String
   description     String?
-  date            DateTime
+  
+  // 日付フィールド（複数日対応）
+  startDate       DateTime   // 開始日（旧: date）
+  endDate         DateTime?  // 終了日（複数日の場合に使用）
+  isMultiDay      Boolean    @default(false) // 複数日フラグ
+  
   startTime       String
   endTime         String
   status          EventStatus @default(SCHEDULED)
@@ -175,7 +180,8 @@ model Event {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   
-  @@index([date])
+  @@index([startDate])
+  @@index([endDate])
   @@index([workerId])
   @@index([managerId])
   @@index([siteId])

@@ -98,7 +98,7 @@ export default function EventDetailModal({ event, onClose, onStatusChange }: Eve
     },
     {
       id: '2',
-      author: event.workerName,
+      author: event.workerName || '担当職人',
       role: '職人',
       content: '午後からの作業で問題ありません。13:00開始でお願いします。',
       timestamp: new Date(2025, 0, 7, 15, 45)
@@ -143,10 +143,17 @@ export default function EventDetailModal({ event, onClose, onStatusChange }: Eve
             }} />
             <div>
               <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0, color: '#2c3e50' }}>
-                {event.constructionType} - {event.city}
+                {event.title}
               </h2>
               <p style={{ fontSize: '14px', color: '#6c7684', margin: '4px 0 0' }}>
-                {new Date(event.date).toLocaleDateString('ja-JP')} {event.startTime}
+                {event.constructionType || '工事'}
+                {event.siteName ? ` - ${event.siteName}` : event.city ? ` - ${event.city}` : ''}
+              </p>
+              <p style={{ fontSize: '14px', color: '#6c7684', margin: '4px 0 0' }}>
+                {event.isMultiDay && event.startDate && event.endDate 
+                  ? `${new Date(event.startDate).toLocaleDateString('ja-JP')} 〜 ${new Date(event.endDate).toLocaleDateString('ja-JP')}`
+                  : new Date(event.date || event.startDate).toLocaleDateString('ja-JP')
+                } {event.startTime}
               </p>
             </div>
             <span style={{
@@ -262,7 +269,26 @@ export default function EventDetailModal({ event, onClose, onStatusChange }: Eve
               <div>
                 <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>日付</p>
                 <p style={{ fontSize: '16px', fontWeight: '500' }}>
-                  {new Date(event.date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  {event.isMultiDay && event.startDate && event.endDate ? (
+                    <>
+                      {new Date(event.startDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      {' 〜 '}
+                      {new Date(event.endDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}
+                      <span style={{ 
+                        marginLeft: '8px', 
+                        fontSize: '12px', 
+                        padding: '2px 6px', 
+                        backgroundColor: '#e0e7ff', 
+                        color: '#3730a3',
+                        borderRadius: '4px',
+                        fontWeight: 'normal'
+                      }}>
+                        複数日
+                      </span>
+                    </>
+                  ) : (
+                    new Date(event.date || event.startDate).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })
+                  )}
                 </p>
               </div>
               <div>
@@ -279,26 +305,27 @@ export default function EventDetailModal({ event, onClose, onStatusChange }: Eve
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div>
                   <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>住所</p>
-                  <p style={{ fontSize: '16px' }}>{event.address}</p>
+                  <p style={{ fontSize: '16px' }}>{event.address || event.siteName || '未設定'}</p>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                   <div>
                     <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>施主名</p>
-                    <p style={{ fontSize: '16px', fontWeight: '500' }}>{event.clientName}</p>
+                    <p style={{ fontSize: '16px', fontWeight: '500' }}>{event.clientName || '未設定'}</p>
                   </div>
                   <div>
                     <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '4px' }}>工務店名</p>
-                    <p style={{ fontSize: '16px', fontWeight: '500' }}>{event.constructorName}</p>
+                    <p style={{ fontSize: '16px', fontWeight: '500' }}>{event.constructorName || '未設定'}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* 営業担当者 */}
-            <div>
-              <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '8px' }}>営業担当者</p>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {event.salesPersons.map((sp, index) => (
+            {event.salesPersons && event.salesPersons.length > 0 && (
+              <div>
+                <p style={{ fontSize: '14px', color: '#6c7684', marginBottom: '8px' }}>営業担当者</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {event.salesPersons.map((sp, index) => (
                   <div key={index} style={{
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -323,6 +350,7 @@ export default function EventDetailModal({ event, onClose, onStatusChange }: Eve
                 ))}
               </div>
             </div>
+            )}
 
             {/* 担当職人 */}
             <div>
@@ -335,7 +363,7 @@ export default function EventDetailModal({ event, onClose, onStatusChange }: Eve
                 background: '#f5f6f8',
                 borderRadius: '8px'
               }}>
-                <span style={{ fontSize: '16px', fontWeight: '500' }}>{event.workerName}</span>
+                <span style={{ fontSize: '16px', fontWeight: '500' }}>{event.workerName || '未割当'}</span>
               </div>
             </div>
 

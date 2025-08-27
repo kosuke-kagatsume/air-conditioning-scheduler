@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import CalendarView from '@/components/Calendar/CalendarView'
+import ImprovedCalendar from '@/components/ImprovedCalendar'
+import MultiDayEventForm from '@/components/MultiDayEventForm'
+import EventDetailModal from '@/components/EventDetailModal'
 import AppLayout from '@/components/AppLayout'
 import WorkerProfile from '@/components/WorkerProfile'
 import AdminProfile from '@/components/AdminProfile'
 import { X } from 'lucide-react'
+import { mockEvents, mockUsers } from '@/lib/mockData'
 
 export default function DemoPage() {
   const [mounted, setMounted] = useState(false)
@@ -15,6 +18,10 @@ export default function DemoPage() {
   const [loading, setLoading] = useState(true)
   const [currentTenant, setCurrentTenant] = useState<any>(null)
   const [isDWAdmin, setIsDWAdmin] = useState(false)
+  const [showEventForm, setShowEventForm] = useState(false)
+  const [selectedEvent, setSelectedEvent] = useState<any>(null)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [events, setEvents] = useState<any[]>([])
   const router = useRouter()
 
   useEffect(() => {
@@ -48,8 +55,121 @@ export default function DemoPage() {
         }
       }
     }
+    
+    // イベントデータを新しいカレンダー形式にマッピング
+    const mappedEvents = mockEvents.map(event => ({
+      id: event.id,
+      title: event.title || `${event.constructionType} - ${event.clientName}`,
+      startDate: event.date,
+      endDate: event.date,
+      startTime: event.startTime,
+      endTime: event.endTime || '18:00',
+      isMultiDay: false,
+      color: getEventColor(event.status),
+      workerId: event.workerId,
+      workerName: event.workerName || mockUsers.find(u => u.id === event.workerId)?.name,
+      siteName: event.city || event.address,
+      constructionType: event.constructionType
+    }))
+    
+    // 複数日イベントのサンプルを追加
+    const today = new Date()
+    const multiDayEvents = [
+      {
+        id: 'multi-1',
+        title: '品川ビル大規模改修',
+        startDate: new Date(today.getFullYear(), today.getMonth(), 25).toISOString().split('T')[0],
+        endDate: new Date(today.getFullYear(), today.getMonth(), 28).toISOString().split('T')[0],
+        startTime: '08:00',
+        endTime: '17:00',
+        isMultiDay: true,
+        color: '#fef3c7',
+        workerId: 'user-2',
+        workerName: '鈴木一郎',
+        siteName: '品川',
+        constructionType: 'エアコン設置工事'
+      },
+      {
+        id: 'multi-2',
+        title: '渋谷タワー空調システム',
+        startDate: new Date(today.getFullYear(), today.getMonth() + 1, 2).toISOString().split('T')[0],
+        endDate: new Date(today.getFullYear(), today.getMonth() + 1, 5).toISOString().split('T')[0],
+        startTime: '09:00',
+        endTime: '18:00',
+        isMultiDay: true,
+        color: '#dcfce7',
+        workerId: 'user-3',
+        workerName: '佐藤次郎',
+        siteName: '渋谷',
+        constructionType: '大型空調システム設置'
+      },
+      {
+        id: 'multi-3',
+        title: '新宿プラザ定期点検',
+        startDate: new Date(today.getFullYear(), today.getMonth(), 15).toISOString().split('T')[0],
+        endDate: new Date(today.getFullYear(), today.getMonth(), 16).toISOString().split('T')[0],
+        startTime: '10:00',
+        endTime: '16:00',
+        isMultiDay: true,
+        color: '#dbeafe',
+        workerId: 'user-4',
+        workerName: '田中太郎',
+        siteName: '新宿',
+        constructionType: '定期メンテナンス'
+      }
+    ]
+    
+    setEvents([...mappedEvents, ...multiDayEvents])
+    
     setLoading(false)
   }, [])
+
+  // イベントの色を取得
+  const getEventColor = (status: string) => {
+    switch (status) {
+      case 'accepted':
+      case 'SCHEDULED':
+        return '#dcfce7'
+      case 'proposed':
+        return '#dbeafe'
+      case 'pending':
+        return '#fef3c7'
+      case 'completed':
+      case 'COMPLETED':
+        return '#ede9fe'
+      default:
+        return '#e0e7ff'
+    }
+  }
+
+  // 日付クリックハンドラー
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date)
+    setShowEventForm(true)
+  }
+
+  // イベントクリックハンドラー
+  const handleEventClick = (event: any) => {
+    setSelectedEvent(event)
+  }
+
+  // 新規イベント追加ハンドラー
+  const handleAddEvent = () => {
+    setSelectedDate(new Date())
+    setShowEventForm(true)
+  }
+
+  // イベント送信ハンドラー
+  const handleEventSubmit = (eventData: any) => {
+    const newEvent = {
+      ...eventData,
+      id: `event-${Date.now()}`,
+      color: '#dbeafe'
+    }
+    setEvents([...events, newEvent])
+    setShowEventForm(false)
+    setSelectedDate(null)
+  }
 
   if (!mounted || loading) {
     return (
@@ -135,25 +255,78 @@ export default function DemoPage() {
             background: '#ffffff',
             position: 'relative'
           }}>
-            {/* カレンダー - 右側のプロファイル分の余白を確保 */}
+            {/* メインコンテンツエリア */}
             <div style={{ 
-              marginRight: '360px',
-              overflow: 'auto'
+              display: 'flex',
+              gap: '20px',
+              height: '100%'
             }}>
-              <CalendarView 
-                selectedWorkers={selectedWorkers}
-              />
+              {/* カレンダーエリア */}
+              <div style={{ 
+                flex: 1,
+                minWidth: 0,
+                overflow: 'auto'
+              }}>
+                <ImprovedCalendar 
+                  events={events}
+                  onDateClick={handleDateClick}
+                  onEventClick={handleEventClick}
+                  onAddEvent={handleAddEvent}
+                />
+              </div>
+              
+              {/* 右側のプロファイル表示 */}
+              <div style={{
+                width: '340px',
+                flexShrink: 0
+              }}>
+                {user?.role === 'WORKER' ? (
+                  <WorkerProfile user={user} />
+                ) : (
+                  <AdminProfile user={user} />
+                )}
+              </div>
             </div>
-            
-            {/* 右側のプロファイル表示 - コンポーネント内部で固定配置されている */}
-            {user?.role === 'WORKER' ? (
-              <WorkerProfile user={user} />
-            ) : (
-              <AdminProfile user={user} />
-            )}
           </div>
         </AppLayout>
       </div>
+
+      {/* 複数日イベント作成フォーム */}
+      <MultiDayEventForm
+        isOpen={showEventForm}
+        onClose={() => {
+          setShowEventForm(false)
+          setSelectedDate(null)
+        }}
+        onSubmit={handleEventSubmit}
+        initialDate={selectedDate || undefined}
+        workers={mockUsers.filter(u => u.role === 'worker' || u.role === 'master').map(u => ({ 
+          id: u.id, 
+          name: u.name 
+        }))}
+        sites={[
+          { id: 'site-1', name: '東京ビル', address: '東京都千代田区丸の内1-1-1' },
+          { id: 'site-2', name: '渋谷タワー', address: '東京都渋谷区渋谷2-2-2' },
+          { id: 'site-3', name: '新宿プラザ', address: '東京都新宿区西新宿3-3-3' },
+          { id: 'site-4', name: '品川センター', address: '東京都港区港南4-4-4' },
+          { id: 'site-5', name: '池袋スクエア', address: '東京都豊島区東池袋5-5-5' }
+        ]}
+      />
+
+      {/* イベント詳細モーダル */}
+      {selectedEvent && (
+        <EventDetailModal
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onStatusChange={(eventId, status, message) => {
+            const updatedEvents = events.map(e => 
+              e.id === eventId ? { ...e, status, color: getEventColor(status) } : e
+            )
+            setEvents(updatedEvents)
+            setSelectedEvent(null)
+          }}
+        />
+      )}
     </>
   )
 }
