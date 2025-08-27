@@ -5,7 +5,7 @@ import { Event } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 
 interface EventDetailModalProps {
-  event: Event
+  event: any
   onClose: () => void
   onStatusChange?: (eventId: string, status: string, message?: string) => void
 }
