@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react'
 import { Event } from '@/types'
 import { mockEvents, mockWorkerCapacities, mockUsers } from '@/lib/mockData'
 import { normalizeEvents, explodeMultiDayForDayGrid } from '@/lib/event-utils'
+import { DataQualityMonitor } from '@/lib/monitoring'
 import { useAuth } from '@/contexts/AuthContext'
 import EventDetailModal from '../EventDetailModal'
 import EventCreateModal from '../EventCreateModal'
@@ -184,6 +185,18 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
     }
     return normalized
   }, [filteredEvents, viewType])
+
+  // イベント数の監視（開発環境のみ、UIには影響なし）
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      DataQualityMonitor.logEventStats(normalizedEvents, `CalendarView-${viewType}`)
+      
+      // 大量イベント時のメモリ監視
+      if (normalizedEvents.length > 100) {
+        DataQualityMonitor.logMemoryUsage(`CalendarView-${viewType}`)
+      }
+    }
+  }, [normalizedEvents, viewType])
 
   // 日付関連のユーティリティ
   const getMonthDays = (date: Date) => {
