@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { Event } from '@/types'
 import { mockEvents, mockWorkerCapacities, mockUsers } from '@/lib/mockData'
 import { normalizeEvents, explodeMultiDayForDayGrid } from '@/lib/event-utils'
 import { DataQualityMonitor } from '@/lib/monitoring'
 import { MemoryGuard, safeExecute } from '@/lib/safety-guards'
+import { getDaysInMonth, getFirstDayOfMonth, formatDate } from '@/lib/date-utils'
 import { useAuth } from '@/contexts/AuthContext'
 import EventDetailModal from '../EventDetailModal'
 import EventCreateModal from '../EventCreateModal'
@@ -202,14 +203,12 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
     }
   }, [normalizedEvents, viewType])
 
-  // 日付関連のユーティリティ
-  const getMonthDays = (date: Date) => {
+  // 日付関連のユーティリティ（最適化版）
+  const getMonthDays = useMemo(() => (date: Date) => {
     const year = date.getFullYear()
     const month = date.getMonth()
-    const firstDay = new Date(year, month, 1)
-    const lastDay = new Date(year, month + 1, 0)
-    const daysInMonth = lastDay.getDate()
-    const startingDayOfWeek = firstDay.getDay()
+    const daysInMonth = getDaysInMonth(year, month) // キャッシュ済み
+    const startingDayOfWeek = getFirstDayOfMonth(year, month) // キャッシュ済み
     
     const days = []
     
@@ -245,7 +244,7 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
     }
     
     return days
-  }
+  }, [])
 
   const getWeekDays = (date: Date) => {
     const startOfWeek = new Date(date)

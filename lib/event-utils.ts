@@ -1,6 +1,7 @@
 import { Event } from "@/types";
 import { DataQualityMonitor, perfMonitor } from "./monitoring";
 import { LoopGuard, checkArraySize, validateDateRange, safeExecute } from "./safety-guards";
+import { eventCache, createCacheKey } from "./cache";
 
 /** UI用に日付をDateへ解決した正規化型 */
 export type NormalizedEvent = Event & {
@@ -33,7 +34,19 @@ const startTimeOrDefault = (t?: string) => t ?? "00:00";
 
 /** イベントを Date 付きへ正規化（単日/複数日どちらもOK） */
 export function normalizeEvents(events: Event[]): NormalizedEvent[] {
-  return perfMonitor.measure('normalizeEvents', () => {
+  // キャッシュキー生成（イベントのIDリストベース）
+  const cacheKey = createCacheKey(
+    'normalize',
+    events.map(e => `${e.id}:${e.date}:${e.endDate}:${e.startTime}:${e.endTime}`).join(',')
+  );
+  
+  // キャッシュチェック
+  const cached = eventCache.get(cacheKey) as NormalizedEvent[] | undefined;
+  if (cached) {
+    return cached;
+  }
+
+  const result = perfMonitor.measure('normalizeEvents', () => {
     // イベント統計をログ（UIには影響なし）
     DataQualityMonitor.logEventStats(events, 'normalizeEvents');
     
@@ -56,10 +69,26 @@ export function normalizeEvents(events: Event[]): NormalizedEvent[] {
       return { ...e, startAt, endAt };
     });
   }, { eventCount: events.length });
+  
+  // キャッシュに保存
+  eventCache.set(cacheKey, result);
+  return result;
 }
 
 /** カレンダーが"日毎の行"前提なら、複数日イベントを日単位に展開して返す */
 export function explodeMultiDayForDayGrid(events: NormalizedEvent[]) {
+  // キャッシュキー生成
+  const cacheKey = createCacheKey(
+    'explode',
+    events.map(e => `${e.id}:${e.startAt.getTime()}:${e.endAt.getTime()}`).join(',')
+  );
+  
+  // キャッシュチェック
+  const cached = eventCache.get(cacheKey) as NormalizedEvent[] | undefined;
+  if (cached) {
+    return cached;
+  }
+
   const out: NormalizedEvent[] = [];
   let multiDayCount = 0;
 
@@ -143,6 +172,8 @@ export function explodeMultiDayForDayGrid(events: NormalizedEvent[]) {
     outputEvents: out.length,
     multiDayEvents: multiDayCount 
   });
-
+  
+  // キャッシュに保存
+  eventCache.set(cacheKey, result);
   return result;
 }
