@@ -1,5 +1,6 @@
 import { Event } from "@/types";
 import { DataQualityMonitor, perfMonitor } from "./monitoring";
+import { LoopGuard, checkArraySize, validateDateRange, safeExecute } from "./safety-guards";
 
 /** UI用に日付をDateへ解決した正規化型 */
 export type NormalizedEvent = Event & {
@@ -63,9 +64,18 @@ export function explodeMultiDayForDayGrid(events: NormalizedEvent[]) {
   let multiDayCount = 0;
 
   const result = perfMonitor.measure('explodeMultiDayForDayGrid', () => {
+    // 入力配列のサイズチェック
+    checkArraySize(events, 'explodeMultiDayForDayGrid input');
+    
     for (const ev of events) {
       const start = new Date(ev.startAt);
       const end = new Date(ev.endAt);
+
+      // 日付範囲の検証
+      if (!validateDateRange(start, end, `Event ${ev.id}`)) {
+        console.warn(`Skipping invalid event: ${ev.id}`);
+        continue;
+      }
 
       // "日を跨ぐ"かどうかを判定（同日内ならそのまま push）
       const cursor = new Date(start);
@@ -89,10 +99,14 @@ export function explodeMultiDayForDayGrid(events: NormalizedEvent[]) {
         out.push({ ...ev, endAt: dayEnd });
       }
 
-      // 2) 中間日
+      // 2) 中間日（無限ループ防止付き）
+      const loopGuard = new LoopGuard(`Event ${ev.id} middle days`, 366); // 最大1年分
       const mid = new Date(cursor);
       mid.setDate(mid.getDate() + 1);
+      
       while (mid.getTime() < lastDay.getTime()) {
+        loopGuard.check(); // 無限ループチェック
+        
         const midStart = new Date(mid);
         midStart.setHours(0, 0, 0, 0);
         const midEnd = new Date(mid);
@@ -110,6 +124,11 @@ export function explodeMultiDayForDayGrid(events: NormalizedEvent[]) {
         const finalStart = new Date(lastDay);
         finalStart.setHours(0, 0, 0, 0);
         out.push({ ...ev, startAt: finalStart, endAt: end });
+      }
+      
+      // 出力配列のサイズチェック
+      if (out.length > 1000 && out.length % 1000 === 0) {
+        checkArraySize(out, 'explodeMultiDayForDayGrid output');
       }
     }
 

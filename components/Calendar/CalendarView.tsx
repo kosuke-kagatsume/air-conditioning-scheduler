@@ -5,6 +5,7 @@ import { Event } from '@/types'
 import { mockEvents, mockWorkerCapacities, mockUsers } from '@/lib/mockData'
 import { normalizeEvents, explodeMultiDayForDayGrid } from '@/lib/event-utils'
 import { DataQualityMonitor } from '@/lib/monitoring'
+import { MemoryGuard, safeExecute } from '@/lib/safety-guards'
 import { useAuth } from '@/contexts/AuthContext'
 import EventDetailModal from '../EventDetailModal'
 import EventCreateModal from '../EventCreateModal'
@@ -176,14 +177,16 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
     return filteredEventList
   }, [events, canViewAllEvents, isMaster, isWorker, user, selectedWorkers, statusFilter])
   
-  // 正規化と複数日展開
+  // 正規化と複数日展開（安全機構付き）
   const normalizedEvents = useMemo(() => {
-    const normalized = normalizeEvents(filteredEvents)
-    // 月表示・週表示では日単位に展開
-    if (viewType === 'month' || viewType === 'week') {
-      return explodeMultiDayForDayGrid(normalized)
-    }
-    return normalized
+    return safeExecute(() => {
+      const normalized = normalizeEvents(filteredEvents)
+      // 月表示・週表示では日単位に展開
+      if (viewType === 'month' || viewType === 'week') {
+        return explodeMultiDayForDayGrid(normalized)
+      }
+      return normalized
+    }, 'normalizedEvents calculation', []) || []
   }, [filteredEvents, viewType])
 
   // イベント数の監視（開発環境のみ、UIには影響なし）
@@ -194,6 +197,7 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
       // 大量イベント時のメモリ監視
       if (normalizedEvents.length > 100) {
         DataQualityMonitor.logMemoryUsage(`CalendarView-${viewType}`)
+        MemoryGuard.check(`CalendarView-${viewType}`)
       }
     }
   }, [normalizedEvents, viewType])
