@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import { Event } from '@/types'
 import { mockEvents, mockWorkerCapacities, mockUsers } from '@/lib/mockData'
+import { normalizeEvents, explodeMultiDayForDayGrid } from '@/lib/event-utils'
 import { useAuth } from '@/contexts/AuthContext'
 import EventDetailModal from '../EventDetailModal'
 import EventCreateModal from '../EventCreateModal'
@@ -173,6 +174,16 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
     
     return filteredEventList
   }, [events, canViewAllEvents, isMaster, isWorker, user, selectedWorkers, statusFilter])
+  
+  // 正規化と複数日展開
+  const normalizedEvents = useMemo(() => {
+    const normalized = normalizeEvents(filteredEvents)
+    // 月表示・週表示では日単位に展開
+    if (viewType === 'month' || viewType === 'week') {
+      return explodeMultiDayForDayGrid(normalized)
+    }
+    return normalized
+  }, [filteredEvents, viewType])
 
   // 日付関連のユーティリティ
   const getMonthDays = (date: Date) => {

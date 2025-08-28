@@ -60,6 +60,7 @@ export interface Event {
   id: string
   title: string
   date: string
+  endDate?: string  // 複数日イベント用の終了日（省略時は単日）
   startTime: string
   endTime?: string
   status: EventStatus

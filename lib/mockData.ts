@@ -1,6 +1,5 @@
 import { User, Event, Notification, WorkerCapacity, Tenant, DashboardData, EventStatus, SalesPerson } from '@/types'
 import { 
-  generateExtendedMockEvents,
   generateMockReports,
   generateMockScheduleChangeRequests,
   generateMockInventory,
@@ -211,6 +210,57 @@ const generateMockEvents = (): Event[] => {
     timeSlotIds: ['ts1'],
     createdAt: '2025-01-01T09:00:00Z',
     updatedAt: '2025-01-01T09:00:00Z'
+  },
+  // 複数日イベント1: 3日間
+  {
+    id: 'event-multi-1',
+    title: '【3日間】大型ビル空調システム総入れ替え工事',
+    date: getDateStr(7),
+    endDate: getDateStr(9),  // 3日間の作業
+    startTime: '08:00',
+    endTime: '18:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都千代田区丸の内2-7-2',
+    city: '千代田区',
+    constructionType: 'エアコン交換',
+    description: 'ビル全館空調システムの総入れ替え',
+    clientName: '丸の内ビル管理組合',
+    constructorName: '大和建設',
+    salesPersons: [
+      { id: 'sp1', name: '営業田中', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-master1',
+    workerName: '田中親方',
+    createdBy: 'user-admin',
+    tenantId: 'tenant-1',
+    timeSlotIds: ['ts1', 'ts2'],
+    createdAt: '2025-01-01T09:00:00Z',
+    updatedAt: '2025-01-01T09:00:00Z'
+  },
+  // 複数日イベント2: 2日間
+  {
+    id: 'event-multi-2',
+    title: '【2日間】マンション全戸エアコン点検',
+    date: getDateStr(3),
+    endDate: getDateStr(4),
+    startTime: '10:00',
+    endTime: '17:00',
+    status: 'accepted' as EventStatus,
+    address: '東京都港区芝浦4-12-33',
+    city: '港区',
+    constructionType: '点検・メンテナンス',
+    clientName: 'タワーマンション芝浦',
+    constructorName: 'マンション管理サービス',
+    salesPersons: [
+      { id: 'sp2', name: '営業佐藤', role: 'main' as SalesPerson['role'] }
+    ],
+    workerId: 'worker-1',
+    workerName: '高橋次郎',
+    createdBy: 'user-manager1',
+    tenantId: 'tenant-1',
+    timeSlotIds: ['ts1', 'ts2'],
+    createdAt: '2025-01-05T09:00:00Z',
+    updatedAt: '2025-01-05T09:00:00Z'
   },
   {
     id: 'event-2',
@@ -679,8 +729,8 @@ const generateMockEvents = (): Event[] => {
   return events
 }
 
-// 既存のイベントと拡張イベントを結合
-export const mockEvents = [...generateMockEvents(), ...generateExtendedMockEvents()]
+// モックイベントを生成
+export const mockEvents = generateMockEvents()
 
 // 職人枠数設定
 export const mockWorkerCapacities: WorkerCapacity[] = [
