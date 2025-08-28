@@ -7,6 +7,7 @@ import { normalizeEvents, explodeMultiDayForDayGrid } from '@/lib/event-utils'
 import { DataQualityMonitor } from '@/lib/monitoring'
 import { MemoryGuard, safeExecute } from '@/lib/safety-guards'
 import { getDaysInMonth, getFirstDayOfMonth, formatDate } from '@/lib/date-utils'
+import { useABTest } from '@/lib/ab-testing'
 import { useAuth } from '@/contexts/AuthContext'
 import EventDetailModal from '../EventDetailModal'
 import EventCreateModal from '../EventCreateModal'
@@ -20,6 +21,11 @@ interface CalendarViewProps {
 
 export default function CalendarView({ selectedWorkers = [], onEventClick }: CalendarViewProps) {
   const { user, currentTenant, canCreateEvent, canViewAllEvents, isMaster, isWorker } = useAuth()
+  
+  // A/Bテスト設定
+  const enhancedCaching = useABTest('enhanced_caching', user?.id)
+  const aggressiveMemoization = useABTest('aggressive_memoization', user?.id)
+  const lazyLoading = useABTest('lazy_loading', user?.id)
   const [viewType, setViewType] = useState<ViewType>('month')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null)
@@ -178,9 +184,11 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
     return filteredEventList
   }, [events, canViewAllEvents, isMaster, isWorker, user, selectedWorkers, statusFilter])
   
-  // 正規化と複数日展開（安全機構付き）
+  // 正規化と複数日展開（安全機構付き + A/Bテスト）
   const normalizedEvents = useMemo(() => {
-    return safeExecute(() => {
+    const startTime = performance.now();
+    
+    const result = safeExecute(() => {
       const normalized = normalizeEvents(filteredEvents)
       // 月表示・週表示では日単位に展開
       if (viewType === 'month' || viewType === 'week') {
@@ -188,7 +196,15 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
       }
       return normalized
     }, 'normalizedEvents calculation', []) || []
-  }, [filteredEvents, viewType])
+    
+    // A/Bテストメトリクス記録
+    const processingTime = performance.now() - startTime;
+    if (enhancedCaching.isEnabled) {
+      enhancedCaching.recordMetric('event_processing_time', processingTime);
+    }
+    
+    return result;
+  }, [filteredEvents, viewType, enhancedCaching])
 
   // イベント数の監視（開発環境のみ、UIには影響なし）
   useEffect(() => {

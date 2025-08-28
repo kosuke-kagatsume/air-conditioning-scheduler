@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import ImprovedCalendar from '@/components/ImprovedCalendar'
 import MultiDayEventForm from '@/components/MultiDayEventForm'
 import EventDetailModal from '@/components/EventDetailModal'
+import ABTestIndicator from '@/components/ABTestIndicator'
 import AppLayout from '@/components/AppLayout'
 import WorkerProfile from '@/components/WorkerProfile'
 import AdminProfile from '@/components/AdminProfile'
@@ -273,6 +274,8 @@ export default function DemoPage() {
                   onEventClick={handleEventClick}
                   onAddEvent={handleAddEvent}
                 />
+                {/* A/Bテストインジケーター（開発環境のみ） */}
+                <ABTestIndicator userId={user?.id} />
               </div>
               
               {/* 右側のプロファイル表示 */}
