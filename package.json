@@ -31,6 +31,8 @@
     "@prisma/client": "^6.13.0",
     "@react-pdf/renderer": "^4.3.0",
     "@sentry/nextjs": "^10.5.0",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2.56.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/qrcode": "^1.5.5",
     "bcryptjs": "^3.0.2",

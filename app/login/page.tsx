@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
 import PageHeader from '@/components/LogoHeader'
 
@@ -13,19 +14,39 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [useSupabase, setUseSupabase] = useState(true)
+  const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
     
-    // モックログイン処理
-    const success = await login(email, password)
-    
-    if (success) {
-      router.push('/demo')
+    if (useSupabase) {
+      // Supabase認証
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+        
+        if (error) throw error
+        
+        // ログイン成功
+        router.push('/dashboard')
+        router.refresh()
+      } catch (error: any) {
+        setError(error.message || 'ログインに失敗しました')
+      }
     } else {
-      setError('メールアドレスまたはパスワードが正しくありません')
+      // 既存のモックログイン処理
+      const success = await login(email, password)
+      
+      if (success) {
+        router.push('/demo')
+      } else {
+        setError('メールアドレスまたはパスワードが正しくありません')
+      }
     }
     
     setLoading(false)
@@ -60,14 +81,12 @@ export default function Login() {
         margin: '20px'
       }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <div style={{
-              margin: '0 auto 20px',
-              cursor: 'pointer'
-            }}>
-              <PageHeader href="/" size={64} />
-            </div>
-          </Link>
+          <div style={{
+            margin: '0 auto 20px',
+            cursor: 'pointer'
+          }}>
+            <PageHeader href="/" size={64} />
+          </div>
           <h1 style={{ 
             fontSize: '28px', 
             fontWeight: '700', 
@@ -162,6 +181,24 @@ export default function Login() {
                 boxSizing: 'border-box'
               }}
             />
+          </div>
+
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              fontSize: '14px',
+              color: '#6c7684',
+              cursor: 'pointer'
+            }}>
+              <input 
+                type="checkbox" 
+                checked={useSupabase}
+                onChange={(e) => setUseSupabase(e.target.checked)}
+                style={{ marginRight: '8px' }}
+              />
+              Supabase認証を使用（新規登録は<Link href="/register" style={{ color: '#667eea' }}>こちら</Link>）
+            </label>
           </div>
 
           <button 
