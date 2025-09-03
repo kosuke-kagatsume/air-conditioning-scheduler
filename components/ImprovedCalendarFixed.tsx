@@ -513,61 +513,100 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
               
               return (
                 <div key={index} style={{
-                  minHeight: '100px',
+                  minHeight: '140px',
                   backgroundColor: isToday ? '#eff6ff' : 'white',
-                  padding: '8px',
+                  padding: '6px',
                   cursor: 'pointer',
                   position: 'relative',
-                  opacity: isCurrentMonth ? 1 : 0.5
+                  opacity: isCurrentMonth ? 1 : 0.5,
+                  borderTop: isToday ? '2px solid #3b82f6' : 'none'
                 }}
                 onClick={() => handleDateClick(date)}
                 >
                   {/* 日付 */}
                   <div style={{
-                    fontSize: '14px',
-                    fontWeight: isToday ? '700' : '400',
+                    fontSize: '13px',
+                    fontWeight: isToday ? '700' : '500',
                     color: date.getDay() === 0 ? '#dc2626' : date.getDay() === 6 ? '#2563eb' : '#374151',
-                    marginBottom: '4px'
+                    marginBottom: '6px'
                   }}>
                     {date.getDate()}
                   </div>
                   
                   {/* イベントプレビュー */}
                   <div style={{ fontSize: '12px' }}>
-                    {dayEvents.slice(0, 2).map((event, i) => (
+                    {dayEvents.slice(0, 3).map((event, i) => (
                       <div key={i} style={{
-                        padding: '2px 4px',
-                        marginBottom: '2px',
+                        padding: '4px 6px',
+                        marginBottom: '3px',
                         borderRadius: '4px',
                         backgroundColor: event.color || '#e0e7ff',
-                        color: '#1e40af',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis',
-                        cursor: 'pointer'
+                        border: '1px solid rgba(0,0,0,0.05)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s'
                       }}
                       onClick={(e) => {
                         e.stopPropagation()
                         onEventClick(event)
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
-                        <span style={{ fontSize: '11px' }}>
-                          {event.isMultiDay ? '◆ ' : `${event.startTime} `}
-                          {event.title.length > 8 ? event.title.substring(0, 8) + '...' : event.title}
-                        </span>
+                        {/* 1行目: 時間と作業内容 */}
+                        <div style={{ 
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color: '#1e293b',
+                          marginBottom: '2px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          {event.isMultiDay ? (
+                            <>
+                              <span>◆</span>
+                              <span>{event.title.length > 10 ? event.title.substring(0, 10) + '...' : event.title}</span>
+                            </>
+                          ) : (
+                            <>
+                              <span style={{ color: '#3b82f6', fontWeight: '700' }}>
+                                {event.startTime}
+                              </span>
+                              <span>{event.title.length > 8 ? event.title.substring(0, 8) + '...' : event.title}</span>
+                            </>
+                          )}
+                        </div>
+                        
+                        {/* 2行目: 現場住所 */}
+                        <div style={{ 
+                          fontSize: '10px',
+                          color: '#6b7280',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '2px'
+                        }}>
+                          <MapPin size={10} />
+                          <span>
+                            {event.siteName ? 
+                              (event.siteName.length > 12 ? event.siteName.substring(0, 12) + '...' : event.siteName) 
+                              : '未設定'
+                            }
+                          </span>
+                        </div>
                       </div>
                     ))}
                     
-                    {dayEvents.length > 2 && (
+                    {dayEvents.length > 3 && (
                       <div style={{
-                        fontSize: '11px',
+                        fontSize: '10px',
                         color: '#6b7280',
                         textAlign: 'center',
                         padding: '2px',
                         backgroundColor: '#f3f4f6',
-                        borderRadius: '4px'
+                        borderRadius: '4px',
+                        marginTop: '2px'
                       }}>
-                        +{dayEvents.length - 2}件
+                        +{dayEvents.length - 3}件
                       </div>
                     )}
                   </div>

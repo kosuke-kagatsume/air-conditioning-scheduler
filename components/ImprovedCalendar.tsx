@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, Fragment } from 'react'
 import { ChevronLeft, ChevronRight, Plus, Calendar, Clock, MapPin, User } from 'lucide-react'
 
 interface Event {
@@ -30,6 +30,8 @@ export default function ImprovedCalendar({ events, onDateClick, onEventClick, on
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [showDayModal, setShowDayModal] = useState(false)
+  const [viewType, setViewType] = useState<'month' | 'week' | 'day'>('month')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
 
   // カレンダーの日付を生成
   const calendarDays = useMemo(() => {
@@ -51,10 +53,39 @@ export default function ImprovedCalendar({ events, onDateClick, onEventClick, on
     return days
   }, [currentMonth])
 
+  // ステータスに基づいてイベントをフィルタリング
+  const filteredEvents = useMemo(() => {
+    if (statusFilter === 'all') return events
+    
+    return events.filter(event => {
+      // ステータスマッピング
+      const statusMap: { [key: string]: string[] } = {
+        'confirmed': ['accepted', 'SCHEDULED', '確定'],
+        'proposed': ['proposed', 'PROPOSED', '提案中'],
+        'pending': ['pending', 'PENDING', '保留'],
+        'completed': ['completed', 'COMPLETED', '完了']
+      }
+      
+      // イベントのステータスを取得（色から推測）
+      const getStatus = (color: string) => {
+        switch (color) {
+          case '#dcfce7': return 'confirmed'
+          case '#dbeafe': return 'proposed'
+          case '#fef3c7': return 'pending'
+          case '#ede9fe': return 'completed'
+          default: return 'proposed'
+        }
+      }
+      
+      const eventStatus = getStatus(event.color)
+      return eventStatus === statusFilter
+    })
+  }, [events, statusFilter])
+
   // 日付のイベントを取得
   const getEventsForDate = (date: Date) => {
     const dateStr = date.toISOString().split('T')[0]
-    const dayEvents = events.filter(event => {
+    const dayEvents = filteredEvents.filter(event => {
       if (!event) return false
       
       if (event.isMultiDay) {
@@ -124,7 +155,9 @@ export default function ImprovedCalendar({ events, onDateClick, onEventClick, on
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        marginBottom: '20px'
+        marginBottom: '20px',
+        flexWrap: 'wrap',
+        gap: '12px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={previousMonth} style={{
@@ -150,43 +183,184 @@ export default function ImprovedCalendar({ events, onDateClick, onEventClick, on
           </button>
         </div>
         
-        <button onClick={onAddEvent} style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '10px 16px',
-          border: 'none',
-          borderRadius: '8px',
-          background: '#3b82f6',
-          color: 'white',
-          cursor: 'pointer',
-          fontWeight: '500'
-        }}>
-          <Plus size={18} />
-          予定作成
-        </button>
-      </div>
-
-      {/* 曜日ヘッダー */}
-      <div style={{ 
-        display: 'grid', 
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        marginBottom: '8px'
-      }}>
-        {weekDays.map((day, index) => (
-          <div key={day} style={{
-            padding: '12px 0',
-            textAlign: 'center',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: index === 0 ? '#dc2626' : index === 6 ? '#2563eb' : '#6b7280'
-          }}>
-            {day}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {/* ビュー切り替えボタン */}
+          <div style={{ display: 'flex', gap: '4px', background: '#f3f4f6', borderRadius: '8px', padding: '4px' }}>
+            <button 
+              onClick={() => setViewType('month')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                background: viewType === 'month' ? 'white' : 'transparent',
+                color: viewType === 'month' ? '#3b82f6' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: viewType === 'month' ? '600' : '400',
+                transition: 'all 0.2s'
+              }}
+            >
+              月
+            </button>
+            <button 
+              onClick={() => setViewType('week')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                background: viewType === 'week' ? 'white' : 'transparent',
+                color: viewType === 'week' ? '#3b82f6' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: viewType === 'week' ? '600' : '400',
+                transition: 'all 0.2s'
+              }}
+            >
+              週
+            </button>
+            <button 
+              onClick={() => setViewType('day')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                background: viewType === 'day' ? 'white' : 'transparent',
+                color: viewType === 'day' ? '#3b82f6' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: viewType === 'day' ? '600' : '400',
+                transition: 'all 0.2s'
+              }}
+            >
+              日
+            </button>
           </div>
-        ))}
+
+          {/* ステータスフィルターボタン */}
+          <div style={{ display: 'flex', gap: '4px', background: '#f3f4f6', borderRadius: '8px', padding: '4px' }}>
+            <button 
+              onClick={() => setStatusFilter('all')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                background: statusFilter === 'all' ? 'white' : 'transparent',
+                color: statusFilter === 'all' ? '#3b82f6' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: statusFilter === 'all' ? '600' : '400',
+                transition: 'all 0.2s'
+              }}
+            >
+              全て
+            </button>
+            <button 
+              onClick={() => setStatusFilter('confirmed')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                background: statusFilter === 'confirmed' ? '#dcfce7' : 'transparent',
+                color: statusFilter === 'confirmed' ? '#16a34a' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: statusFilter === 'confirmed' ? '600' : '400',
+                transition: 'all 0.2s'
+              }}
+            >
+              確定
+            </button>
+            <button 
+              onClick={() => setStatusFilter('proposed')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                background: statusFilter === 'proposed' ? '#dbeafe' : 'transparent',
+                color: statusFilter === 'proposed' ? '#2563eb' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: statusFilter === 'proposed' ? '600' : '400',
+                transition: 'all 0.2s'
+              }}
+            >
+              提案中
+            </button>
+            <button 
+              onClick={() => setStatusFilter('pending')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                background: statusFilter === 'pending' ? '#fef3c7' : 'transparent',
+                color: statusFilter === 'pending' ? '#d97706' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: statusFilter === 'pending' ? '600' : '400',
+                transition: 'all 0.2s'
+              }}
+            >
+              保留
+            </button>
+            <button 
+              onClick={() => setStatusFilter('completed')}
+              style={{
+                padding: '6px 12px',
+                border: 'none',
+                borderRadius: '6px',
+                background: statusFilter === 'completed' ? '#ede9fe' : 'transparent',
+                color: statusFilter === 'completed' ? '#7c3aed' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: statusFilter === 'completed' ? '600' : '400',
+                transition: 'all 0.2s'
+              }}
+            >
+              完了
+            </button>
+          </div>
+
+          <button onClick={onAddEvent} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '10px 16px',
+            border: 'none',
+            borderRadius: '8px',
+            background: '#3b82f6',
+            color: 'white',
+            cursor: 'pointer',
+            fontWeight: '500'
+          }}>
+            <Plus size={18} />
+            予定作成
+          </button>
+        </div>
       </div>
 
-      {/* カレンダー本体 */}
+      {/* ビューに応じた表示 */}
+      {viewType === 'month' && (
+        <>
+          {/* 曜日ヘッダー */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(7, 1fr)',
+            marginBottom: '8px'
+          }}>
+            {weekDays.map((day, index) => (
+              <div key={day} style={{
+                padding: '12px 0',
+                textAlign: 'center',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: index === 0 ? '#dc2626' : index === 6 ? '#2563eb' : '#6b7280'
+              }}>
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* 月表示カレンダー本体 */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(7, 1fr)',
@@ -274,6 +448,208 @@ export default function ImprovedCalendar({ events, onDateClick, onEventClick, on
           )
         })}
       </div>
+        </>
+      )}
+
+      {/* 週表示 */}
+      {viewType === 'week' && (
+        <>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '80px repeat(7, 1fr)',
+            gap: '1px',
+            backgroundColor: '#e5e7eb',
+            marginTop: '20px'
+          }}>
+            {/* 時間ヘッダー */}
+            <div style={{ backgroundColor: 'white', padding: '8px', fontSize: '12px', fontWeight: '600' }}>時間</div>
+            {/* 週の日付ヘッダー */}
+            {(() => {
+              const weekStart = new Date(currentMonth)
+              const currentDayOfWeek = weekStart.getDay()
+              weekStart.setDate(weekStart.getDate() - currentDayOfWeek)
+              
+              return Array.from({ length: 7 }, (_, i) => {
+                const day = new Date(weekStart)
+                day.setDate(weekStart.getDate() + i)
+                return (
+                  <div key={i} style={{ 
+                    backgroundColor: 'white', 
+                    padding: '8px', 
+                    textAlign: 'center',
+                    borderBottom: '2px solid #e5e7eb'
+                  }}>
+                    <div style={{ fontSize: '12px', color: '#6b7280' }}>{weekDays[i]}</div>
+                    <div style={{ fontSize: '16px', fontWeight: '600' }}>{day.getDate()}</div>
+                  </div>
+                )
+              })
+            })()}
+            
+            {/* 時間スロット */}
+            {Array.from({ length: 10 }, (_, hourIndex) => {
+              const hour = 8 + hourIndex
+              return (
+                <React.Fragment key={`hour-${hour}`}>
+                  <div style={{ 
+                    backgroundColor: '#f9fafb', 
+                    padding: '8px', 
+                    fontSize: '12px',
+                    textAlign: 'center'
+                  }}>
+                    {hour}:00
+                  </div>
+                  {Array.from({ length: 7 }, (_, dayIndex) => {
+                    const weekStart = new Date(currentMonth)
+                    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + dayIndex)
+                    const dateStr = weekStart.toISOString().split('T')[0]
+                    const hourEvents = filteredEvents.filter(event => {
+                      if (event.startDate === dateStr || event.date === dateStr) {
+                        const eventHour = parseInt(event.startTime.split(':')[0])
+                        return eventHour === hour
+                      }
+                      return false
+                    })
+                    
+                    return (
+                      <div key={`${hour}-${dayIndex}`} style={{ 
+                        backgroundColor: 'white', 
+                        padding: '4px',
+                        minHeight: '60px',
+                        cursor: 'pointer'
+                      }}
+                      onClick={() => handleDateClick(weekStart)}
+                      >
+                        {hourEvents.map((event, i) => (
+                          <div key={i} style={{
+                            padding: '2px 4px',
+                            marginBottom: '2px',
+                            borderRadius: '4px',
+                            backgroundColor: event.color || '#e0e7ff',
+                            fontSize: '11px',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis',
+                            cursor: 'pointer'
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            onEventClick(event)
+                          }}
+                          >
+                            {event.title}
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })}
+                </React.Fragment>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {/* 日表示 */}
+      {viewType === 'day' && (
+        <>
+          <div style={{ 
+            marginTop: '20px',
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            padding: '16px'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>
+              {currentMonth.getFullYear()}年{currentMonth.getMonth() + 1}月{currentMonth.getDate()}日
+            </h3>
+            
+            {/* タイムライン */}
+            <div style={{ display: 'grid', gap: '8px' }}>
+              {Array.from({ length: 12 }, (_, i) => {
+                const hour = 8 + i
+                const dateStr = currentMonth.toISOString().split('T')[0]
+                const hourEvents = filteredEvents.filter(event => {
+                  if (event.startDate === dateStr || event.date === dateStr) {
+                    const eventHour = parseInt(event.startTime.split(':')[0])
+                    return eventHour === hour
+                  }
+                  return false
+                })
+                
+                return (
+                  <div key={hour} style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '60px 1fr',
+                    gap: '16px',
+                    padding: '8px',
+                    borderBottom: '1px solid #e5e7eb'
+                  }}>
+                    <div style={{ 
+                      fontSize: '14px', 
+                      fontWeight: '500',
+                      color: '#6b7280'
+                    }}>
+                      {hour}:00
+                    </div>
+                    <div style={{ minHeight: '40px' }}>
+                      {hourEvents.map((event, i) => (
+                        <div key={i} style={{
+                          padding: '8px 12px',
+                          marginBottom: '4px',
+                          borderRadius: '6px',
+                          backgroundColor: event.color || '#e0e7ff',
+                          cursor: 'pointer',
+                          border: '1px solid rgba(0,0,0,0.05)'
+                        }}
+                        onClick={() => onEventClick(event)}
+                        >
+                          <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
+                            {event.title}
+                          </div>
+                          {event.workerName && (
+                            <div style={{ fontSize: '12px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <User size={12} />
+                              {event.workerName}
+                            </div>
+                          )}
+                          {event.siteName && (
+                            <div style={{ fontSize: '12px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              <MapPin size={12} />
+                              {event.siteName}
+                            </div>
+                          )}
+                          <div style={{ fontSize: '12px', color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <Clock size={12} />
+                            {event.startTime} - {event.endTime}
+                          </div>
+                        </div>
+                      ))}
+                      {hourEvents.length === 0 && (
+                        <div 
+                          style={{ 
+                            height: '40px', 
+                            border: '1px dashed #e5e7eb',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#9ca3af',
+                            fontSize: '12px'
+                          }}
+                          onClick={() => handleDateClick(currentMonth)}
+                        >
+                          予定を追加
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* 日付詳細モーダル */}
       {showDayModal && selectedDate && (
