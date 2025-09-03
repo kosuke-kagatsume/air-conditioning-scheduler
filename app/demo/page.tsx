@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import ImprovedCalendar from '@/components/ImprovedCalendar'
+import ImprovedCalendar from '@/components/ImprovedCalendarFixed'
 import MultiDayEventForm from '@/components/MultiDayEventForm'
 import EventDetailModal from '@/components/EventDetailModal'
 import ABTestIndicator from '@/components/ABTestIndicator'
