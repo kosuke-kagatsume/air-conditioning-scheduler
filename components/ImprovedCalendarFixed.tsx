@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Plus, Calendar, Clock, MapPin, User } from 'lucide-react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
+import { ChevronLeft, ChevronRight, Plus, Calendar, Clock, MapPin, User, Users, Check } from 'lucide-react'
 
 interface Event {
   id: string
@@ -32,26 +32,64 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
   const [showDayModal, setShowDayModal] = useState(false)
   const [viewType, setViewType] = useState<'month' | 'week' | 'day'>('month')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-
-  // ステータスに基づいてイベントをフィルタリング
-  const filteredEvents = useMemo(() => {
-    if (statusFilter === 'all') return events
-    
-    return events.filter(event => {
-      const getStatus = (color: string) => {
-        switch (color) {
-          case '#dcfce7': return 'confirmed'
-          case '#dbeafe': return 'proposed'
-          case '#fef3c7': return 'pending'
-          case '#ede9fe': return 'completed'
-          default: return 'proposed'
-        }
+  const [selectedWorkers, setSelectedWorkers] = useState<string[]>([])
+  const [showWorkerDropdown, setShowWorkerDropdown] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  
+  // ドロップダウンの外側クリックで閉じる
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowWorkerDropdown(false)
       }
-      
-      const eventStatus = getStatus(event.color)
-      return eventStatus === statusFilter
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+  
+  // 職人リストを取得（イベントから）
+  const workers = useMemo(() => {
+    const workerMap = new Map()
+    events.forEach(event => {
+      if (event.workerId && event.workerName) {
+        workerMap.set(event.workerId, event.workerName)
+      }
     })
-  }, [events, statusFilter])
+    return Array.from(workerMap, ([id, name]) => ({ id, name }))
+  }, [events])
+
+  // ステータスと職人に基づいてイベントをフィルタリング
+  const filteredEvents = useMemo(() => {
+    let filtered = events
+    
+    // ステータスフィルター
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(event => {
+        const getStatus = (color: string) => {
+          switch (color) {
+            case '#dcfce7': return 'confirmed'
+            case '#dbeafe': return 'proposed'
+            case '#fef3c7': return 'pending'
+            case '#ede9fe': return 'completed'
+            default: return 'proposed'
+          }
+        }
+        
+        const eventStatus = getStatus(event.color)
+        return eventStatus === statusFilter
+      })
+    }
+    
+    // 職人フィルター
+    if (selectedWorkers.length > 0) {
+      filtered = filtered.filter(event => 
+        event.workerId && selectedWorkers.includes(event.workerId)
+      )
+    }
+    
+    return filtered
+  }, [events, statusFilter, selectedWorkers])
 
   // カレンダーの日付を生成
   const calendarDays = useMemo(() => {
@@ -274,6 +312,151 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
             >
               完了
             </button>
+          </div>
+
+          {/* 職人フィルター */}
+          <div ref={dropdownRef} style={{ position: 'relative' }}>
+            <button 
+              onClick={() => setShowWorkerDropdown(!showWorkerDropdown)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 12px',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                background: 'white',
+                color: selectedWorkers.length > 0 ? '#3b82f6' : '#6b7280',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: selectedWorkers.length > 0 ? '600' : '400',
+                minWidth: '120px'
+              }}
+            >
+              <Users size={16} />
+              <span>
+                {selectedWorkers.length === 0 
+                  ? '全職人' 
+                  : selectedWorkers.length === 1
+                    ? workers.find(w => w.id === selectedWorkers[0])?.name
+                    : `${selectedWorkers.length}人選択`
+                }
+              </span>
+              <ChevronRight size={14} style={{ 
+                marginLeft: 'auto',
+                transform: showWorkerDropdown ? 'rotate(90deg)' : 'rotate(0)',
+                transition: 'transform 0.2s'
+              }} />
+            </button>
+
+            {/* ドロップダウンメニュー */}
+            {showWorkerDropdown && (
+              <div style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '4px',
+                background: 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                zIndex: 100,
+                minWidth: '200px',
+                maxHeight: '300px',
+                overflow: 'auto'
+              }}>
+                <div style={{ padding: '8px' }}>
+                  {/* 全選択/全解除 */}
+                  <button
+                    onClick={() => {
+                      if (selectedWorkers.length === workers.length) {
+                        setSelectedWorkers([])
+                      } else {
+                        setSelectedWorkers(workers.map(w => w.id))
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      border: 'none',
+                      borderRadius: '6px',
+                      background: '#f3f4f6',
+                      color: '#374151',
+                      cursor: 'pointer',
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      marginBottom: '4px',
+                      textAlign: 'left'
+                    }}
+                  >
+                    {selectedWorkers.length === workers.length ? '全て解除' : '全て選択'}
+                  </button>
+
+                  {/* 職人リスト */}
+                  {workers.map(worker => (
+                    <label
+                      key={worker.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '8px 12px',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'background 0.2s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <div style={{
+                        width: '16px',
+                        height: '16px',
+                        border: '2px solid #d1d5db',
+                        borderRadius: '4px',
+                        background: selectedWorkers.includes(worker.id) ? '#3b82f6' : 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s'
+                      }}>
+                        {selectedWorkers.includes(worker.id) && (
+                          <Check size={12} color="white" />
+                        )}
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={selectedWorkers.includes(worker.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedWorkers([...selectedWorkers, worker.id])
+                          } else {
+                            setSelectedWorkers(selectedWorkers.filter(id => id !== worker.id))
+                          }
+                        }}
+                        style={{ display: 'none' }}
+                      />
+                      <span style={{
+                        fontSize: '14px',
+                        color: '#374151'
+                      }}>
+                        {worker.name}
+                      </span>
+                    </label>
+                  ))}
+                  
+                  {workers.length === 0 && (
+                    <div style={{
+                      padding: '12px',
+                      textAlign: 'center',
+                      color: '#9ca3af',
+                      fontSize: '13px'
+                    }}>
+                      職人データがありません
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <button onClick={onAddEvent} style={{
