@@ -712,34 +712,86 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                 })
                 
                 hourSlots.push(
-                  <div key={`${hour}-${dayIndex}`} style={{ 
+                  <div key={`${hour}-${dayIndex}`} 
+                  style={{ 
                     backgroundColor: 'white', 
                     padding: '4px',
-                    minHeight: '60px',
+                    minHeight: '80px',
                     cursor: 'pointer',
-                    borderRight: dayIndex === 6 ? 'none' : '1px solid #f3f4f6'
+                    borderRight: dayIndex === 6 ? 'none' : '1px solid #f3f4f6',
+                    transition: 'background 0.2s',
+                    position: 'relative'
                   }}
-                  onClick={() => handleDateClick(slotDate)}
+                  onClick={(e) => {
+                    // イベント要素またはその子要素をクリックしていない場合
+                    const target = e.target as HTMLElement
+                    const isEventClick = target.closest('[data-event-item]')
+                    
+                    if (!isEventClick) {
+                      const clickedDate = new Date(slotDate)
+                      clickedDate.setHours(hour, 0, 0, 0)
+                      handleDateClick(clickedDate)
+                    }
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = '#f9fafb'
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = 'white'
+                  }}
                   >
                     {hourEvents.map((event, i) => (
-                      <div key={i} style={{
-                        padding: '2px 4px',
-                        marginBottom: '2px',
+                      <div key={i} 
+                      data-event-item="true"
+                      style={{
+                        padding: '4px 6px',
+                        marginBottom: '3px',
                         borderRadius: '4px',
                         backgroundColor: event.color || '#e0e7ff',
-                        fontSize: '11px',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                        textOverflow: 'ellipsis',
-                        cursor: 'pointer'
+                        border: '1px solid rgba(0,0,0,0.05)',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s'
                       }}
                       onClick={(e) => {
                         e.stopPropagation()
                         onEventClick(event)
                       }}
+                      onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)'}
+                      onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.transform = 'scale(1)'}
                       >
-                        {event.isMultiDay && '◆ '}
-                        {event.title.length > 10 ? event.title.substring(0, 10) + '...' : event.title}
+                        {/* 1行目: タイトル */}
+                        <div style={{
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color: '#1e293b',
+                          marginBottom: '2px',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap',
+                          textOverflow: 'ellipsis'
+                        }}>
+                          {event.isMultiDay && '◆ '}
+                          {event.title.length > 12 ? event.title.substring(0, 12) + '...' : event.title}
+                        </div>
+                        
+                        {/* 2行目: 現場住所 */}
+                        <div style={{
+                          fontSize: '10px',
+                          color: '#6b7280',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '2px',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap',
+                          textOverflow: 'ellipsis'
+                        }}>
+                          <MapPin size={9} />
+                          <span>
+                            {event.siteName ? 
+                              (event.siteName.length > 10 ? event.siteName.substring(0, 10) + '...' : event.siteName) 
+                              : '未設定'
+                            }
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -845,8 +897,22 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                     </div>
                     <div style={{ 
                       padding: '8px',
-                      minHeight: '60px'
-                    }}>
+                      minHeight: '60px',
+                      cursor: 'pointer',
+                      position: 'relative'
+                    }}
+                    onClick={(e) => {
+                      // イベント要素またはその子要素をクリックしていない場合
+                      const target = e.target as HTMLElement
+                      const isEventClick = target.closest('[data-day-event]')
+                      
+                      if (!isEventClick) {
+                        const clickedDate = new Date(currentMonth)
+                        clickedDate.setHours(hour, 0, 0, 0)
+                        handleDateClick(clickedDate)
+                      }
+                    }}
+                    >
                       {hourEvents.length > 0 ? (
                         <div style={{ position: 'relative', height: '100%', minHeight: '60px' }}>
                           {/* 継続中のイベントの背景表示 */}
@@ -883,7 +949,9 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                             const duration = eventEndHour - eventStartHour
                             
                             return (
-                              <div key={i} style={{
+                              <div key={i} 
+                              data-day-event="true"
+                              style={{
                                 position: 'relative',
                                 padding: '8px 12px',
                                 borderRadius: '6px',
@@ -893,7 +961,10 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                                 transition: 'transform 0.2s, box-shadow 0.2s',
                                 marginBottom: '4px'
                               }}
-                              onClick={() => onEventClick(event)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                onEventClick(event)
+                              }}
                               onMouseEnter={(e) => {
                                 e.currentTarget.style.transform = 'translateY(-1px)'
                                 e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'
@@ -912,28 +983,27 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                                   {event.isMultiDay && '◆ '}{event.title}
                                 </div>
                                 <div style={{ display: 'grid', gap: '2px' }}>
+                                  <div style={{ 
+                                    fontSize: '12px', 
+                                    color: '#4b5563', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '4px',
+                                    fontWeight: '500'
+                                  }}>
+                                    <MapPin size={12} />
+                                    {event.siteName || '未設定'}
+                                  </div>
                                   {event.workerName && (
                                     <div style={{ 
-                                      fontSize: '12px', 
-                                      color: '#4b5563', 
+                                      fontSize: '11px', 
+                                      color: '#6b7280', 
                                       display: 'flex', 
                                       alignItems: 'center', 
                                       gap: '4px' 
                                     }}>
-                                      <User size={12} />
+                                      <User size={11} />
                                       {event.workerName}
-                                    </div>
-                                  )}
-                                  {event.siteName && (
-                                    <div style={{ 
-                                      fontSize: '12px', 
-                                      color: '#4b5563', 
-                                      display: 'flex', 
-                                      alignItems: 'center', 
-                                      gap: '4px' 
-                                    }}>
-                                      <MapPin size={12} />
-                                      {event.siteName}
                                     </div>
                                   )}
                                   <div style={{ 
@@ -952,32 +1022,7 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                             )
                           })}
                         </div>
-                      ) : (
-                        <div 
-                          style={{ 
-                            height: '100%',
-                            minHeight: '50px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: '1px dashed #e5e7eb',
-                            borderRadius: '6px',
-                            cursor: 'pointer',
-                            color: '#9ca3af',
-                            fontSize: '12px',
-                            transition: 'background 0.2s'
-                          }}
-                          onClick={() => {
-                            const targetDate = new Date(currentMonth)
-                            targetDate.setHours(hour, 0, 0, 0)
-                            handleDateClick(targetDate)
-                          }}
-                          onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
-                          onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                        >
-                          + 予定を追加
-                        </div>
-                      )}
+                      ) : null}
                     </div>
                   </div>
                 )
