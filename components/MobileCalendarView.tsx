@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Event } from '@/types'
 
 interface MobileCalendarViewProps {
@@ -75,131 +75,124 @@ export default function MobileCalendarView({
     }
   }
 
+  // 6週間分のグリッドを作成
+  const weeks = []
+  for (let i = 0; i < 6; i++) {
+    weeks.push(monthDays.slice(i * 7, (i + 1) * 7))
+  }
+
   return (
     <div style={{
       width: '100%',
-      maxWidth: '100vw',
       background: 'white',
-      padding: '8px'
+      padding: '4px'
     }}>
-      {/* 曜日ヘッダー */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        marginBottom: '4px'
+      {/* テーブルレイアウトで確実に表示 */}
+      <table style={{
+        width: '100%',
+        borderCollapse: 'collapse',
+        tableLayout: 'fixed'
       }}>
-        {['日', '月', '火', '水', '木', '金', '土'].map((day, i) => (
-          <div
-            key={day}
-            style={{
-              textAlign: 'center',
-              fontSize: '12px',
-              fontWeight: '600',
-              padding: '8px 0',
-              color: i === 0 ? '#ef4444' : i === 6 ? '#3b82f6' : '#374151',
-              background: '#f9fafb',
-              border: '0.5px solid #e5e7eb'
-            }}
-          >
-            {day}
-          </div>
-        ))}
-      </div>
-
-      {/* カレンダーグリッド */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: '0'
-      }}>
-        {monthDays.map((day, index) => {
-          const dayEvents = events.filter(e => e.date === day.dateStr)
-          const isToday = day.dateStr === todayStr
-          const dayOfWeek = day.date.getDay()
-          
-          return (
-            <div
-              key={index}
-              onClick={() => {
-                setSelectedDate(day.dateStr)
-                onDateClick(day.dateStr)
-              }}
-              style={{
-                aspectRatio: '1',
-                minHeight: '50px',
-                padding: '4px',
-                border: '0.5px solid #e5e7eb',
-                background: !day.isCurrentMonth ? '#f9fafb' : 
-                  selectedDate === day.dateStr ? '#dbeafe' :
-                  isToday ? '#fef3c7' : 'white',
-                position: 'relative',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center'
-              }}
-            >
-              {/* 日付 */}
-              <div style={{
-                fontSize: '13px',
-                fontWeight: isToday ? '700' : '500',
-                color: !day.isCurrentMonth ? '#9ca3af' : 
-                  dayOfWeek === 0 ? '#ef4444' : 
-                  dayOfWeek === 6 ? '#3b82f6' : 
-                  '#1f2937',
-                marginBottom: '2px'
-              }}>
-                {day.date.getDate()}
-              </div>
-
-              {/* イベントインジケーター */}
-              {dayEvents.length > 0 && (
-                <div style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '2px',
-                  justifyContent: 'center',
-                  width: '100%'
-                }}>
-                  {dayEvents.slice(0, 3).map((event, i) => (
-                    <div
-                      key={i}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onEventClick(event)
-                      }}
-                      style={{
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        background: getStatusColor(event.status)
-                      }}
-                    />
-                  ))}
-                  {dayEvents.length > 3 && (
+        <thead>
+          <tr>
+            {['日', '月', '火', '水', '木', '金', '土'].map((day, i) => (
+              <th
+                key={day}
+                style={{
+                  padding: '6px 0',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  color: i === 0 ? '#ef4444' : i === 6 ? '#3b82f6' : '#374151',
+                  background: '#f9fafb',
+                  border: '1px solid #e5e7eb'
+                }}
+              >
+                {day}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {weeks.map((week, weekIndex) => (
+            <tr key={weekIndex}>
+              {week.map((day, dayIndex) => {
+                const dayEvents = events.filter(e => e.date === day.dateStr)
+                const isToday = day.dateStr === todayStr
+                const isSelected = day.dateStr === selectedDate
+                const dayOfWeek = day.date.getDay()
+                
+                return (
+                  <td
+                    key={dayIndex}
+                    onClick={() => {
+                      setSelectedDate(day.dateStr)
+                      onDateClick(day.dateStr)
+                    }}
+                    style={{
+                      width: '14.28%',
+                      height: '48px',
+                      padding: '2px',
+                      border: '1px solid #e5e7eb',
+                      background: !day.isCurrentMonth ? '#f9fafb' : 
+                        isSelected ? '#dbeafe' :
+                        isToday ? '#fef3c7' : 'white',
+                      cursor: 'pointer',
+                      verticalAlign: 'top',
+                      position: 'relative'
+                    }}
+                  >
                     <div style={{
-                      fontSize: '9px',
-                      color: '#6b7280'
+                      fontSize: '12px',
+                      fontWeight: isToday ? '700' : '500',
+                      color: !day.isCurrentMonth ? '#9ca3af' : 
+                        dayOfWeek === 0 ? '#ef4444' : 
+                        dayOfWeek === 6 ? '#3b82f6' : 
+                        '#1f2937',
+                      textAlign: 'center'
                     }}>
-                      +{dayEvents.length - 3}
+                      {day.date.getDate()}
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )
-        })}
-      </div>
+                    
+                    {/* イベントドット */}
+                    {dayEvents.length > 0 && (
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '1px',
+                        marginTop: '2px'
+                      }}>
+                        {dayEvents.slice(0, 3).map((event, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              display: 'inline-block',
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%',
+                              background: getStatusColor(event.status)
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-      {/* 選択された日のイベントリスト */}
+      {/* 選択された日のイベント */}
       {selectedDate && (
         <div style={{
-          marginTop: '16px',
-          padding: '12px',
+          marginTop: '12px',
+          padding: '10px',
           background: '#f9fafb',
-          borderRadius: '8px'
+          borderRadius: '6px'
         }}>
-          <h3 style={{
+          <div style={{
             fontSize: '14px',
             fontWeight: '600',
             marginBottom: '8px',
@@ -209,36 +202,39 @@ export default function MobileCalendarView({
               month: 'long',
               day: 'numeric',
               weekday: 'short'
-            })}の予定
-          </h3>
-          {events
-            .filter(e => e.date === selectedDate)
-            .map(event => (
-              <div
-                key={event.id}
-                onClick={() => onEventClick(event)}
-                style={{
-                  padding: '8px',
-                  marginBottom: '4px',
-                  background: 'white',
-                  borderRadius: '6px',
-                  borderLeft: `3px solid ${getStatusColor(event.status)}`,
-                  fontSize: '12px'
-                }}
-              >
-                <div style={{ fontWeight: '500' }}>
-                  {event.startTime} - {event.constructionType}
+            })}
+          </div>
+          
+          <div>
+            {events
+              .filter(e => e.date === selectedDate)
+              .map(event => (
+                <div
+                  key={event.id}
+                  onClick={() => onEventClick(event)}
+                  style={{
+                    padding: '6px',
+                    marginBottom: '4px',
+                    background: 'white',
+                    borderRadius: '4px',
+                    borderLeft: `3px solid ${getStatusColor(event.status)}`,
+                    fontSize: '12px'
+                  }}
+                >
+                  <div style={{ fontWeight: '500' }}>
+                    {event.startTime} {event.constructionType}
+                  </div>
+                  <div style={{ color: '#6b7280', fontSize: '11px' }}>
+                    {event.city}
+                  </div>
                 </div>
-                <div style={{ color: '#6b7280', fontSize: '11px' }}>
-                  📍 {event.city}
-                </div>
+              ))}
+            {events.filter(e => e.date === selectedDate).length === 0 && (
+              <div style={{ color: '#9ca3af', fontSize: '12px' }}>
+                予定はありません
               </div>
-            ))}
-          {events.filter(e => e.date === selectedDate).length === 0 && (
-            <div style={{ color: '#9ca3af', fontSize: '12px' }}>
-              予定はありません
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </div>
