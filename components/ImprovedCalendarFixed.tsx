@@ -34,7 +34,18 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedWorkers, setSelectedWorkers] = useState<string[]>([])
   const [showWorkerDropdown, setShowWorkerDropdown] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  
+  // モバイル判定
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
   
   // ドロップダウンの外側クリックで閉じる
   useEffect(() => {
@@ -148,8 +159,8 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
   return (
     <div style={{ 
       backgroundColor: 'white', 
-      borderRadius: '12px', 
-      padding: '20px',
+      borderRadius: isMobile ? '8px' : '12px', 
+      padding: isMobile ? '10px' : '20px',
       boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
     }}>
       {/* カレンダーヘッダー */}
@@ -157,9 +168,9 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center',
-        marginBottom: '20px',
+        marginBottom: isMobile ? '10px' : '20px',
         flexWrap: 'wrap',
-        gap: '12px'
+        gap: isMobile ? '8px' : '12px'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button onClick={previousMonth} style={{
@@ -171,7 +182,7 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
           }}>
             <ChevronLeft size={20} />
           </button>
-          <h2 style={{ fontSize: '20px', fontWeight: '600' }}>
+          <h2 style={{ fontSize: isMobile ? '16px' : '20px', fontWeight: '600' }}>
             {currentMonth.getFullYear()}年{currentMonth.getMonth() + 1}月
           </h2>
           <button onClick={nextMonth} style={{
@@ -484,15 +495,19 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
           <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(7, 1fr)',
-            marginBottom: '8px'
+            marginBottom: isMobile ? '4px' : '8px',
+            backgroundColor: '#f9fafb',
+            border: '1px solid #e5e7eb',
+            borderRadius: '4px 4px 0 0'
           }}>
             {weekDays.map((day, index) => (
               <div key={day} style={{
-                padding: '12px 0',
+                padding: isMobile ? '8px 0' : '12px 0',
                 textAlign: 'center',
-                fontSize: '14px',
+                fontSize: isMobile ? '12px' : '14px',
                 fontWeight: '600',
-                color: index === 0 ? '#dc2626' : index === 6 ? '#2563eb' : '#6b7280'
+                color: index === 0 ? '#dc2626' : index === 6 ? '#2563eb' : '#6b7280',
+                borderRight: index < 6 ? '1px solid #e5e7eb' : 'none'
               }}>
                 {day}
               </div>
@@ -504,7 +519,9 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
             display: 'grid', 
             gridTemplateColumns: 'repeat(7, 1fr)',
             gap: '1px',
-            backgroundColor: '#e5e7eb'
+            backgroundColor: '#e5e7eb',
+            border: '1px solid #e5e7eb',
+            borderTop: 'none'
           }}>
             {calendarDays.map((date, index) => {
               const dayEvents = getEventsForDate(date)
@@ -513,9 +530,9 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
               
               return (
                 <div key={index} style={{
-                  minHeight: '140px',
+                  minHeight: isMobile ? '60px' : '140px',
                   backgroundColor: isToday ? '#eff6ff' : 'white',
-                  padding: '6px',
+                  padding: isMobile ? '4px' : '6px',
                   cursor: 'pointer',
                   position: 'relative',
                   opacity: isCurrentMonth ? 1 : 0.5,
@@ -525,32 +542,71 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                 >
                   {/* 日付 */}
                   <div style={{
-                    fontSize: '13px',
+                    fontSize: isMobile ? '11px' : '13px',
                     fontWeight: isToday ? '700' : '500',
                     color: date.getDay() === 0 ? '#dc2626' : date.getDay() === 6 ? '#2563eb' : '#374151',
-                    marginBottom: '6px'
+                    marginBottom: isMobile ? '2px' : '6px',
+                    textAlign: 'center'
                   }}>
                     {date.getDate()}
                   </div>
                   
                   {/* イベントプレビュー */}
-                  <div style={{ fontSize: '12px' }}>
-                    {dayEvents.slice(0, 3).map((event, i) => (
-                      <div key={i} style={{
-                        padding: '4px 6px',
-                        marginBottom: '3px',
-                        borderRadius: '4px',
-                        backgroundColor: event.color || '#e0e7ff',
-                        border: '1px solid rgba(0,0,0,0.05)',
-                        cursor: 'pointer',
-                        transition: 'transform 0.2s'
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onEventClick(event)
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                  {isMobile ? (
+                    /* モバイル用：ドット表示 */
+                    dayEvents.length > 0 && (
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '2px',
+                        marginTop: '4px'
+                      }}>
+                        {dayEvents.slice(0, 3).map((event, i) => (
+                          <span
+                            key={i}
+                            style={{
+                              display: 'inline-block',
+                              width: '6px',
+                              height: '6px',
+                              borderRadius: '50%',
+                              backgroundColor: event.color || '#3b82f6'
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              onEventClick(event)
+                            }}
+                          />
+                        ))}
+                        {dayEvents.length > 3 && (
+                          <span style={{
+                            fontSize: '10px',
+                            color: '#6b7280',
+                            marginLeft: '2px'
+                          }}>
+                            +{dayEvents.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )
+                  ) : (
+                    /* デスクトップ用：詳細表示 */
+                    <div style={{ fontSize: '12px' }}>
+                      {dayEvents.slice(0, 3).map((event, i) => (
+                        <div key={i} style={{
+                          padding: '4px 6px',
+                          marginBottom: '3px',
+                          borderRadius: '4px',
+                          backgroundColor: event.color || '#e0e7ff',
+                          border: '1px solid rgba(0,0,0,0.05)',
+                          cursor: 'pointer',
+                          transition: 'transform 0.2s'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onEventClick(event)
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'
                       >
                         {/* 1行目: 時間と作業内容 */}
                         <div style={{ 
@@ -594,22 +650,23 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                           </span>
                         </div>
                       </div>
-                    ))}
-                    
-                    {dayEvents.length > 3 && (
-                      <div style={{
-                        fontSize: '10px',
-                        color: '#6b7280',
-                        textAlign: 'center',
-                        padding: '2px',
-                        backgroundColor: '#f3f4f6',
-                        borderRadius: '4px',
-                        marginTop: '2px'
-                      }}>
-                        +{dayEvents.length - 3}件
-                      </div>
-                    )}
-                  </div>
+                      ))}
+                      
+                      {dayEvents.length > 3 && (
+                        <div style={{
+                          fontSize: '10px',
+                          color: '#6b7280',
+                          textAlign: 'center',
+                          padding: '2px',
+                          backgroundColor: '#f3f4f6',
+                          borderRadius: '4px',
+                          marginTop: '2px'
+                        }}>
+                          +{dayEvents.length - 3}件
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )
             })}
