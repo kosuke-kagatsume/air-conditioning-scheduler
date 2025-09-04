@@ -11,6 +11,7 @@ import { useABTest } from '@/lib/ab-testing'
 import { useAuth } from '@/contexts/AuthContext'
 import EventDetailModal from '../EventDetailModal'
 import EventCreateModal from '../EventCreateModal'
+import MobileCalendarView from '../MobileCalendarView'
 
 type ViewType = 'month' | 'week' | 'day'
 
@@ -683,113 +684,14 @@ export default function CalendarView({ selectedWorkers = [], onEventClick }: Cal
       <div>
         {viewType === 'month' && (
           <div>
-            {/* モバイル用シンプルカレンダー */}
+            {/* モバイル用カレンダー */}
             {isMobile ? (
-              <div style={{ width: '100%', background: 'white' }}>
-                {/* 曜日ヘッダー */}
-                <div style={{ 
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  width: '100%',
-                  borderBottom: '1px solid #e5e7eb'
-                }}>
-                  {['日', '月', '火', '水', '木', '金', '土'].map((day, i) => (
-                    <div
-                      key={day}
-                      style={{
-                        padding: '8px 0',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        textAlign: 'center',
-                        color: i === 0 ? '#ef4444' : i === 6 ? '#3b82f6' : '#374151',
-                        background: 'white'
-                      }}
-                    >
-                      {day}
-                    </div>
-                  ))}
-                </div>
-                
-                {/* 日付グリッド - グリッドレイアウト使用 */}
-                <div style={{ 
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(7, 1fr)',
-                  width: '100%'
-                }}>
-                  {monthDays.map((day, index) => {
-                    const dayEvents = filteredEvents.filter(e => e.date === day.dateStr)
-                    const isToday = day.dateStr === todayStr
-                    
-                    return (
-                      <div
-                        key={index}
-                        style={{
-                          aspectRatio: '1',
-                          minHeight: '50px',
-                          padding: '4px',
-                          border: '0.5px solid #e5e7eb',
-                          borderTop: index < 7 ? 'none' : '0.5px solid #e5e7eb',
-                          borderLeft: index % 7 === 0 ? '0.5px solid #e5e7eb' : 'none',
-                          background: day.isCurrentMonth ? 'white' : '#f9fafb',
-                          position: 'relative',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => handleDateClick(day.dateStr)}
-                      >
-                          {isToday && (
-                            <div style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              right: 0,
-                              height: '2px',
-                              background: '#3b82f6'
-                            }} />
-                          )}
-                        <div style={{
-                          fontSize: '12px',
-                          fontWeight: isToday ? '600' : '400',
-                          textAlign: 'center',
-                          color: !day.isCurrentMonth ? '#9ca3af' : 
-                            day.date.getDay() === 0 ? '#ef4444' : 
-                            day.date.getDay() === 6 ? '#3b82f6' : 
-                            '#1f2937'
-                        }}>
-                          {day.date.getDate()}
-                        </div>
-                        {dayEvents.length > 0 && (
-                          <div style={{
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            justifyContent: 'center',
-                            marginTop: '4px',
-                            gap: '2px'
-                          }}>
-                            {dayEvents.slice(0, 3).map((event, i) => (
-                              <div
-                                key={i}
-                                style={{
-                                  width: '5px',
-                                  height: '5px',
-                                  borderRadius: '50%',
-                                  background: getStatusColor(event.status)
-                                }}
-                              />
-                            ))}
-                            {dayEvents.length > 3 && (
-                              <div style={{
-                                fontSize: '8px',
-                                color: '#6b7280',
-                                lineHeight: '5px'
-                              }}>+{dayEvents.length - 3}</div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
+              <MobileCalendarView
+                events={filteredEvents}
+                currentDate={currentDate}
+                onDateClick={handleDateClick}
+                onEventClick={handleEventClick}
+              />
             ) : (
               // デスクトップ用の既存のレイアウト
               <>
