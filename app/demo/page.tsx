@@ -24,10 +24,18 @@ export default function DemoPage() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [events, setEvents] = useState<any[]>([])
+  const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
+    
+    // モバイル判定
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
     
     // DW管理者としてテナントにログインしているかチェック
     const tenantData = localStorage.getItem('currentTenant')
@@ -124,6 +132,11 @@ export default function DemoPage() {
     setEvents([...mappedEvents, ...multiDayEvents])
     
     setLoading(false)
+    
+    // クリーンアップ
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+    }
   }, [])
 
   // イベントの色を取得
@@ -259,19 +272,17 @@ export default function DemoPage() {
           }}>
             {/* メインコンテンツエリア */}
             <div style={{ 
-              display: 'flex',
+              display: isMobile ? 'block' : 'flex',
               gap: '20px',
               height: '100%'
             }}>
               {/* カレンダーエリア */}
               <div style={{ 
-                flex: 1,
+                flex: isMobile ? 'none' : 1,
+                width: isMobile ? '100%' : 'auto',
                 minWidth: 0,
                 overflow: 'auto'
               }}>
-                {/* デバッグ用一時表示 */}
-                <MobileCalendarDebug />
-                
                 <ImprovedCalendar 
                   events={events}
                   onDateClick={handleDateClick}
@@ -279,20 +290,22 @@ export default function DemoPage() {
                   onAddEvent={handleAddEvent}
                 />
                 {/* A/Bテストインジケーター（開発環境のみ） */}
-                <ABTestIndicator userId={user?.id} />
+                {!isMobile && <ABTestIndicator userId={user?.id} />}
               </div>
               
-              {/* 右側のプロファイル表示 */}
-              <div style={{
-                width: '340px',
-                flexShrink: 0
-              }}>
-                {user?.role === 'WORKER' ? (
-                  <WorkerProfile user={user} />
-                ) : (
-                  <AdminProfile user={user} />
-                )}
-              </div>
+              {/* 右側のプロファイル表示 - モバイルでは非表示 */}
+              {!isMobile && (
+                <div style={{
+                  width: '340px',
+                  flexShrink: 0
+                }}>
+                  {user?.role === 'WORKER' ? (
+                    <WorkerProfile user={user} />
+                  ) : (
+                    <AdminProfile user={user} />
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </AppLayout>
