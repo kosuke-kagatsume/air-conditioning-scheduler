@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ImprovedCalendar from '@/components/ImprovedCalendarFixed'
+import MobileCalendarDebug from '@/components/MobileCalendarDebug'
 import MultiDayEventForm from '@/components/MultiDayEventForm'
 import EventDetailModal from '@/components/EventDetailModal'
 import ABTestIndicator from '@/components/ABTestIndicator'
@@ -268,6 +269,9 @@ export default function DemoPage() {
                 minWidth: 0,
                 overflow: 'auto'
               }}>
+                {/* デバッグ用一時表示 */}
+                <MobileCalendarDebug />
+                
                 <ImprovedCalendar 
                   events={events}
                   onDateClick={handleDateClick}
