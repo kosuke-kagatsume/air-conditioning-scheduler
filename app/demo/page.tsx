@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import ImprovedCalendar from '@/components/ImprovedCalendarFixed'
+import ResponsiveCalendar from '@/components/ResponsiveCalendar'
 import MobileCalendarDebug from '@/components/MobileCalendarDebug'
 import MultiDayEventForm from '@/components/MultiDayEventForm'
 import EventDetailModal from '@/components/EventDetailModal'
@@ -283,7 +283,7 @@ export default function DemoPage() {
                 minWidth: 0,
                 overflow: 'auto'
               }}>
-                <ImprovedCalendar 
+                <ResponsiveCalendar 
                   events={events}
                   onDateClick={handleDateClick}
                   onEventClick={handleEventClick}

@@ -44,6 +44,48 @@ a {
   --tt-pink: #ff8cc8;
 }
 
+/* iOS最適化: スクロールとタップの改善 */
+.calendar-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+/* 透明オーバーレイがタップを食べる事故防止 */
+.ui-overlay { 
+  pointer-events: none; 
+}
+
+/* 小ボタンの押しやすさを底上げ（FullCalendarのボタン類） */
+.fc .fc-button { 
+  min-height: 36px; 
+  padding: 6px 12px; 
+}
+
+.fc .fc-toolbar-title { 
+  font-size: 16px; 
+}
+
+/* イベント行の視認性とタップ余白を増やす */
+.fc .fc-list-event { 
+  padding: 8px 10px; 
+}
+
+.fc .fc-daygrid-event { 
+  padding: 6px 8px; 
+  border-radius: 10px; 
+}
+
+/* フォーム入力のズーム防止（iOS） */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* タッチ操作の最適化 */
+button, a, .clickable {
+  touch-action: manipulation;
+}
+
 /* Next.js route announcer fix */
 .next-route-announcer {
   position: absolute !important;

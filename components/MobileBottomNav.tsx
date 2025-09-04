@@ -16,19 +16,24 @@ export default function MobileBottomNav() {
   ]
 
   return (
-    <div style={{
+    <footer style={{
       position: 'fixed',
       bottom: 0,
       left: 0,
       right: 0,
-      height: '56px',
       backgroundColor: 'white',
       borderTop: '1px solid #e5e7eb',
+      zIndex: 40,
+      paddingBottom: 'max(env(safe-area-inset-bottom), 12px)'
+    }}>
+    <nav style={{
       display: 'flex',
       justifyContent: 'space-around',
       alignItems: 'center',
-      paddingBottom: 'env(safe-area-inset-bottom)',
-      zIndex: 50
+      height: '56px',
+      maxWidth: '640px',
+      margin: '0 auto',
+      padding: '8px 16px'
     }}>
       {navItems.map(item => {
         const Icon = item.icon
@@ -56,6 +61,7 @@ export default function MobileBottomNav() {
           </Link>
         )
       })}
-    </div>
+    </nav>
+    </footer>
   )
 }
