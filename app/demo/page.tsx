@@ -265,7 +265,7 @@ export default function DemoPage() {
       <div style={{ paddingTop: isDWAdmin ? '40px' : '0' }}>
         <AppLayout>
           <div style={{ 
-            padding: '16px',
+            padding: isMobile ? '8px' : '16px',
             minHeight: 'calc(100vh - 56px)',
             background: '#ffffff',
             position: 'relative'
