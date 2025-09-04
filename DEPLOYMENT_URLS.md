@@ -4,9 +4,14 @@
 
 ### プロダクション環境（推奨）
 ```
-https://air-conditioning-scheduler.vercel.app/demo
+https://air-conditioning-scheduler-kosukes-projects-c6ad92ba.vercel.app/demo
 ```
 **これを使ってください！常に最新のコードが反映されます。**
+
+### 最新デプロイメント（2025-09-04）
+```
+https://air-conditioning-scheduler-ns7et111h-kosukes-projects-c6ad92ba.vercel.app/demo
+```
 
 ### 開発環境（ローカル）
 ```
