@@ -42,12 +42,13 @@ export default function MobileNav() {
       right: 0,
       background: 'white',
       borderTop: '1px solid #e5e7eb',
-      display: 'flex',
-      justifyContent: 'space-around',
+      display: 'grid',
+      gridTemplateColumns: 'repeat(5, 1fr)',
       alignItems: 'center',
       padding: '8px 0',
       zIndex: 1000,
-      paddingBottom: 'env(safe-area-inset-bottom, 8px)'
+      paddingBottom: 'env(safe-area-inset-bottom, 8px)',
+      boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.05)'
     }}>
       {menuItems.map(item => {
         const isActive = pathname === item.href
@@ -60,12 +61,14 @@ export default function MobileNav() {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '4px',
+              justifyContent: 'center',
+              gap: '2px',
               textDecoration: 'none',
-              padding: '4px 8px',
+              padding: '4px',
               borderRadius: '8px',
               background: isActive ? '#FF8C4210' : 'transparent',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              minWidth: '48px'
             }}
           >
             <Icon 

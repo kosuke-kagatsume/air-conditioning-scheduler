@@ -4,16 +4,21 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Yu Gothic', 'YuGothic', sans-serif;
   background: #ffffff;
   color: #1a1a1a;
   line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -245,20 +250,50 @@ a {
   overflow-x: hidden;
 }
 
+/* iOS/Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* iOS-specific styles */
+  input, textarea, select {
+    font-size: 16px !important; /* Prevent zoom on focus */
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Fix for iOS Safari grid layout */
+  .calendar-grid {
+    display: -webkit-grid;
+    display: grid;
+    -webkit-grid-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, 1fr);
+  }
+  
+  /* iOS safe area */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
+  
+  /* Smooth scrolling on iOS */
+  .overflow-auto,
+  .overflow-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 /* Mobile first responsive */
 @media (max-width: 768px) {
   .hide-mobile { display: none !important; }
   
   .calendar-grid {
     gap: 0;
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
   }
   
   .calendar-cell {
-    min-height: auto;
+    min-height: 44px;
     padding: 4px;
-    aspect-ratio: auto;
-    height: calc((100vw - 24px) / 7);
-    max-height: 120px;
+    aspect-ratio: 1;
+    max-height: 80px;
   }
   
   .event-item {
@@ -312,9 +347,13 @@ a {
     right: 0;
     background: white;
     border-top: 1px solid var(--tt-gray);
+    display: -webkit-box;
+    display: -webkit-flex;
     display: flex;
+    -webkit-justify-content: space-around;
     justify-content: space-around;
     padding: 8px 0;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
     z-index: 100;
   }
   
@@ -423,6 +462,37 @@ a {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 1px;
+  }
+  
+  /* Touch-friendly buttons */
+  button, a[role="button"], .clickable {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+}
+
+/* iPad specific */
+@media (min-width: 769px) and (max-width: 1366px) {
+  .calendar-cell {
+    min-height: 100px;
+  }
+  
+  .container {
+    max-width: 100%;
+    padding: 0 24px;
+  }
+}
+
+/* Landscape orientation */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-bottom-nav {
+    padding: 4px 0;
+    padding-bottom: env(safe-area-inset-bottom, 4px);
+  }
+  
+  .calendar-cell {
+    min-height: 40px;
   }
 }
 
