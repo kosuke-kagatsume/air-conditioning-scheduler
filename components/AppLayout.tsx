@@ -6,6 +6,7 @@ import { Menu, Bell, User, Calendar, Users, MapPin, LayoutDashboard, FileEdit, C
 import { usePathname, useRouter } from 'next/navigation'
 import NotificationPanel from './NotificationPanel'
 import NotificationBell from './NotificationBell'
+import MobileBottomNav from './MobileBottomNav'
 import { generateMockNotifications } from '@/lib/mockDataExtended'
 import { generateSampleNotifications } from '@/lib/notifications'
 
@@ -18,6 +19,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [showNotifications, setShowNotifications] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -33,6 +35,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
       generateSampleNotifications()
       localStorage.setItem('notifications_initialized', 'true')
     }
+    
+    // モバイル判定
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   useEffect(() => {
@@ -102,8 +112,16 @@ export default function AppLayout({ children }: AppLayoutProps) {
           >
             <Menu size={20} color="#4b5563" />
           </button>
-          <span style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>
-            {user?.role === 'worker' ? 'マイスケジュール' : 'Dandori Scheduler'}
+          <span style={{ 
+            fontSize: isMobile ? '16px' : '20px', 
+            fontWeight: '600', 
+            color: '#111827',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: isMobile ? '180px' : 'auto'
+          }}>
+            {isMobile ? 'Dandori' : (user?.role === 'worker' ? 'マイスケジュール' : 'Dandori Scheduler')}
           </span>
         </div>
 
@@ -248,9 +266,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
       )}
 
       {/* メインコンテンツ */}
-      <div style={{ paddingTop: '56px' }}>
+      <div style={{ 
+        paddingTop: '56px',
+        paddingBottom: isMobile ? '56px' : '0'
+      }}>
         {children}
       </div>
+      
+      {/* モバイルボトムナビ */}
+      {isMobile && <MobileBottomNav />}
 
       <style jsx>{`
         @keyframes slideIn {

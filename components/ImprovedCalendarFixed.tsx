@@ -553,41 +553,38 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                   
                   {/* イベントプレビュー */}
                   {isMobile ? (
-                    /* モバイル用：ドット表示 */
-                    dayEvents.length > 0 && (
-                      <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        gap: '2px',
-                        marginTop: '4px'
-                      }}>
-                        {dayEvents.slice(0, 3).map((event, i) => (
-                          <span
-                            key={i}
-                            style={{
-                              display: 'inline-block',
-                              width: '6px',
-                              height: '6px',
-                              borderRadius: '50%',
-                              backgroundColor: event.color || '#3b82f6'
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              onEventClick(event)
-                            }}
-                          />
-                        ))}
-                        {dayEvents.length > 3 && (
-                          <span style={{
-                            fontSize: '10px',
-                            color: '#6b7280',
-                            marginLeft: '2px'
-                          }}>
-                            +{dayEvents.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    )
+                    /* モバイル用：シンプルな表示 */
+                    <div style={{ marginTop: '4px' }}>
+                      {dayEvents.slice(0, 2).map((event, i) => (
+                        <div key={i} style={{
+                          fontSize: '9px',
+                          padding: '2px 4px',
+                          marginBottom: '2px',
+                          borderRadius: '3px',
+                          backgroundColor: event.color || '#e0e7ff',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          color: '#374151',
+                          fontWeight: '500'
+                        }}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onEventClick(event)
+                        }}>
+                          {event.startTime?.substring(0, 5)}
+                        </div>
+                      ))}
+                      {dayEvents.length > 2 && (
+                        <div style={{
+                          fontSize: '8px',
+                          color: '#6b7280',
+                          textAlign: 'center'
+                        }}>
+                          +{dayEvents.length - 2}件
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     /* デスクトップ用：詳細表示 */
                     <div style={{ fontSize: '12px' }}>
