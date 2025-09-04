@@ -198,7 +198,7 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           {/* ビュー切り替えボタン */}
-          {!isMobile && (
+          {!isMobile ? (
           <div style={{ display: 'flex', gap: '4px', background: '#f3f4f6', borderRadius: '8px', padding: '4px' }}>
             <button 
               onClick={() => setViewType('month')}
@@ -246,10 +246,10 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
               日
             </button>
           </div>
-          )}
+          ) : null}
 
           {/* ステータスフィルターボタン */}
-          {!isMobile && (
+          {!isMobile ? (
           <div style={{ display: 'flex', gap: '4px', background: '#f3f4f6', borderRadius: '8px', padding: '4px' }}>
             <button 
               onClick={() => setStatusFilter('all')}
@@ -327,10 +327,10 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
               完了
             </button>
           </div>
-          )}
+          ) : null}
 
           {/* 職人フィルター */}
-          {!isMobile && (
+          {!isMobile ? (
           <div ref={dropdownRef} style={{ position: 'relative' }}>
             <button 
               onClick={() => setShowWorkerDropdown(!showWorkerDropdown)}
@@ -474,7 +474,7 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
               </div>
             )}
           </div>
-          )}
+          ) : null}
 
           <button onClick={onAddEvent} style={{
             display: 'flex',
@@ -619,7 +619,7 @@ export default function ImprovedCalendarFixed({ events, onDateClick, onEventClic
                           onEventClick(event)
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                       >
                         {/* 1行目: 時間と作業内容 */}
                         <div style={{ 
