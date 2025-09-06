@@ -3,6 +3,10 @@ const { withSentryConfig } = require("@sentry/nextjs");
 
 const nextConfig = {
   reactStrictMode: true,
+  output: 'standalone',
+  images: {
+    domains: ['localhost', 'amplifyapp.com'],
+  },
 }
 
 // Sentry設定オプション
