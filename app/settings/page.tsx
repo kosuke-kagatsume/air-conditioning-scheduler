@@ -11,6 +11,12 @@ import AppSyncModal from '@/components/AppSyncModal'
 import ReportModal from '@/components/ReportModal'
 import WorkerModal from '@/components/WorkerModal'
 import AutoAssignmentModal from '@/components/AutoAssignmentModal'
+import {
+  COLORS,
+  DEFAULT_SKILLS,
+  DEFAULT_CERTIFICATIONS,
+  DEFAULT_BUSINESS_HOURS
+} from '@/constants/settings'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -38,10 +44,10 @@ export default function SettingsPage() {
     includeWeekends: true,
     hideCompleted: false,
     colorRules: {
-      installation: '#3B82F6',
-      maintenance: '#10B981', 
-      repair: '#F59E0B',
-      emergency: '#EF4444'
+      installation: COLORS.INSTALLATION,
+      maintenance: COLORS.MAINTENANCE,
+      repair: COLORS.REPAIR,
+      emergency: COLORS.EMERGENCY
     }
   })
 
@@ -55,8 +61,8 @@ export default function SettingsPage() {
   })
 
   // Skills and certifications management
-  const [skills, setSkills] = useState(['エアコン設置', 'エアコン修理', '電気工事', '配管工事', '冷媒取扱', '高所作業', 'クレーン操作', '溶接作業', '断熱工事', 'ダクト工事'])
-  const [certifications, setCertifications] = useState(['第一種電気工事士', '第二種電気工事士', '冷媒取扱技術者', '高所作業車運転', 'ガス溶接', 'アーク溶接', '管工事施工管理技士', '冷凍機械責任者'])
+  const [skills, setSkills] = useState([...DEFAULT_SKILLS])
+  const [certifications, setCertifications] = useState([...DEFAULT_CERTIFICATIONS])
   const [newSkill, setNewSkill] = useState('')
   const [newCertification, setNewCertification] = useState('')
 
