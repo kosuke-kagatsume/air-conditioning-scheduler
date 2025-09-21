@@ -4,6 +4,7 @@
   "description": "Dandori Scheduler - 工事現場スケジューラー",
   "scripts": {
     "dev": "next dev",
+    "dev:safe": "pkill -f 'next|vercel|node.*next' || true && npm run dev -- --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
