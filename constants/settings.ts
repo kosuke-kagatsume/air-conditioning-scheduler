@@ -1,110 +1,87 @@
-// Settings page constants
-// 設定ページで使用する定数を集約
+// 純データ化したconstants - HMR/循環/サーバ境界汚染を完全排除
+// ❶ 純データ(JSON)を読み込む
+// ❷ exportは"namedのみ"。defaultは使わない
+// ❸ 関数・env参照・他ファイルimport・'use client' は一切なし
 
-// カラーテーマ
-export const COLORS = {
-  INSTALLATION: '#3B82F6',
-  MAINTENANCE: '#10B981',
-  REPAIR: '#F59E0B',
-  EMERGENCY: '#EF4444',
-} as const
+import raw from './settings.json';
 
-// デフォルトスキル
-export const DEFAULT_SKILLS = [
-  'エアコン設置',
-  'エアコン修理',
-  '電気工事',
-  '配管工事',
-  '冷媒取扱',
-  '高所作業',
-  'クレーン操作',
-  '溶接作業',
-  '断熱工事',
-  'ダクト工事'
-]
+// 型定義
+type Settings = {
+  COLORS: {
+    INSTALLATION: string;
+    MAINTENANCE: string;
+    REPAIR: string;
+    EMERGENCY: string;
+  };
+  DEFAULT_SKILLS: string[];
+  DEFAULT_CERTIFICATIONS: string[];
+  DEFAULT_BUSINESS_HOURS: {
+    WEEKDAY_START: string;
+    WEEKDAY_END: string;
+    LUNCH_START: string;
+    LUNCH_END: string;
+  };
+  SHIFT_PATTERNS: {
+    FIXED: string;
+    ROTATING: string;
+    FLEXIBLE: string;
+  };
+  APPROVAL_ROLES: {
+    MANAGER: string;
+    SUPERVISOR: string;
+    DIRECTOR: string;
+  };
+  REPORT_TYPES: {
+    DAILY: string;
+    WEEKLY: string;
+    MONTHLY: string;
+    CUSTOM: string;
+  };
+  REPORT_FORMATS: {
+    PDF: string;
+    EXCEL: string;
+    EMAIL: string;
+  };
+  USER_ROLES: {
+    ADMIN: string;
+    MANAGER: string;
+    SUPERVISOR: string;
+    WORKER: string;
+    VIEWER: string;
+  };
+  TAB_LABELS: {
+    calendar: string;
+    workers: string;
+    shifts: string;
+    notifications: string;
+    approvals: string;
+    reports: string;
+    permissions: string;
+    'business-hours': string;
+  };
+  NOTIFICATION_TIMINGS: Array<{
+    value: number;
+    label: string;
+  }>;
+  HOLIDAY_TYPES: {
+    NATIONAL: string;
+    COMPANY: string;
+    REGIONAL: string;
+  };
+};
 
-// デフォルト資格
-export const DEFAULT_CERTIFICATIONS = [
-  '第一種電気工事士',
-  '第二種電気工事士',
-  '冷媒取扱技術者',
-  '高所作業車運転',
-  'ガス溶接',
-  'アーク溶接',
-  '管工事施工管理技士',
-  '冷凍機械責任者'
-]
+const data = raw as Settings;
 
-// シフトパターン
-export const SHIFT_PATTERNS = {
-  FIXED: '固定',
-  ROTATING: 'ローテーション',
-  FLEXIBLE: 'フレキシブル',
-} as const
-
-// 承認ステップロール
-export const APPROVAL_ROLES = {
-  MANAGER: 'マネージャー',
-  SUPERVISOR: 'スーパーバイザー',
-  DIRECTOR: 'ディレクター',
-} as const
-
-// レポートタイプ
-export const REPORT_TYPES = {
-  DAILY: '日次',
-  WEEKLY: '週次',
-  MONTHLY: '月次',
-  CUSTOM: 'カスタム',
-} as const
-
-// レポートフォーマット
-export const REPORT_FORMATS = {
-  PDF: 'PDF',
-  EXCEL: 'Excel',
-  EMAIL: 'メール',
-} as const
-
-// ユーザーロール
-export const USER_ROLES = {
-  ADMIN: '管理者',
-  MANAGER: 'マネージャー',
-  SUPERVISOR: 'スーパーバイザー',
-  WORKER: '作業員',
-  VIEWER: '閲覧者',
-} as const
-
-// タブ設定
-export const TAB_LABELS = {
-  calendar: 'カレンダー表示',
-  workers: '作業員管理',
-  shifts: 'シフトテンプレート',
-  notifications: '通知設定',
-  approvals: '承認フロー',
-  reports: 'レポート設定',
-  permissions: 'ユーザー権限',
-  'business-hours': '営業日設定',
-} as const
-
-// 通知タイミング（分）
-export const NOTIFICATION_TIMINGS = [
-  { value: 15, label: '15分前' },
-  { value: 30, label: '30分前' },
-  { value: 60, label: '1時間前' },
-  { value: 120, label: '2時間前' },
-  { value: 1440, label: '1日前' },
-] as const
-
-// 営業時間デフォルト値
-export const DEFAULT_BUSINESS_HOURS = {
-  WEEKDAY_START: '09:00',
-  WEEKDAY_END: '18:00',
-  LUNCH_START: '12:00',
-  LUNCH_END: '13:00',
-} as const
-
-// 休日タイプ
-export const HOLIDAY_TYPES = {
-  NATIONAL: '祝日',
-  COMPANY: '会社休日',
-  REGIONAL: '地域休日',
-} as const
+// Object.freezeで実行時の書き換えを防ぐ（安全性向上）
+export const COLORS = Object.freeze({ ...data.COLORS });
+export const DEFAULT_SKILLS = Object.freeze([...data.DEFAULT_SKILLS]);
+export const DEFAULT_CERTIFICATIONS = Object.freeze([...data.DEFAULT_CERTIFICATIONS]);
+export const DEFAULT_BUSINESS_HOURS = Object.freeze({ ...data.DEFAULT_BUSINESS_HOURS });
+export const SHIFT_PATTERNS = Object.freeze({ ...data.SHIFT_PATTERNS });
+export const APPROVAL_ROLES = Object.freeze({ ...data.APPROVAL_ROLES });
+export const REPORT_TYPES = Object.freeze({ ...data.REPORT_TYPES });
+export const REPORT_FORMATS = Object.freeze({ ...data.REPORT_FORMATS });
+export const USER_ROLES = Object.freeze({ ...data.USER_ROLES });
+export const TAB_LABELS = Object.freeze({ ...data.TAB_LABELS });
+export const NOTIFICATION_TIMINGS = Object.freeze([...data.NOTIFICATION_TIMINGS]);
+export const HOLIDAY_TYPES = Object.freeze({ ...data.HOLIDAY_TYPES });
