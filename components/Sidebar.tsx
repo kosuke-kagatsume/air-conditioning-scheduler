@@ -3,11 +3,10 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  CalendarIcon, 
-  WorkersIcon, 
-  SitesIcon, 
-  DashboardIcon, 
+import {
+  CalendarIcon,
+  WorkersIcon,
+  SitesIcon,
   ScheduleChangeIcon,
   ShiftIcon,
   InventoryIcon,
@@ -32,7 +31,6 @@ export default function Sidebar() {
     { href: '/demo', Icon: CalendarIcon, label: 'カレンダー', roles: ['admin', 'worker', 'superadmin'] },
     { href: '/workers', Icon: WorkersIcon, label: '職人管理', roles: ['admin', 'superadmin'] },
     { href: '/sites', Icon: SitesIcon, label: '現場管理', roles: ['admin', 'superadmin'] },
-    { href: '/dashboard', Icon: DashboardIcon, label: 'ダッシュボード', roles: ['admin', 'worker', 'superadmin'] },
     { href: '/schedule-change', Icon: ScheduleChangeIcon, label: '予定変更申請', roles: ['admin', 'worker', 'superadmin'] },
     { href: '/shifts', Icon: ShiftIcon, label: 'シフト管理', roles: ['admin', 'superadmin'] },
     { href: '/inventory', Icon: InventoryIcon, label: '在庫管理', roles: ['admin', 'worker', 'superadmin'] },

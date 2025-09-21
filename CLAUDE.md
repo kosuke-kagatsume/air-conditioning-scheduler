@@ -1,9 +1,9 @@
 # Dandori Scheduler - Claude開発ログ
 
 ## 🏷️ 現在の安定バージョン
-**タグ**: `v1.3-stable-settings-split`
+**タグ**: `v1.7-major-settings-refactor-complete`
 **日付**: 2025年9月21日
-**状況**: ✅ 完全動作中
+**状況**: ✅ 完全動作中・設定画面リファクタリング完了
 
 ## 📋 実行可能なコマンド
 
@@ -15,10 +15,13 @@ npm run dev -- --port 3001
 ### 安全な復旧方法
 ```bash
 # 現在の安定版に戻す
-git checkout v1.3-stable-settings-split
+git checkout v1.7-major-settings-refactor-complete
 
-# 前の安定版に戻す（リファクタリング前）
-git checkout v1.2-stable-before-refactor
+# 前の安定版に戻す（部分リファクタリング後）
+git checkout v1.6-calendar-display-tab-success
+
+# さらに前の安定版に戻す
+git checkout v1.3-stable-settings-split
 ```
 
 ### 型チェック・Lint
@@ -34,15 +37,24 @@ npm run lint     # ESLint（要確認）
 1. **Webpack Runtime Error 完全解決**
    - 原因: Service Worker/PWAキャッシュ
    - 解決: ブラウザキャッシュクリア手順確立
-2. **設定ファイルリファクタリング**
+2. **設定ファイル大規模リファクタリング完了（2025年9月21日）**
    - `app/settings/page.tsx`: 3,357行 → 55行（サーバーコンポーネント）
    - `constants/settings.json`: 設定データ外部化
-   - `app/settings/SettingsClient.tsx`: 3,390行（クライアントコンポーネント）
+3. **全設定タブのコンポーネント分離完了**
+   - `components/settings/NotificationsTab.tsx`: 通知設定タブ（78行）
+   - `components/settings/CalendarDisplayTab.tsx`: カレンダー表示タブ（92行）
+   - `components/settings/CalendarConfigTab.tsx`: カレンダー設定タブ（490行）
+   - `components/settings/AutoAssignmentRules.tsx`: 自動割当ルール（176行）
+   - `components/settings/WorkersTab.tsx`: 職人管理タブ（336行）
+   - `components/settings/PermissionsTab.tsx`: 権限管理タブ（557行）
+   - `components/settings/ReportsTab.tsx`: レポート設定タブ（433行）
+   - `utils/settingsHelpers.ts`: 共通ヘルパー関数とスタイル定義（126行）
+   - **SettingsClient.tsx: 3,327行 → 1,282行（61%削減！）**
 
 ### 🚨 残存課題
-1. **SettingsClient.tsx が巨大** (3,390行)
-2. **27個のuseState** - 状態管理混乱
-3. **8つの機能が1ファイル** - コンポーネント分割未実施
+1. **SettingsClient.tsx まだ1,282行** - さらなる分割可能
+2. **ApprovalTab未分離** - 必要に応じて分離可能
+3. **27個のuseState** - 状態管理の改善余地あり
 
 ## 🛠️ 次回の開発指針
 
