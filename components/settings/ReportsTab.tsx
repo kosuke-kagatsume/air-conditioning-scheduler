@@ -12,7 +12,7 @@ interface ReportTemplate {
 
 interface ReportsTabProps {
   reportTemplates: ReportTemplate[];
-  showToast: (message: string, type: string) => void;
+  showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   openEditModal: (item: any, type: string) => void;
   toggleTemplateStatus: (id: string, type: string) => void;
   handleReportGenerate: () => void;
@@ -207,7 +207,14 @@ export default function ReportsTab({
 }
 
 // Sub-component for Report Template Card
-function ReportTemplateCard({ report, openEditModal, showToast, toggleTemplateStatus }: any) {
+interface ReportTemplateCardProps {
+  report: ReportTemplate;
+  openEditModal: (item: any, type: string) => void;
+  showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  toggleTemplateStatus: (id: string, type: string) => void;
+}
+
+function ReportTemplateCard({ report, openEditModal, showToast, toggleTemplateStatus }: ReportTemplateCardProps) {
   return (
     <div style={{
       border: '1px solid #e5e7eb',

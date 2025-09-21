@@ -121,10 +121,10 @@ export default function SettingsClient(props: SettingsClientProps) {
 
   // Report templates
   const [reportTemplates, setReportTemplates] = useState([
-    { id: 1, name: '作業完了レポート', frequency: '毎日', recipients: ['管理者', '営業部'], format: 'PDF', active: true, lastSent: '8/23 09:00' },
-    { id: 2, name: '売上集計レポート', frequency: '毎週月曜', recipients: ['管理者', '経理部'], format: 'Excel', active: true, lastSent: '8/19 10:00' },
-    { id: 3, name: '職人稼働状況', frequency: '毎月末', recipients: ['人事部', '管理者'], format: 'PDF', active: true, lastSent: '7/31 17:00' },
-    { id: 4, name: '顧客満足度調査', frequency: '四半期', recipients: ['営業部', '品質管理'], format: 'PDF+CSV', active: false, lastSent: '6/30 15:00' }
+    { id: '1', name: '作業完了レポート', frequency: '毎日', recipients: ['管理者', '営業部'], format: 'PDF', active: true, lastSent: '8/23 09:00' },
+    { id: '2', name: '売上集計レポート', frequency: '毎週月曜', recipients: ['管理者', '経理部'], format: 'Excel', active: true, lastSent: '8/19 10:00' },
+    { id: '3', name: '職人稼働状況', frequency: '毎月末', recipients: ['人事部', '管理者'], format: 'PDF', active: true, lastSent: '7/31 17:00' },
+    { id: '4', name: '顧客満足度調査', frequency: '四半期', recipients: ['営業部', '品質管理'], format: 'PDF+CSV', active: false, lastSent: '6/30 15:00' }
   ])
 
   // User roles
@@ -137,10 +137,10 @@ export default function SettingsClient(props: SettingsClientProps) {
 
   // Users data
   const [users, setUsers] = useState([
-    { id: 1, name: '田中管理者', email: 'admin@company.com', role: '管理者', roleColor: '#dc2626', lastLogin: '8/23 10:30', status: 'active' },
-    { id: 2, name: '山田太郎', email: 'yamada@company.com', role: '現場責任者', roleColor: '#f59e0b', lastLogin: '8/23 09:15', status: 'active' },
-    { id: 3, name: '佐藤次郎', email: 'sato@company.com', role: '職人', roleColor: '#10b981', lastLogin: '8/22 17:45', status: 'active' },
-    { id: 4, name: '鈴木三郎', email: 'suzuki@company.com', role: '職人', roleColor: '#10b981', lastLogin: '8/20 16:20', status: 'inactive' }
+    { id: '1', name: '田中管理者', email: 'admin@company.com', role: '管理者', roleColor: '#dc2626', lastLogin: '8/23 10:30', status: 'active' },
+    { id: '2', name: '山田太郎', email: 'yamada@company.com', role: '現場責任者', roleColor: '#f59e0b', lastLogin: '8/23 09:15', status: 'active' },
+    { id: '3', name: '佐藤次郎', email: 'sato@company.com', role: '職人', roleColor: '#10b981', lastLogin: '8/22 17:45', status: 'active' },
+    { id: '4', name: '鈴木三郎', email: 'suzuki@company.com', role: '職人', roleColor: '#10b981', lastLogin: '8/20 16:20', status: 'inactive' }
   ])
 
   // Business hours settings
@@ -235,7 +235,7 @@ export default function SettingsClient(props: SettingsClientProps) {
     showToast('職人のステータスを変更しました', 'success')
   }
 
-  const toggleTemplateStatus = (templateId: number, templateType: string) => {
+  const toggleTemplateStatus = (templateId: string | number, templateType: string) => {
     if (templateType === 'shift') {
       setShiftTemplates(shiftTemplates.map(template =>
         template.id === templateId
@@ -250,7 +250,7 @@ export default function SettingsClient(props: SettingsClientProps) {
       ))
     } else if (templateType === 'report') {
       setReportTemplates(reportTemplates.map(template =>
-        template.id === templateId
+        template.id === String(templateId)
           ? { ...template, active: !template.active }
           : template
       ))
@@ -281,7 +281,7 @@ export default function SettingsClient(props: SettingsClientProps) {
     showToast('役割の状態を変更しました', 'success')
   }
 
-  const toggleUserStatus = (userId: number) => {
+  const toggleUserStatus = (userId: string) => {
     setUsers(users.map(user =>
       user.id === userId
         ? { ...user, status: user.status === 'active' ? 'inactive' : 'active' }

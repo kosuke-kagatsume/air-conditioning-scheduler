@@ -21,7 +21,7 @@ interface User {
 interface PermissionsTabProps {
   userRoles: UserRole[];
   users: User[];
-  showToast: (message: string, type: string) => void;
+  showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
   openEditModal: (item: any, type: string) => void;
   toggleUserStatus: (userId: string) => void;
   syncMobileApp: (type: string) => void;
