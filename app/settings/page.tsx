@@ -306,6 +306,7 @@ export default function SettingsPage() {
       alert('削除中にエラーが発生しました')
     }
   }
+
   const openDeleteModal = (item: any, type: string) => {
     setDeletingItem({ ...item, type })
     setDeleteModalOpen(true)
