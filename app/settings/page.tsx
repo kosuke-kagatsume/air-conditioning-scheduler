@@ -11,11 +11,11 @@ import AppSyncModal from '@/components/AppSyncModal'
 import ReportModal from '@/components/ReportModal'
 import WorkerModal from '@/components/WorkerModal'
 import AutoAssignmentModal from '@/components/AutoAssignmentModal'
+// 段階的にインポートを戻す
 import {
   COLORS,
   DEFAULT_SKILLS,
   DEFAULT_CERTIFICATIONS,
-  DEFAULT_BUSINESS_HOURS
 } from '@/constants/settings'
 
 export default function SettingsPage() {
@@ -61,8 +61,8 @@ export default function SettingsPage() {
   })
 
   // Skills and certifications management
-  const [skills, setSkills] = useState([...DEFAULT_SKILLS])
-  const [certifications, setCertifications] = useState([...DEFAULT_CERTIFICATIONS])
+  const [skills, setSkills] = useState(Array.from(DEFAULT_SKILLS))
+  const [certifications, setCertifications] = useState(Array.from(DEFAULT_CERTIFICATIONS))
   const [newSkill, setNewSkill] = useState('')
   const [newCertification, setNewCertification] = useState('')
 
