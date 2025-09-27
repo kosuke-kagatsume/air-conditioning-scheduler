@@ -106,4 +106,4 @@ Vercelダッシュボード → Deployments → 前のデプロイを選択 → 
 
 ## 📄 ライセンス
 
-Private - 社内利用のみ
+Private - 社内利用のみ # 末尾に空行など1行追加
