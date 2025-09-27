@@ -1,0 +1,19 @@
+# Dandori Scheduler CODEOWNERS
+# This file defines who reviews code in specific parts of the codebase
+
+# Default owner for everything
+* @kosuke-kagatsume
+
+# Frontend application
+/app/** @kosuke-kagatsume
+
+# API routes
+/app/api/** @kosuke-kagatsume
+
+# Components
+/components/** @kosuke-kagatsume
+
+# Infrastructure and CI/CD
+/.github/** @kosuke-kagatsume
+/docker-compose.yml @kosuke-kagatsume
+/Dockerfile @kosuke-kagatsume
